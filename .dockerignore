@@ -1,0 +1,12 @@
+node_modules
+.nuxt
+.output
+.git
+.gitignore
+*.md
+.env
+.env.*
+!.env.example
+_backup
+.vscode
+.idea
