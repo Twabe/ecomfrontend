@@ -23,7 +23,7 @@ const tryRefreshToken = async (): Promise<boolean> => {
 
   refreshPromise = (async () => {
     try {
-      const baseURL = useRuntimeConfig().public.apiBase || 'https://localhost:5001'
+      const baseURL = useRuntimeConfig().public.apiBaseUrl || 'https://localhost:5001'
       const { tenantId } = useAuthState()
 
       const response = await $fetch<{ token: string; refreshToken: string }>(
@@ -77,7 +77,7 @@ export const customInstance = async <T>(
   // Use shared auth state (same as useAuth and useApi)
   const { authToken, tenantId } = useAuthState()
 
-  const baseURL = useRuntimeConfig().public.apiBase || 'https://localhost:5001'
+  const baseURL = useRuntimeConfig().public.apiBaseUrl || 'https://localhost:5001'
 
   // Build the full URL
   const url = `${baseURL}${config.url}`
