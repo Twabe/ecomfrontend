@@ -294,11 +294,15 @@ const handleOAuthConnect = async (platform: PlatformConfig) => {
   try {
     // Get the runtime config for API base URL
     const config = useRuntimeConfig()
-    const apiBase = config.public.apiBase || ''
+    // Use production URL as fallback since runtime config may not be available at build time
+    const apiBase = config.public.apiBaseUrl || 'http://ecombackend.api.astracaisse.com'
 
     // Build the OAuth connect URL with proper redirect
     const callbackUrl = `${window.location.origin}/oauth/youcan/callback`
     const connectUrl = `${apiBase}/api/integrations/youcan/connect?storeId=${defaultStoreId}&redirectUrl=${encodeURIComponent(callbackUrl)}`
+
+    console.log('[YouCan OAuth] API Base:', apiBase)
+    console.log('[YouCan OAuth] Connect URL:', connectUrl)
 
     // Redirect to YouCan OAuth page
     window.location.href = connectUrl
