@@ -521,6 +521,7 @@
             class="input text-sm w-40"
           >
             <option value="">{{ $t('common.all') }}</option>
+            <option value="unassigned">{{ $t('supervisor.statusUnassigned') }}</option>
             <option value="pending">{{ $t('supervisor.statusPending') }}</option>
             <option value="taken">{{ $t('supervisor.statusTaken') }}</option>
           </select>
@@ -1516,18 +1517,21 @@ const openReassignModal = async () => {
       }
     } else if (activeTab.value === 'suivi') {
       // Tab Suivi: get active suivi services from suiviOrders
+      // Include 'unassigned' orders so supervisor can assign them
       for (const orderId of selectedOrders.value) {
         const matchingOrders = suiviOrders.value.filter(o => o.orderId === orderId)
 
         for (const suiviOrder of matchingOrders) {
-          const isActiveStatus = activeStatuses.includes(suiviOrder.assignmentStatus || '')
-          if (suiviOrder.serviceType && isActiveStatus) {
-            const key = suiviOrder.serviceType
+          const status = suiviOrder.assignmentStatus || 'unassigned'
+          const isActiveOrUnassigned = activeStatuses.includes(status) || status === 'unassigned'
+
+          if (isActiveOrUnassigned) {
+            const key = suiviOrder.serviceType || 'suivi'
             if (!servicesMap.has(key)) {
               servicesMap.set(key, {
-                serviceType: suiviOrder.serviceType,
+                serviceType: key,
                 workerName: suiviOrder.workerName || null,
-                status: suiviOrder.assignmentStatus || 'unknown',
+                status: status,
                 orderId: suiviOrder.orderId || ''
               })
             }
