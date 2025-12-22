@@ -407,7 +407,17 @@
     "receiveStockNote": "La réception de cet achat ajoutera automatiquement les articles à votre inventaire.",
     "receiveComment": "Commentaire",
     "receiveCommentPlaceholder": "Ajoutez des notes sur cette livraison...",
-    "receiveAndUpdateStock": "Réceptionner et mettre à jour le stock"
+    "receiveAndUpdateStock": "Réceptionner et mettre à jour le stock",
+    "updateStatus": "Mise à jour du statut",
+    "currentStatus": "Statut actuel",
+    "newStatus": "Nouveau statut",
+    "statusPending": "En attente",
+    "statusConfirmed": "Confirmé",
+    "statusShipped": "Expédié",
+    "statusReceived": "Reçu",
+    "statusCancelled": "Annulé",
+    "receiveStockWarning": "Le stock sera automatiquement mis à jour avec les articles de cet achat.",
+    "statusNotePlaceholder": "Notes sur ce changement de statut..."
   },
   "settings": {
     "title": "Paramètres",

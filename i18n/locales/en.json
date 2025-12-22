@@ -398,7 +398,17 @@
     "receiveStockNote": "Receiving this purchase will automatically add the items to your inventory stock.",
     "receiveComment": "Comment",
     "receiveCommentPlaceholder": "Add any notes about this delivery...",
-    "receiveAndUpdateStock": "Receive & Update Stock"
+    "receiveAndUpdateStock": "Receive & Update Stock",
+    "updateStatus": "Update Status",
+    "currentStatus": "Current Status",
+    "newStatus": "New Status",
+    "statusPending": "Pending",
+    "statusConfirmed": "Confirmed",
+    "statusShipped": "Shipped",
+    "statusReceived": "Received",
+    "statusCancelled": "Cancelled",
+    "receiveStockWarning": "Stock will be automatically updated with the items from this purchase.",
+    "statusNotePlaceholder": "Notes about this status change..."
   },
   "settings": {
     "title": "Settings",

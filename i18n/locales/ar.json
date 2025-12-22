@@ -390,7 +390,17 @@
     "receiveStockNote": "استلام هذا الشراء سيضيف العناصر تلقائياً إلى مخزونك.",
     "receiveComment": "تعليق",
     "receiveCommentPlaceholder": "أضف ملاحظات حول هذا التسليم...",
-    "receiveAndUpdateStock": "استلام وتحديث المخزون"
+    "receiveAndUpdateStock": "استلام وتحديث المخزون",
+    "updateStatus": "تحديث الحالة",
+    "currentStatus": "الحالة الحالية",
+    "newStatus": "الحالة الجديدة",
+    "statusPending": "قيد الانتظار",
+    "statusConfirmed": "مؤكد",
+    "statusShipped": "تم الشحن",
+    "statusReceived": "تم الاستلام",
+    "statusCancelled": "ملغي",
+    "receiveStockWarning": "سيتم تحديث المخزون تلقائياً بعناصر هذا الشراء.",
+    "statusNotePlaceholder": "ملاحظات حول تغيير الحالة..."
   },
   "settings": {
     "title": "الإعدادات",

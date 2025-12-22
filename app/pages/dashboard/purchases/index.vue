@@ -205,87 +205,13 @@
       </Dialog>
     </TransitionRoot>
 
-    <!-- Receive Purchase Modal -->
-    <TransitionRoot :show="showReceiveModal" as="template">
-      <Dialog as="div" class="relative z-50" @close="showReceiveModal = false">
-        <TransitionChild
-          enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
-          leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-gray-900/50" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              enter="ease-out duration-300" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100"
-              leave="ease-in duration-200" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
-                <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  {{ $t('purchases.receiveTitle') }}
-                </DialogTitle>
-
-                <div v-if="receivingPurchase" class="mb-4">
-                  <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                    <div class="flex items-center justify-between mb-2">
-                      <span class="font-medium text-gray-900 dark:text-white">{{ receivingPurchase.code }}</span>
-                      <span class="text-sm text-gray-500">{{ receivingPurchase.supplierName }}</span>
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                      {{ receivingPurchase.items?.length ?? 0 }} {{ $t('purchases.items') }} -
-                      <span class="font-medium">{{ (receivingPurchase.totalCost ?? 0).toFixed(2) }}</span>
-                    </div>
-                  </div>
-
-                  <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
-                    <div class="flex items-start gap-2">
-                      <InformationCircleIcon class="w-5 h-5 text-blue-500 mt-0.5" />
-                      <p class="text-sm text-blue-700 dark:text-blue-300">
-                        {{ $t('purchases.receiveStockNote') }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <form @submit.prevent="submitReceive">
-                  <div class="space-y-4">
-                    <div>
-                      <label class="label">{{ $t('purchases.actualDeliveryDate') }}</label>
-                      <input
-                        v-model="receiveForm.actualDeliveryDate"
-                        type="date"
-                        class="input"
-                      />
-                    </div>
-
-                    <div>
-                      <label class="label">{{ $t('purchases.receiveComment') }}</label>
-                      <textarea
-                        v-model="receiveForm.comment"
-                        class="input"
-                        rows="2"
-                        :placeholder="$t('purchases.receiveCommentPlaceholder')"
-                      ></textarea>
-                    </div>
-                  </div>
-
-                  <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" class="btn-secondary" @click="showReceiveModal = false">
-                      {{ $t('common.cancel') }}
-                    </button>
-                    <button type="submit" class="btn-primary bg-green-600 hover:bg-green-700" :disabled="isMutating">
-                      <ArchiveBoxArrowDownIcon class="w-5 h-5 mr-2" />
-                      {{ isMutating ? $t('common.loading') : $t('purchases.receiveAndUpdateStock') }}
-                    </button>
-                  </div>
-                </form>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
+    <!-- Status Update Modal -->
+    <PurchasesPurchaseStatusModal
+      :show="showStatusModal"
+      :purchase="statusPurchase"
+      @close="showStatusModal = false"
+      @update="handleStatusUpdate"
+    />
 
     <!-- View Details Modal -->
     <TransitionRoot :show="showViewModal" as="template">
@@ -473,39 +399,24 @@
               </td>
               <td class="py-3 px-4 text-right">
                 <div class="flex items-center justify-end gap-1">
-                  <!-- Status actions -->
+                  <!-- View Details -->
                   <button
-                    v-if="purchase.status === 'Pending'"
-                    @click="handleConfirm(purchase)"
-                    class="p-2 text-blue-500 hover:text-blue-700"
-                    :title="$t('purchases.confirm')"
+                    @click="openViewModal(purchase)"
+                    class="p-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
+                    :title="$t('common.view')"
                   >
-                    <CheckIcon class="w-4 h-4" />
+                    <EyeIcon class="w-4 h-4" />
                   </button>
-                  <button
-                    v-if="purchase.status === 'Confirmed'"
-                    @click="handleShip(purchase)"
-                    class="p-2 text-purple-500 hover:text-purple-700"
-                    :title="$t('purchases.markShipped')"
-                  >
-                    <TruckIcon class="w-4 h-4" />
-                  </button>
-                  <button
-                    v-if="purchase.status === 'Shipped'"
-                    @click="handleReceive(purchase)"
-                    class="p-2 text-green-500 hover:text-green-700"
-                    :title="$t('purchases.markReceived')"
-                  >
-                    <ArchiveBoxArrowDownIcon class="w-4 h-4" />
-                  </button>
+                  <!-- Status Update -->
                   <button
                     v-if="purchase.status !== 'Cancelled' && purchase.status !== 'Received'"
-                    @click="handleCancel(purchase)"
-                    class="p-2 text-red-500 hover:text-red-700"
-                    :title="$t('purchases.cancel')"
+                    @click="openStatusModal(purchase)"
+                    class="p-2 text-primary-500 hover:text-primary-700"
+                    :title="$t('purchases.updateStatus')"
                   >
-                    <XCircleIcon class="w-4 h-4" />
+                    <ArrowPathIcon class="w-4 h-4" />
                   </button>
+                  <!-- Edit -->
                   <button
                     @click="openEditModal(purchase)"
                     class="p-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
@@ -513,6 +424,7 @@
                   >
                     <PencilIcon class="w-4 h-4" />
                   </button>
+                  <!-- Delete -->
                   <button
                     @click="handleDelete(purchase)"
                     class="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
@@ -557,7 +469,7 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import {
   PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon, ShoppingCartIcon,
-  CheckIcon, TruckIcon, ArchiveBoxArrowDownIcon, XCircleIcon, InformationCircleIcon
+  EyeIcon, ArrowPathIcon
 } from '@heroicons/vue/24/outline'
 import { usePurchasesService, useSuppliersService, useProductsService, useProductVariantsByProduct, type PurchaseDto, type ProductDto } from '~/services'
 import { PurchaseStatuses } from '~/types/purchase'
@@ -597,16 +509,10 @@ const statusOptions = Object.values(PurchaseStatuses)
 // Modal state
 const showModal = ref(false)
 const showViewModal = ref(false)
-const showReceiveModal = ref(false)
+const showStatusModal = ref(false)
 const editingPurchase = ref<PurchaseDto | null>(null)
 const viewingPurchase = ref<PurchaseDto | null>(null)
-const receivingPurchase = ref<PurchaseDto | null>(null)
-
-// Receive form
-const receiveForm = ref({
-  actualDeliveryDate: new Date().toISOString().split('T')[0],
-  comment: ''
-})
+const statusPurchase = ref<PurchaseDto | null>(null)
 
 // Filters
 const searchKeyword = ref('')
@@ -808,62 +714,41 @@ const handleSubmit = async () => {
   }
 }
 
-// Status actions
-const handleConfirm = async (purchase: PurchaseDto) => {
-  if (confirm(t('purchases.confirmAction'))) {
-    try {
-      await confirmPurchase(purchase.id!)
-      notify({ type: 'success', message: t('messages.updateSuccess') })
-    } catch (error: any) {
-      notify({ type: 'error', message: error.message || t('messages.error') })
-    }
-  }
+// Open status modal
+const openStatusModal = (purchase: PurchaseDto) => {
+  statusPurchase.value = purchase
+  showStatusModal.value = true
 }
 
-const handleShip = async (purchase: PurchaseDto) => {
-  if (confirm(t('purchases.shipAction'))) {
-    try {
-      await markAsShipped(purchase.id!)
-      notify({ type: 'success', message: t('messages.updateSuccess') })
-    } catch (error: any) {
-      notify({ type: 'error', message: error.message || t('messages.error') })
-    }
-  }
-}
-
-const handleReceive = (purchase: PurchaseDto) => {
-  receivingPurchase.value = purchase
-  receiveForm.value = {
-    actualDeliveryDate: new Date().toISOString().split('T')[0],
-    comment: ''
-  }
-  showReceiveModal.value = true
-}
-
-const submitReceive = async () => {
-  if (!receivingPurchase.value) return
+// Handle status update from modal
+const handleStatusUpdate = async (newStatus: string, notes: string, receiveDate?: string) => {
+  if (!statusPurchase.value) return
 
   try {
-    await receivePurchase(receivingPurchase.value.id!, {
-      actualDeliveryDate: receiveForm.value.actualDeliveryDate || undefined,
-      comment: receiveForm.value.comment || undefined
-    })
+    const purchaseId = statusPurchase.value.id!
+
+    switch (newStatus) {
+      case 'Confirmed':
+        await confirmPurchase(purchaseId, notes || undefined)
+        break
+      case 'Shipped':
+        await markAsShipped(purchaseId, notes || undefined)
+        break
+      case 'Received':
+        await receivePurchase(purchaseId, {
+          receivedDate: receiveDate || undefined
+        })
+        break
+      case 'Cancelled':
+        await cancelPurchase(purchaseId, notes || undefined)
+        break
+    }
+
     notify({ type: 'success', message: t('messages.updateSuccess') })
-    showReceiveModal.value = false
-    receivingPurchase.value = null
+    showStatusModal.value = false
+    statusPurchase.value = null
   } catch (error: any) {
     notify({ type: 'error', message: error.message || t('messages.error') })
-  }
-}
-
-const handleCancel = async (purchase: PurchaseDto) => {
-  if (confirm(t('purchases.cancelAction'))) {
-    try {
-      await cancelPurchase(purchase.id!)
-      notify({ type: 'success', message: t('messages.updateSuccess') })
-    } catch (error: any) {
-      notify({ type: 'error', message: error.message || t('messages.error') })
-    }
   }
 }
 
