@@ -100,7 +100,7 @@
                                 v-model="item.productId"
                                 class="input text-sm"
                                 required
-                                @change="item.productVariantId = undefined; currentItemIndexForVariants = index"
+                                @change="onProductChange(item, index)"
                               >
                                 <option value="">{{ $t('common.select') }}</option>
                                 <option v-for="product in productsList" :key="product.id" :value="product.id">
@@ -158,6 +158,7 @@
                                 :class="{ 'border-red-300': !item.productVariantId }"
                                 required
                                 @focus="currentItemIndexForVariants = index"
+                                @change="onVariantChange(item, item.productVariantId)"
                               >
                                 <option :value="undefined">
                                   {{ currentItemIndexForVariants === index && isLoadingVariants ? $t('common.loading') : $t('common.select') }}
@@ -593,6 +594,36 @@ const getProductHasVariants = (productId: string): boolean => {
 const getProductVariantCount = (productId: string): number => {
   const product = productsList.value.find((p: ProductDto) => p.id === productId)
   return product?.variantCount || 0
+}
+
+// Helper to get product buying price
+const getProductBuyingPrice = (productId: string): number => {
+  const product = productsList.value.find((p: ProductDto) => p.id === productId)
+  return product?.buyingPrice || 0
+}
+
+// Handle product selection - auto-fill unit cost
+const onProductChange = (item: FormItem, index: number) => {
+  item.productVariantId = undefined
+  currentItemIndexForVariants.value = index
+
+  // Auto-fill unitCost from product's buyingPrice (only if product doesn't have variants)
+  if (item.productId && !getProductHasVariants(item.productId)) {
+    item.unitCost = getProductBuyingPrice(item.productId)
+  }
+}
+
+// Handle variant selection - auto-fill unit cost from variant
+const onVariantChange = (item: FormItem, variantId: string | undefined) => {
+  if (variantId && currentProductVariants.value) {
+    const variant = currentProductVariants.value.find(v => v.id === variantId)
+    if (variant?.buyingPrice) {
+      item.unitCost = variant.buyingPrice
+    } else if (item.productId) {
+      // Fallback to product's buyingPrice if variant doesn't have one
+      item.unitCost = getProductBuyingPrice(item.productId)
+    }
+  }
 }
 
 const defaultForm = () => ({
