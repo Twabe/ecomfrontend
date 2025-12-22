@@ -248,7 +248,8 @@
       "delivered": "Delivered",
       "cancelled": "Cancelled",
       "returned": "Returned"
-    }
+    },
+    "assignment": "Assignment"
   },
   "delivery": {
     "company": "Delivery Company",

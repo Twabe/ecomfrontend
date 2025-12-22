@@ -132,6 +132,21 @@ export interface Order {
 
   // Timestamps
   createdOn: string
+
+  // Active Assignments (for supervisor/admin view)
+  activeAssignments?: OrderAssignmentSummary[]
+}
+
+// Order Assignment Summary (embedded in Order for display)
+export interface OrderAssignmentSummary {
+  id: string
+  workerId: string
+  workerName?: string
+  serviceType: string
+  status: string
+  assignedAt: string
+  takenAt?: string
+  completedAt?: string
 }
 
 // Create Order Item Request

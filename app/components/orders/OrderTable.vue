@@ -115,6 +115,69 @@ const formatDate = (date: string) => {
     minute: '2-digit'
   })
 }
+
+// Assignment status colors
+const getAssignmentStatusColor = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'pending': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+    case 'taken': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+  }
+}
+
+// Service type colors
+const getServiceTypeColor = (serviceType: string) => {
+  switch (serviceType?.toLowerCase()) {
+    case 'confirmation': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+    case 'quality': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400'
+    case 'suivi': return 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400'
+    case 'callback': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+  }
+}
+
+// Get service type label
+const getServiceTypeLabel = (serviceType: string) => {
+  const key = `supervisor.${serviceType?.toLowerCase()}`
+  const translated = t(key)
+  return translated === key ? serviceType : translated
+}
+
+// Get assignment status label
+const getAssignmentStatusLabel = (status: string) => {
+  const key = `supervisor.status${status?.charAt(0).toUpperCase() + status?.slice(1)}`
+  const translated = t(key)
+  return translated === key ? status : translated
+}
+
+// Calculate duration from assignedAt or takenAt
+const formatDuration = (assignedAt: string | null, takenAt: string | null) => {
+  const startDate = takenAt ? new Date(takenAt) : assignedAt ? new Date(assignedAt) : null
+  if (!startDate) return '-'
+
+  const now = new Date()
+  const diffMs = now.getTime() - startDate.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+
+  if (diffMins < 60) {
+    return `${diffMins}m`
+  }
+  const hours = Math.floor(diffMins / 60)
+  const mins = diffMins % 60
+  if (hours < 24) {
+    return `${hours}h ${mins}m`
+  }
+  const days = Math.floor(hours / 24)
+  return `${days}j ${hours % 24}h`
+}
+
+// Get active assignment for order (first one or primary)
+const getActiveAssignment = (order: Order) => {
+  if (!order.activeAssignments || order.activeAssignments.length === 0) return null
+  // Return the first assignment (or the most relevant - taken over pending)
+  return order.activeAssignments.find(a => a.status === 'taken') || order.activeAssignments[0]
+}
 </script>
 
 <template>
@@ -154,6 +217,9 @@ const formatDate = (date: string) => {
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {{ t('orders.date') }}
             </th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {{ t('orders.assignment') }}
+            </th>
             <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {{ t('common.actions') }}
             </th>
@@ -161,12 +227,12 @@ const formatDate = (date: string) => {
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
           <tr v-if="isLoading">
-            <td colspan="10" class="px-4 py-8 text-center text-gray-500">
+            <td colspan="11" class="px-4 py-8 text-center text-gray-500">
               {{ t('common.loading') }}
             </td>
           </tr>
           <tr v-else-if="orders.length === 0">
-            <td colspan="10" class="px-4 py-8 text-center text-gray-500">
+            <td colspan="11" class="px-4 py-8 text-center text-gray-500">
               {{ t('common.noData') }}
             </td>
           </tr>
@@ -240,6 +306,42 @@ const formatDate = (date: string) => {
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
               {{ formatDate(order.createdOn) }}
+            </td>
+            <!-- Assignment Column -->
+            <td class="px-4 py-3">
+              <template v-if="order.activeAssignments && order.activeAssignments.length > 0">
+                <div class="space-y-1.5">
+                  <div
+                    v-for="assignment in order.activeAssignments"
+                    :key="assignment.id"
+                    class="flex flex-wrap items-center gap-1.5"
+                  >
+                    <!-- Service Type Badge -->
+                    <span
+                      class="inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                      :class="getServiceTypeColor(assignment.serviceType)"
+                    >
+                      {{ getServiceTypeLabel(assignment.serviceType) }}
+                    </span>
+                    <!-- Status Badge -->
+                    <span
+                      class="inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                      :class="getAssignmentStatusColor(assignment.status)"
+                    >
+                      {{ getAssignmentStatusLabel(assignment.status) }}
+                    </span>
+                    <!-- Worker Name -->
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {{ assignment.workerName }}
+                    </span>
+                    <!-- Duration -->
+                    <span class="text-[10px] text-gray-500">
+                      {{ formatDuration(assignment.assignedAt, assignment.takenAt) }}
+                    </span>
+                  </div>
+                </div>
+              </template>
+              <span v-else class="text-xs text-gray-400">-</span>
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-2">

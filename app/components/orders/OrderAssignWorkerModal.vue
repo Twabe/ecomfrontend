@@ -52,20 +52,25 @@ const availableServiceTypes = computed((): Array<{ value: ServiceType; label: st
   const phases = new Set(validOrders.value.map(o => o.phase?.toLowerCase()))
   const states = new Set(validOrders.value.map(o => o.state?.toLowerCase()))
 
+  // For new orders, allow pre-assigning all services in chain
+  const isNewOrder = phases.has('new')
+
   // Confirmation is available for new and confirmation phase orders
   if (phases.has('new') || phases.has('confirmation')) {
     services.push({ value: 'confirmation', label: t('supervisor.confirmation') })
   }
 
   // Quality is available for confirmed orders or quality phase (if enabled)
+  // Also available for new orders to pre-assign as chain
   if (props.isQualityEnabled) {
-    if (states.has('confirmed') || phases.has('quality') || phases.has('shipping')) {
+    if (isNewOrder || states.has('confirmed') || phases.has('quality') || phases.has('shipping')) {
       services.push({ value: 'quality', label: t('supervisor.quality') })
     }
   }
 
   // Suivi is available for confirmed orders or shipping/suivi phase
-  if (states.has('confirmed') || phases.has('quality') || phases.has('shipping') || phases.has('suivi')) {
+  // Also available for new orders to pre-assign as chain
+  if (isNewOrder || states.has('confirmed') || phases.has('quality') || phases.has('shipping') || phases.has('suivi')) {
     services.push({ value: 'suivi', label: t('supervisor.suivi') })
   }
 

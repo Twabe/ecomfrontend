@@ -257,7 +257,8 @@
       "cancelled": "Annulée",
       "returned": "Retournée"
     },
-    "confirmedAt": "Confirmé le"
+    "confirmedAt": "Confirmé le",
+    "assignment": "Assignation"
   },
   "delivery": {
     "company": "Société de livraison",

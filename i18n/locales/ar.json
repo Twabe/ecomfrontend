@@ -240,7 +240,8 @@
       "delivered": "تم التسليم",
       "cancelled": "ملغي",
       "returned": "مرتجع"
-    }
+    },
+    "assignment": "التكليف"
   },
   "delivery": {
     "company": "شركة التوصيل",
