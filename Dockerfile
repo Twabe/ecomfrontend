@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Build arguments for environment variables (needed at build time for Nuxt)
-ARG NUXT_PUBLIC_API_BASE_URL=http://ecombackend.api.astracaisse.com
+ARG NUXT_PUBLIC_API_BASE_URL=http://ecombackend.ecom.astracaisse.com
 ENV NUXT_PUBLIC_API_BASE_URL=$NUXT_PUBLIC_API_BASE_URL
 
 # Copy package files

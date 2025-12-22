@@ -295,7 +295,7 @@ const handleOAuthConnect = async (platform: PlatformConfig) => {
     // Get the runtime config for API base URL
     const config = useRuntimeConfig()
     // Use production URL as fallback since runtime config may not be available at build time
-    const apiBase = config.public.apiBaseUrl || 'http://ecombackend.api.astracaisse.com'
+    const apiBase = config.public.apiBaseUrl || 'http://ecombackend.ecom.astracaisse.com'
 
     // Build the OAuth connect URL with proper redirect
     const callbackUrl = `${window.location.origin}/oauth/youcan/callback`

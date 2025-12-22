@@ -23,7 +23,7 @@ const tryRefreshToken = async (): Promise<boolean> => {
 
   refreshPromise = (async () => {
     try {
-      const baseURL = useRuntimeConfig().public.apiBaseUrl || 'http://ecombackend.api.astracaisse.com'
+      const baseURL = useRuntimeConfig().public.apiBaseUrl || 'http://ecombackend.ecom.astracaisse.com'
       const { tenantId } = useAuthState()
 
       const response = await $fetch<{ token: string; refreshToken: string }>(
@@ -77,7 +77,7 @@ export const customInstance = async <T>(
   // Use shared auth state (same as useAuth and useApi)
   const { authToken, tenantId } = useAuthState()
 
-  const baseURL = useRuntimeConfig().public.apiBaseUrl || 'http://ecombackend.api.astracaisse.com'
+  const baseURL = useRuntimeConfig().public.apiBaseUrl || 'http://ecombackend.ecom.astracaisse.com'
 
   // Build the full URL
   const url = `${baseURL}${config.url}`
