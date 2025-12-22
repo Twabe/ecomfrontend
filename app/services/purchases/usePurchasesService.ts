@@ -57,7 +57,7 @@ export function usePurchasesService() {
     const result = await customInstance<string>({
       url: `/api/v1/purchases/${id}/confirm`,
       method: 'POST',
-      data: reason ?? null,
+      data: { reason: reason || null },
     })
     invalidateCache()
     return result
@@ -70,7 +70,7 @@ export function usePurchasesService() {
     const result = await customInstance<string>({
       url: `/api/v1/purchases/${id}/ship`,
       method: 'POST',
-      data: reason ?? null,
+      data: { reason: reason || null },
     })
     invalidateCache()
     return result
@@ -83,7 +83,7 @@ export function usePurchasesService() {
     const result = await customInstance<string>({
       url: `/api/v1/purchases/${id}/cancel`,
       method: 'POST',
-      data: reason ?? null,
+      data: { reason: reason || null },
     })
     invalidateCache()
     return result
@@ -105,6 +105,16 @@ export function usePurchasesService() {
     return result
   }
 
+  /**
+   * Get purchase status change history
+   */
+  const getPurchaseHistory = async (id: string): Promise<PurchaseHistoryDto[]> => {
+    return await customInstance<PurchaseHistoryDto[]>({
+      url: `/api/v1/purchases/${id}/history`,
+      method: 'GET',
+    })
+  }
+
   return {
     // All base service methods
     ...baseService,
@@ -114,7 +124,18 @@ export function usePurchasesService() {
     markAsShipped,
     cancelPurchase,
     receivePurchase,
+    getPurchaseHistory,
   }
+}
+
+// PurchaseHistory DTO type
+export interface PurchaseHistoryDto {
+  id: string
+  purchaseId: string
+  status?: string
+  comment?: string
+  agentName?: string
+  createdOn: string
 }
 
 export type { PurchaseDto, CreatePurchaseRequest, UpdatePurchaseRequest, ReceivePurchaseRequest }

@@ -408,7 +408,9 @@
     "statusReceived": "Received",
     "statusCancelled": "Cancelled",
     "receiveStockWarning": "Stock will be automatically updated with the items from this purchase.",
-    "statusNotePlaceholder": "Notes about this status change..."
+    "statusNotePlaceholder": "Notes about this status change...",
+    "cannotEditCompleted": "Cannot edit this purchase. Received or cancelled purchases cannot be modified.",
+    "statusHistory": "Status History"
   },
   "settings": {
     "title": "Settings",

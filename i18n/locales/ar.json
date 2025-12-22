@@ -400,7 +400,9 @@
     "statusReceived": "تم الاستلام",
     "statusCancelled": "ملغي",
     "receiveStockWarning": "سيتم تحديث المخزون تلقائياً بعناصر هذا الشراء.",
-    "statusNotePlaceholder": "ملاحظات حول تغيير الحالة..."
+    "statusNotePlaceholder": "ملاحظات حول تغيير الحالة...",
+    "cannotEditCompleted": "لا يمكن تعديل هذا الشراء. لا يمكن تعديل المشتريات المستلمة أو الملغاة.",
+    "statusHistory": "سجل الحالات"
   },
   "settings": {
     "title": "الإعدادات",

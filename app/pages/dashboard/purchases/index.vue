@@ -77,8 +77,8 @@
                       ></textarea>
                     </div>
 
-                    <!-- Items Section (Only for Create) -->
-                    <div v-if="!editingPurchase" class="border-t dark:border-gray-700 pt-4">
+                    <!-- Items Section -->
+                    <div class="border-t dark:border-gray-700 pt-4">
                       <div class="flex items-center justify-between mb-3">
                         <h3 class="font-medium text-gray-900 dark:text-white">{{ $t('purchases.items') }}</h3>
                         <button type="button" class="btn-secondary text-sm" @click="addItem">
@@ -258,6 +258,12 @@
                     </div>
                   </div>
 
+                  <!-- Note -->
+                  <div v-if="viewingPurchase.note" class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                    <span class="text-sm text-gray-500">{{ $t('common.note') }}</span>
+                    <p class="mt-1 text-gray-900 dark:text-white whitespace-pre-wrap">{{ viewingPurchase.note }}</p>
+                  </div>
+
                   <!-- Items -->
                   <div class="border-t dark:border-gray-700 pt-4">
                     <h3 class="font-medium text-gray-900 dark:text-white mb-3">{{ $t('purchases.items') }}</h3>
@@ -291,11 +297,47 @@
                       </tbody>
                     </table>
                   </div>
+
+                  <!-- Status History -->
+                  <div class="border-t dark:border-gray-700 pt-4">
+                    <h3 class="font-medium text-gray-900 dark:text-white mb-3">{{ $t('purchases.statusHistory') }}</h3>
+
+                    <div v-if="isLoadingHistory" class="text-center py-4">
+                      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto"></div>
+                    </div>
+
+                    <div v-else-if="purchaseHistory.length === 0" class="text-center py-4 text-gray-500">
+                      {{ $t('common.noData') }}
+                    </div>
+
+                    <div v-else class="space-y-3">
+                      <div
+                        v-for="history in purchaseHistory"
+                        :key="history.id"
+                        class="flex items-start gap-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3"
+                      >
+                        <div class="flex-shrink-0 mt-1">
+                          <span :class="getStatusClass(history.status)" class="text-xs">
+                            {{ history.status }}
+                          </span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p v-if="history.comment" class="text-sm text-gray-900 dark:text-white">
+                            {{ history.comment }}
+                          </p>
+                          <div class="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                            <span>{{ formatDateTime(history.createdOn) }}</span>
+                            <span v-if="history.agentName">• {{ history.agentName }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="flex justify-end mt-6">
                   <button type="button" class="btn-secondary" @click="showViewModal = false">
-                    {{ $t('common.cancel') }}
+                    {{ $t('common.close') }}
                   </button>
                 </div>
               </DialogPanel>
@@ -416,8 +458,9 @@
                   >
                     <ArrowPathIcon class="w-4 h-4" />
                   </button>
-                  <!-- Edit -->
+                  <!-- Edit (hidden for Received/Cancelled - stock already affected) -->
                   <button
+                    v-if="purchase.status !== 'Received' && purchase.status !== 'Cancelled'"
                     @click="openEditModal(purchase)"
                     class="p-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
                     :title="$t('common.edit')"
@@ -471,7 +514,7 @@ import {
   PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon, ShoppingCartIcon,
   EyeIcon, ArrowPathIcon
 } from '@heroicons/vue/24/outline'
-import { usePurchasesService, useSuppliersService, useProductsService, useProductVariantsByProduct, type PurchaseDto, type ProductDto } from '~/services'
+import { usePurchasesService, useSuppliersService, useProductsService, useProductVariantsByProduct, type PurchaseDto, type ProductDto, type PurchaseHistoryDto } from '~/services'
 import { PurchaseStatuses } from '~/types/purchase'
 
 definePageMeta({
@@ -499,6 +542,7 @@ const {
   markAsShipped,
   cancelPurchase,
   receivePurchase,
+  getPurchaseHistory,
 } = usePurchasesService()
 
 // Dropdowns data from services (auto-fetch)
@@ -513,6 +557,8 @@ const showStatusModal = ref(false)
 const editingPurchase = ref<PurchaseDto | null>(null)
 const viewingPurchase = ref<PurchaseDto | null>(null)
 const statusPurchase = ref<PurchaseDto | null>(null)
+const purchaseHistory = ref<PurchaseHistoryDto[]>([])
+const isLoadingHistory = ref(false)
 
 // Filters
 const searchKeyword = ref('')
@@ -520,6 +566,7 @@ const filterSupplier = ref('')
 const filterStatus = ref('')
 
 interface FormItem {
+  id?: string  // For existing items during edit
   productId: string
   productVariantId?: string
   quantity: number
@@ -601,15 +648,36 @@ const openEditModal = (purchase: PurchaseDto) => {
     purchaseDate: purchase.purchaseDate?.split('T')[0] || '',
     expectedDeliveryDate: purchase.expectedDeliveryDate?.split('T')[0] || '',
     note: purchase.note || '',
-    items: []
+    // Load existing items for editing
+    items: (purchase.items || []).map(item => ({
+      id: item.id,
+      productId: item.productId || '',
+      productVariantId: item.productVariantId || undefined,
+      quantity: item.quantity || 1,
+      unitCost: item.unitCost || 0,
+      note: item.note || ''
+    }))
   }
   showModal.value = true
 }
 
 // Open view modal
-const openViewModal = (purchase: PurchaseDto) => {
+const openViewModal = async (purchase: PurchaseDto) => {
   viewingPurchase.value = purchase
+  purchaseHistory.value = []
   showViewModal.value = true
+
+  // Fetch history
+  if (purchase.id) {
+    isLoadingHistory.value = true
+    try {
+      purchaseHistory.value = await getPurchaseHistory(purchase.id)
+    } catch (error) {
+      console.error('Failed to fetch purchase history:', error)
+    } finally {
+      isLoadingHistory.value = false
+    }
+  }
 }
 
 // Close modal
@@ -643,6 +711,12 @@ const formatDate = (dateString?: string) => {
   return new Date(dateString).toLocaleDateString()
 }
 
+// Format date with time
+const formatDateTime = (dateString?: string) => {
+  if (!dateString) return '-'
+  return new Date(dateString).toLocaleString()
+}
+
 // Get status class
 const getStatusClass = (status?: string) => {
   const baseClass = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium'
@@ -668,13 +742,36 @@ const handleSubmit = async () => {
 
   try {
     if (editingPurchase.value) {
+      // Validate items
+      if (form.value.items.length === 0) {
+        notify({ type: 'error', message: t('purchases.itemsRequired') })
+        return
+      }
+
+      // Validate that all items with variants have a variant selected
+      const invalidItems = form.value.items.filter(item =>
+        item.productId && getProductHasVariants(item.productId) && !item.productVariantId
+      )
+      if (invalidItems.length > 0) {
+        notify({ type: 'error', message: t('products.variantRequired') || 'Please select a variant for all products with variants' })
+        return
+      }
+
       await update(editingPurchase.value.id!, {
         id: editingPurchase.value.id!,
         code: form.value.code,
         supplierId: form.value.supplierId,
         purchaseDate: form.value.purchaseDate,
         expectedDeliveryDate: form.value.expectedDeliveryDate || undefined,
-        note: form.value.note || undefined
+        note: form.value.note || undefined,
+        items: form.value.items.map(item => ({
+          id: item.id || undefined,  // Include id for existing items
+          productId: item.productId,
+          productVariantId: item.productVariantId || undefined,
+          quantity: item.quantity,
+          unitCost: item.unitCost,
+          note: item.note
+        }))
       })
       notify({ type: 'success', message: t('messages.updateSuccess') })
     } else {

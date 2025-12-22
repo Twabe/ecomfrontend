@@ -417,7 +417,9 @@
     "statusReceived": "Reçu",
     "statusCancelled": "Annulé",
     "receiveStockWarning": "Le stock sera automatiquement mis à jour avec les articles de cet achat.",
-    "statusNotePlaceholder": "Notes sur ce changement de statut..."
+    "statusNotePlaceholder": "Notes sur ce changement de statut...",
+    "cannotEditCompleted": "Impossible de modifier cet achat. Les achats reçus ou annulés ne peuvent pas être modifiés.",
+    "statusHistory": "Historique des statuts"
   },
   "settings": {
     "title": "Paramètres",
