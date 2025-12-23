@@ -135,14 +135,18 @@ const canConfirm = (order: Order) => {
 const canCancel = (order: Order) => {
   // Archived orders cannot be modified
   if (order.isArchived) return false
+  // Terminal states cannot be cancelled
   const state = order.state?.toLowerCase()
-  return state !== 'cancelled' && state !== 'delivered'
+  return !['cancelled', 'canceled', 'delivered', 'returned'].includes(state || '')
 }
 
 // Check if order can be edited
 const canEdit = (order: Order) => {
   // Archived orders cannot be modified
   if (order.isArchived) return false
+  // Terminal states cannot be edited
+  const state = order.state?.toLowerCase()
+  if (['delivered', 'returned', 'cancelled', 'canceled'].includes(state || '')) return false
   return !order.cannotEdit
 }
 

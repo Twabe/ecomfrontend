@@ -810,15 +810,21 @@ const submitConfirm = async () => {
   if (!selectedAssignment.value) return
   isSubmitting.value = true
   try {
-    // Confirm order - backend automatically completes the confirmation assignment
-    // No need to call orderAssignmentsService.complete() separately
+    // STEP 1: Confirm order FIRST (validates stock, business rules)
+    // If this fails, assignment stays "taken" and user can retry
     await ordersWorkflow.confirmOrder({
       orderId: selectedAssignment.value.orderId,
       moveToShipping: true,
       comment: confirmForm.value.comment || undefined
     })
 
-    notification.success(t('orders.orderConfirmed'))
+    // STEP 2: Complete assignment AFTER order is confirmed
+    // This ensures we only mark as complete when order is truly confirmed
+    await orderAssignmentsService.complete(selectedAssignment.value.id, {
+      result: 'confirmed',
+      notes: confirmForm.value.comment || undefined
+    })
+
     closeConfirmModal()
     await refreshAll()
   } catch (error: any) {
@@ -860,15 +866,20 @@ const submitCancel = async () => {
   if (!selectedAssignment.value) return
   isSubmitting.value = true
   try {
-    // Cancel order - backend automatically completes ALL active assignments
-    // No need to call orderAssignmentsService.complete() separately
+    // STEP 1: Cancel order FIRST (validates business rules)
+    // If this fails, assignment stays "taken" and user can retry
     await ordersWorkflow.cancelOrder({
       orderId: selectedAssignment.value.orderId,
       reasonId: cancelForm.value.reasonId || undefined,
       customReason: cancelForm.value.customReason || undefined
     })
 
-    notification.success(t('orders.orderCancelled'))
+    // STEP 2: Complete assignment AFTER order is cancelled
+    // This ensures we only mark as complete when order is truly cancelled
+    await orderAssignmentsService.complete(selectedAssignment.value.id, {
+      result: 'cancelled'
+    })
+
     closeCancelModal()
     await refreshAll()
   } catch (error: any) {
