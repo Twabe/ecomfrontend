@@ -248,7 +248,19 @@
       "all": "جميع الطلبات",
       "active": "النشطة",
       "archived": "المؤرشفة"
-    }
+    },
+    "bulkConfirmTitle": "تأكيد الطلبات",
+    "bulkConfirmMessage": "ستقوم بتأكيد {count} طلب(ات). سيتم خصم المخزون لكل طلب.",
+    "bulkConfirmComment": "تعليق لجميع الطلبات",
+    "confirmOrders": "تأكيد {count} طلب(ات)",
+    "ordersConfirmed": "طلب(ات) تم تأكيدها",
+    "bulkCancelTitle": "إلغاء الطلبات",
+    "bulkCancelMessage": "ستقوم بإلغاء {count} طلب(ات). سيتم استرجاع المخزون للطلبات المؤكدة.",
+    "cancelOrders": "إلغاء {count} طلب(ات)",
+    "ordersCancelled": "طلب(ات) تم إلغاؤها",
+    "ordersFailed": "طلب(ات) فشلت",
+    "customReasonPlaceholder": "أدخل سبباً مخصصاً",
+    "reasonOrCustomRequired": "اختر سبباً أو أدخل سبباً مخصصاً"
   },
   "delivery": {
     "company": "شركة التوصيل",

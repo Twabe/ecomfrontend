@@ -103,6 +103,8 @@ const showItemsModal = ref(false)
 const showHistoryModal = ref(false)
 const showAssignDeliveryModal = ref(false)
 const showAssignWorkerModal = ref(false)
+const showBulkConfirmModal = ref(false)
+const showBulkCancelModal = ref(false)
 
 const selectedOrder = ref<OrderDto | null>(null)
 const selectedOrderForHistory = ref<{ id: string; code: string } | null>(null)
@@ -150,6 +152,11 @@ const hidePhaseStatusFilters = computed(() => {
 // Check if we're in shipping phase (for bulk action buttons)
 const isShippingPhase = computed(() => {
   return route.query.phase === 'shipping'
+})
+
+// Check if we're in confirmation phase (for bulk confirm/cancel buttons)
+const isConfirmationPhase = computed(() => {
+  return route.query.phase === 'new' || route.query.phase === 'confirmation'
 })
 
 const applyFilters = () => {
@@ -465,6 +472,77 @@ const handleBulkUnarchive = async () => {
     notify({ type: 'error', message: error.message || t('messages.error') })
   }
 }
+
+// Bulk confirm/cancel handlers
+const openBulkConfirmModal = () => {
+  if (selectedOrders.value.length === 0) return
+  showBulkConfirmModal.value = true
+}
+
+const openBulkCancelModal = () => {
+  if (selectedOrders.value.length === 0) return
+  showBulkCancelModal.value = true
+}
+
+const handleBulkConfirm = async (data: ConfirmOrderRequest) => {
+  if (selectedOrders.value.length === 0) return
+
+  let successCount = 0
+  let failCount = 0
+
+  for (const orderId of selectedOrders.value) {
+    try {
+      await confirmOrder({
+        ...data,
+        orderId
+      })
+      successCount++
+    } catch (error: any) {
+      failCount++
+      console.error(`Failed to confirm order ${orderId}:`, error)
+    }
+  }
+
+  showBulkConfirmModal.value = false
+  selectedOrders.value = []
+
+  if (successCount > 0) {
+    notify({ type: 'success', message: `${successCount} ${t('orders.ordersConfirmed')}` })
+  }
+  if (failCount > 0) {
+    notify({ type: 'error', message: `${failCount} ${t('orders.ordersFailed')}` })
+  }
+}
+
+const handleBulkCancel = async (data: CancelOrderRequest) => {
+  if (selectedOrders.value.length === 0) return
+
+  let successCount = 0
+  let failCount = 0
+
+  for (const orderId of selectedOrders.value) {
+    try {
+      await cancelOrder({
+        ...data,
+        orderId
+      })
+      successCount++
+    } catch (error: any) {
+      failCount++
+      console.error(`Failed to cancel order ${orderId}:`, error)
+    }
+  }
+
+  showBulkCancelModal.value = false
+  selectedOrders.value = []
+
+  if (successCount > 0) {
+    notify({ type: 'success', message: `${successCount} ${t('orders.ordersCancelled')}` })
+  }
+  if (failCount > 0) {
+    notify({ type: 'error', message: `${failCount} ${t('orders.ordersFailed')}` })
+  }
+}
 </script>
 
 <template>
@@ -498,6 +576,7 @@ const handleBulkUnarchive = async () => {
     <OrdersOrderBulkActions
       :selected-count="selectedOrders.length"
       :is-shipping-phase="isShippingPhase"
+      :is-confirmation-phase="isConfirmationPhase"
       :is-archived-filter="filters.isArchived"
       @assign-delivery="openAssignDeliveryModal()"
       @assign-worker="openAssignWorkerModal()"
@@ -505,6 +584,8 @@ const handleBulkUnarchive = async () => {
       @mark-returned="openReturnedModal"
       @archive="handleBulkArchive"
       @unarchive="handleBulkUnarchive"
+      @bulk-confirm="openBulkConfirmModal"
+      @bulk-cancel="openBulkCancelModal"
     />
 
     <!-- Table -->
@@ -617,6 +698,25 @@ const handleBulkUnarchive = async () => {
       :is-quality-enabled="isQualityEnabled"
       @close="showAssignWorkerModal = false"
       @confirm="handleAssignWorker"
+    />
+
+    <!-- Bulk Confirm Modal -->
+    <OrdersOrderBulkConfirmModal
+      :show="showBulkConfirmModal"
+      :selected-count="selectedOrders.length"
+      :delivery-companies="deliveryCompanies"
+      :sub-delivery-companies="subDeliveryCompanies"
+      @close="showBulkConfirmModal = false"
+      @confirm="handleBulkConfirm"
+    />
+
+    <!-- Bulk Cancel Modal -->
+    <OrdersOrderBulkCancelModal
+      :show="showBulkCancelModal"
+      :selected-count="selectedOrders.length"
+      :reasons="reasons"
+      @close="showBulkCancelModal = false"
+      @cancel="handleBulkCancel"
     />
   </div>
 </template>

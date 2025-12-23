@@ -256,7 +256,19 @@
       "all": "All orders",
       "active": "Active",
       "archived": "Archived"
-    }
+    },
+    "bulkConfirmTitle": "Confirm Orders",
+    "bulkConfirmMessage": "You are about to confirm {count} order(s). Stock will be deducted for each order.",
+    "bulkConfirmComment": "Comment for all orders",
+    "confirmOrders": "Confirm {count} order(s)",
+    "ordersConfirmed": "order(s) confirmed",
+    "bulkCancelTitle": "Cancel Orders",
+    "bulkCancelMessage": "You are about to cancel {count} order(s). Stock will be restored for confirmed orders.",
+    "cancelOrders": "Cancel {count} order(s)",
+    "ordersCancelled": "order(s) cancelled",
+    "ordersFailed": "order(s) failed",
+    "customReasonPlaceholder": "Enter a custom reason",
+    "reasonOrCustomRequired": "Select a reason or enter a custom reason"
   },
   "delivery": {
     "company": "Delivery Company",

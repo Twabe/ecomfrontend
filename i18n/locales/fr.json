@@ -265,7 +265,19 @@
       "all": "Tous les états",
       "active": "Actives",
       "archived": "Archivées"
-    }
+    },
+    "bulkConfirmTitle": "Confirmer les commandes",
+    "bulkConfirmMessage": "Vous allez confirmer {count} commande(s). Le stock sera déduit pour chaque commande.",
+    "bulkConfirmComment": "Commentaire pour toutes les commandes",
+    "confirmOrders": "Confirmer {count} commande(s)",
+    "ordersConfirmed": "commande(s) confirmée(s)",
+    "bulkCancelTitle": "Annuler les commandes",
+    "bulkCancelMessage": "Vous allez annuler {count} commande(s). Le stock sera restauré pour les commandes confirmées.",
+    "cancelOrders": "Annuler {count} commande(s)",
+    "ordersCancelled": "commande(s) annulée(s)",
+    "ordersFailed": "commande(s) échouée(s)",
+    "customReasonPlaceholder": "Saisir une raison personnalisée",
+    "reasonOrCustomRequired": "Sélectionnez une raison ou saisissez une raison personnalisée"
   },
   "delivery": {
     "company": "Société de livraison",

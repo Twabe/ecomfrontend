@@ -16,6 +16,7 @@ import {
   ChevronRightIcon,
   ChatBubbleLeftIcon,
   BanknotesIcon,
+  ArchiveBoxIcon,
 } from '@heroicons/vue/24/outline'
 import { useOrdersWorkflowService, useDeliveryCompaniesService, useSubDeliveryCompaniesService, useReasonsService } from '~/services'
 import { useOrderHistoriesService, type OrderHistoryDto } from '~/services/order-histories/useOrderHistoriesService'
@@ -109,22 +110,32 @@ const getPhaseColor = (phase?: string | null) => OrderPhaseColors[phase?.toLower
 
 // Computed
 const canConfirm = computed(() => {
+  // Archived orders cannot be modified
+  if (order.value?.isArchived) return false
   return order.value?.phase === 'new' || (order.value?.phase === 'confirmation' && order.value?.state === 'new')
 })
 
 const canCancel = computed(() => {
+  // Archived orders cannot be modified
+  if (order.value?.isArchived) return false
   return order.value?.state !== 'delivered' && order.value?.state !== 'cancelled' && order.value?.state !== 'returned'
 })
 
 const canAssignDelivery = computed(() => {
+  // Archived orders cannot be modified
+  if (order.value?.isArchived) return false
   return order.value?.state === 'confirmed' && !order.value?.deliveryCompanyId
 })
 
 const canMarkDelivered = computed(() => {
+  // Archived orders cannot be modified
+  if (order.value?.isArchived) return false
   return order.value?.phase === 'shipping' && order.value?.state !== 'delivered' && order.value?.state !== 'returned'
 })
 
 const canMarkReturned = computed(() => {
+  // Archived orders cannot be modified
+  if (order.value?.isArchived) return false
   return order.value?.phase === 'shipping' && order.value?.state !== 'delivered' && order.value?.state !== 'returned'
 })
 
@@ -305,6 +316,10 @@ const getActionColor = (actionType: string) => actionColors[actionType] ?? actio
               <ExclamationTriangleIcon class="h-4 w-4" />
               Blacklisté
             </span>
+            <span v-if="order.isArchived" class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+              <ArchiveBoxIcon class="h-4 w-4" />
+              Archivée
+            </span>
           </div>
 
           <div class="flex flex-wrap gap-2">
@@ -312,6 +327,17 @@ const getActionColor = (actionType: string) => actionColors[actionType] ?? actio
               <PrinterIcon class="h-4 w-4" />
               Imprimer
             </button>
+          </div>
+        </div>
+
+        <!-- Archived Warning Banner -->
+        <div v-if="order.isArchived" class="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-4 dark:bg-amber-900/20 dark:border-amber-800">
+          <div class="flex items-center gap-3">
+            <ArchiveBoxIcon class="h-6 w-6 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <div>
+              <h4 class="text-sm font-medium text-amber-800 dark:text-amber-300">Commande archivée</h4>
+              <p class="text-sm text-amber-700 dark:text-amber-400">Cette commande est archivée. Les actions de modification sont désactivées.</p>
+            </div>
           </div>
         </div>
       </div>

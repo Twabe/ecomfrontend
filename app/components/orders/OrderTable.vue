@@ -105,6 +105,8 @@ const getStateLabel = (state: string) => {
 
 // Check if order can have delivery company assigned
 const canAssignDelivery = (order: Order) => {
+  // Archived orders cannot be modified
+  if (order.isArchived) return false
   const phase = order.phase?.toLowerCase()
   const state = order.state?.toLowerCase()
   // Block terminal states
@@ -115,6 +117,8 @@ const canAssignDelivery = (order: Order) => {
 
 // Check if order can have worker assigned
 const canAssignWorker = (order: Order) => {
+  // Archived orders cannot be modified
+  if (order.isArchived) return false
   const state = order.state?.toLowerCase()
   // Block terminal states
   return !['cancelled', 'canceled', 'delivered', 'returned'].includes(state || '')
@@ -122,13 +126,24 @@ const canAssignWorker = (order: Order) => {
 
 // Check if order can be confirmed
 const canConfirm = (order: Order) => {
+  // Archived orders cannot be modified
+  if (order.isArchived) return false
   return order.phase === 'confirmation' && order.state !== 'confirmed'
 }
 
 // Check if order can be cancelled
 const canCancel = (order: Order) => {
+  // Archived orders cannot be modified
+  if (order.isArchived) return false
   const state = order.state?.toLowerCase()
   return state !== 'cancelled' && state !== 'delivered'
+}
+
+// Check if order can be edited
+const canEdit = (order: Order) => {
+  // Archived orders cannot be modified
+  if (order.isArchived) return false
+  return !order.cannotEdit
 }
 
 const formatCurrency = (amount: number) => {
@@ -533,7 +548,7 @@ const handleAction = (action: string, order: Order) => {
 
                 <!-- Edit -->
                 <button
-                  v-if="!actionsModalOrder.cannotEdit"
+                  v-if="canEdit(actionsModalOrder)"
                   class="flex flex-col items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 p-4 transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/30 dark:hover:bg-blue-900/50"
                   @click="handleAction('edit', actionsModalOrder)"
                 >
@@ -543,7 +558,7 @@ const handleAction = (action: string, order: Order) => {
 
                 <!-- Manage Items -->
                 <button
-                  v-if="!actionsModalOrder.cannotEdit"
+                  v-if="canEdit(actionsModalOrder)"
                   class="flex flex-col items-center justify-center gap-2 rounded-xl border border-purple-200 bg-purple-50 p-4 transition hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-900/30 dark:hover:bg-purple-900/50"
                   @click="handleAction('edit-items', actionsModalOrder)"
                 >

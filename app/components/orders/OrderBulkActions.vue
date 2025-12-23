@@ -5,12 +5,15 @@ import {
   BuildingOffice2Icon,
   UserGroupIcon,
   ArchiveBoxIcon,
-  ArchiveBoxXMarkIcon
+  ArchiveBoxXMarkIcon,
+  CheckCircleIcon,
+  XCircleIcon
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps<{
   selectedCount: number
   isShippingPhase?: boolean
+  isConfirmationPhase?: boolean
   isArchivedFilter?: boolean | null
 }>()
 
@@ -21,6 +24,8 @@ const emit = defineEmits<{
   assignWorker: []
   archive: []
   unarchive: []
+  bulkConfirm: []
+  bulkCancel: []
 }>()
 
 const { t } = useI18n()
@@ -32,6 +37,23 @@ const { t } = useI18n()
       {{ selectedCount }} {{ t('common.selected') }}
     </span>
     <div class="flex flex-wrap gap-2">
+      <!-- Confirm/Cancel buttons - only show in confirmation phase -->
+      <template v-if="isConfirmationPhase">
+        <button
+          class="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+          @click="emit('bulkConfirm')"
+        >
+          <CheckCircleIcon class="h-4 w-4" />
+          {{ t('orders.confirmOrder') }}
+        </button>
+        <button
+          class="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+          @click="emit('bulkCancel')"
+        >
+          <XCircleIcon class="h-4 w-4" />
+          {{ t('orders.cancelOrder') }}
+        </button>
+      </template>
       <button
         class="inline-flex items-center gap-1 rounded-lg bg-orange-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-700"
         @click="emit('assignDelivery')"
