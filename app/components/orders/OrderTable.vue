@@ -7,7 +7,8 @@ import {
   ShoppingCartIcon,
   ClockIcon,
   TruckIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  EyeIcon
 } from '@heroicons/vue/24/outline'
 import type { Order } from '~/types/order'
 import { OrderStateColors, OrderPhaseColors } from '~/types/order'
@@ -345,6 +346,14 @@ const getActiveAssignment = (order: Order) => {
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-2">
+                <!-- View Details button - navigates to order details page -->
+                <NuxtLink
+                  :to="`/dashboard/orders/${order.id}`"
+                  class="rounded p-1 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                  :title="t('common.view')"
+                >
+                  <EyeIcon class="h-5 w-5" />
+                </NuxtLink>
                 <!-- Confirm button (only for pending orders in confirmation phase) -->
                 <button
                   v-if="order.phase === 'confirmation' && order.state !== 'confirmed'"
