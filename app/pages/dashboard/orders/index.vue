@@ -75,6 +75,7 @@ const { items: stores } = useStoresService()
 const { items: reasons } = useReasonsService()
 
 // Search & Filters - Initialize from URL query params
+// Default: isArchived = false (show only non-archived orders)
 const searchQuery = ref('')
 const filters = ref({
   phase: (route.query.phase as string) || '',
@@ -84,7 +85,7 @@ const filters = ref({
   deliveryCompanyId: (route.query.deliveryCompanyId as string) || '',
   storeId: (route.query.storeId as string) || '',
   sourceId: (route.query.sourceId as string) || '',
-  isArchived: route.query.isArchived === 'true' ? true : route.query.isArchived === 'false' ? false : null as boolean | null
+  isArchived: route.query.isArchived === 'true' ? true : route.query.isArchived === 'false' ? false : false as boolean | null
 })
 
 // Selection for bulk actions
@@ -125,7 +126,8 @@ watch(() => route.query, (newQuery) => {
     deliveryCompanyId: (newQuery.deliveryCompanyId as string) || '',
     storeId: (newQuery.storeId as string) || '',
     sourceId: (newQuery.sourceId as string) || '',
-    isArchived: newQuery.isArchived === 'true' ? true : newQuery.isArchived === 'false' ? false : null
+    // Default to false (non-archived) unless explicitly set to true or null in URL
+    isArchived: newQuery.isArchived === 'true' ? true : newQuery.isArchived === 'null' ? null : false
   }
   applyFilters()
 }, { deep: true })
@@ -143,6 +145,11 @@ onMounted(() => {
 // Hide phase/status filters when entering from sidebar links
 const hidePhaseStatusFilters = computed(() => {
   return !!(route.query.phase || route.query.state || route.query.trackingState)
+})
+
+// Check if we're in shipping phase (for bulk action buttons)
+const isShippingPhase = computed(() => {
+  return route.query.phase === 'shipping'
 })
 
 const applyFilters = () => {
@@ -421,7 +428,7 @@ const changePage = (page: number) => {
   setPage(page)
 }
 
-// Archive handlers
+// Archive handlers (single order)
 const handleArchive = async (order: OrderDto) => {
   try {
     await archiveOrders({ orderIds: [order.id!] })
@@ -433,6 +440,27 @@ const handleArchive = async (order: OrderDto) => {
 const handleUnarchive = async (order: OrderDto) => {
   try {
     await unarchiveOrders({ orderIds: [order.id!] })
+  } catch (error: any) {
+    notify({ type: 'error', message: error.message || t('messages.error') })
+  }
+}
+
+// Bulk archive handlers
+const handleBulkArchive = async () => {
+  if (selectedOrders.value.length === 0) return
+  try {
+    await archiveOrders({ orderIds: selectedOrders.value })
+    selectedOrders.value = []
+  } catch (error: any) {
+    notify({ type: 'error', message: error.message || t('messages.error') })
+  }
+}
+
+const handleBulkUnarchive = async () => {
+  if (selectedOrders.value.length === 0) return
+  try {
+    await unarchiveOrders({ orderIds: selectedOrders.value })
+    selectedOrders.value = []
   } catch (error: any) {
     notify({ type: 'error', message: error.message || t('messages.error') })
   }
@@ -469,10 +497,14 @@ const handleUnarchive = async (order: OrderDto) => {
     <!-- Bulk Actions -->
     <OrdersOrderBulkActions
       :selected-count="selectedOrders.length"
+      :is-shipping-phase="isShippingPhase"
+      :is-archived-filter="filters.isArchived"
       @assign-delivery="openAssignDeliveryModal()"
       @assign-worker="openAssignWorkerModal()"
       @mark-delivered="openDeliveredModal"
       @mark-returned="openReturnedModal"
+      @archive="handleBulkArchive"
+      @unarchive="handleBulkUnarchive"
     />
 
     <!-- Table -->

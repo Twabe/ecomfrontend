@@ -3,11 +3,15 @@ import {
   TruckIcon,
   ArrowUturnLeftIcon,
   BuildingOffice2Icon,
-  UserGroupIcon
+  UserGroupIcon,
+  ArchiveBoxIcon,
+  ArchiveBoxXMarkIcon
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps<{
   selectedCount: number
+  isShippingPhase?: boolean
+  isArchivedFilter?: boolean | null
 }>()
 
 const emit = defineEmits<{
@@ -15,6 +19,8 @@ const emit = defineEmits<{
   markReturned: []
   assignDelivery: []
   assignWorker: []
+  archive: []
+  unarchive: []
 }>()
 
 const { t } = useI18n()
@@ -40,19 +46,39 @@ const { t } = useI18n()
         <UserGroupIcon class="h-4 w-4" />
         {{ t('orders.assignWorker') }}
       </button>
+      <!-- Delivered/Returned buttons - only show in shipping phase -->
+      <template v-if="isShippingPhase">
+        <button
+          class="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+          @click="emit('markDelivered')"
+        >
+          <TruckIcon class="h-4 w-4" />
+          {{ t('orders.deliverOrder') }}
+        </button>
+        <button
+          class="inline-flex items-center gap-1 rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700"
+          @click="emit('markReturned')"
+        >
+          <ArrowUturnLeftIcon class="h-4 w-4" />
+          {{ t('orders.returnOrder') }}
+        </button>
+      </template>
+      <!-- Archive/Unarchive buttons -->
       <button
-        class="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
-        @click="emit('markDelivered')"
+        v-if="isArchivedFilter !== true"
+        class="inline-flex items-center gap-1 rounded-lg bg-gray-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
+        @click="emit('archive')"
       >
-        <TruckIcon class="h-4 w-4" />
-        {{ t('orders.deliverOrder') }}
+        <ArchiveBoxIcon class="h-4 w-4" />
+        {{ t('orders.archive') }}
       </button>
       <button
-        class="inline-flex items-center gap-1 rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700"
-        @click="emit('markReturned')"
+        v-if="isArchivedFilter === true"
+        class="inline-flex items-center gap-1 rounded-lg bg-gray-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
+        @click="emit('unarchive')"
       >
-        <ArrowUturnLeftIcon class="h-4 w-4" />
-        {{ t('orders.returnOrder') }}
+        <ArchiveBoxXMarkIcon class="h-4 w-4" />
+        {{ t('orders.unarchive') }}
       </button>
     </div>
   </div>
