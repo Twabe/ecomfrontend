@@ -96,8 +96,7 @@ export interface Order {
   platformOrderId?: string
   platformSource?: string
 
-  // Workers
-  workerId?: string
+  // Workers (workerId removed - use activeAssignments instead)
   moderatorId?: string
   mediaBuyerId?: string
 
@@ -225,7 +224,7 @@ export interface UpdateOrderRequest {
   trackingStateId?: string
   deliveryCompanyId?: string
   subDeliveryCompanyId?: string
-  workerId?: string
+  // workerId removed - use OrderAssignment API for worker assignment
   moderatorId?: string
   mediaBuyerId?: string
   storeId?: string
