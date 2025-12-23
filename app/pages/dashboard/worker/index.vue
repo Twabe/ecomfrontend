@@ -792,20 +792,21 @@ const submitConfirm = async () => {
   if (!selectedAssignment.value) return
   isSubmitting.value = true
   try {
-    // IMPORTANT: Complete assignment FIRST to check if still valid
-    // This prevents confirming orders that have been reassigned
+    // STEP 1: Confirm order FIRST (validates stock, business rules)
+    // If this fails, assignment stays "taken" and user can retry
+    await ordersWorkflow.confirmOrder({
+      orderId: selectedAssignment.value.orderId,
+      moveToShipping: true,
+      comment: confirmForm.value.comment || undefined
+    })
+
+    // STEP 2: Complete assignment AFTER order is confirmed
+    // This ensures we only mark as complete when order is truly confirmed
     await orderAssignmentsService.complete(selectedAssignment.value.id, {
       result: 'confirmed',
       notes: confirmForm.value.comment || undefined
     })
 
-    // Only confirm the order AFTER assignment is validated
-    // This ensures we don't confirm orders for reassigned assignments
-    await ordersWorkflow.confirmOrder({
-      orderId: selectedAssignment.value.orderId,
-      moveToShipping: true,  // Always move to shipping on confirm
-      comment: confirmForm.value.comment || undefined
-    })
     closeConfirmModal()
     await refreshAll()
   } catch (error: any) {
@@ -814,8 +815,15 @@ const submitConfirm = async () => {
       notification.warning(t('worker.orderReassigned'))
       closeConfirmModal()
       await refreshAll()
+    } else {
+      // Show error message to user (e.g., no stock, validation errors)
+      const errorMessage = error?.response?.data?.exception
+        || error?.response?.data?.message
+        || error?.message
+        || t('common.errorOccurred')
+      notification.error(errorMessage)
+      // Dialog stays open for retry - assignment is still "taken"
     }
-    // Other errors are handled by service layer
   } finally {
     isSubmitting.value = false
   }
@@ -840,18 +848,20 @@ const submitCancel = async () => {
   if (!selectedAssignment.value) return
   isSubmitting.value = true
   try {
-    // IMPORTANT: Complete assignment FIRST to check if still valid
-    // This prevents cancelling orders that have been reassigned
-    await orderAssignmentsService.complete(selectedAssignment.value.id, {
-      result: 'cancelled'
-    })
-
-    // Only cancel the order AFTER assignment is validated
+    // STEP 1: Cancel order FIRST (validates business rules)
+    // If this fails, assignment stays "taken" and user can retry
     await ordersWorkflow.cancelOrder({
       orderId: selectedAssignment.value.orderId,
       reasonId: cancelForm.value.reasonId || undefined,
       customReason: cancelForm.value.customReason || undefined
     })
+
+    // STEP 2: Complete assignment AFTER order is cancelled
+    // This ensures we only mark as complete when order is truly cancelled
+    await orderAssignmentsService.complete(selectedAssignment.value.id, {
+      result: 'cancelled'
+    })
+
     closeCancelModal()
     await refreshAll()
   } catch (error: any) {
@@ -860,8 +870,15 @@ const submitCancel = async () => {
       notification.warning(t('worker.orderReassigned'))
       closeCancelModal()
       await refreshAll()
+    } else {
+      // Show error message to user
+      const errorMessage = error?.response?.data?.exception
+        || error?.response?.data?.message
+        || error?.message
+        || t('common.errorOccurred')
+      notification.error(errorMessage)
+      // Dialog stays open for retry - assignment is still "taken"
     }
-    // Other errors are handled by service layer
   } finally {
     isSubmitting.value = false
   }
