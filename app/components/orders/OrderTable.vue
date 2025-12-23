@@ -10,10 +10,23 @@ import {
   UserGroupIcon,
   EyeIcon,
   ArchiveBoxIcon,
-  ArchiveBoxXMarkIcon
+  ArchiveBoxXMarkIcon,
+  EllipsisHorizontalIcon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline'
 import type { Order } from '~/types/order'
 import { OrderStateColors, OrderPhaseColors } from '~/types/order'
+
+// Track which order's actions modal is open
+const actionsModalOrder = ref<Order | null>(null)
+
+const openActionsModal = (order: Order) => {
+  actionsModalOrder.value = order
+}
+
+const closeActionsModal = () => {
+  actionsModalOrder.value = null
+}
 
 const props = defineProps<{
   orders: Order[]
@@ -107,6 +120,17 @@ const canAssignWorker = (order: Order) => {
   return !['cancelled', 'canceled', 'delivered', 'returned'].includes(state || '')
 }
 
+// Check if order can be confirmed
+const canConfirm = (order: Order) => {
+  return order.phase === 'confirmation' && order.state !== 'confirmed'
+}
+
+// Check if order can be cancelled
+const canCancel = (order: Order) => {
+  const state = order.state?.toLowerCase()
+  return state !== 'cancelled' && state !== 'delivered'
+}
+
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(amount)
 }
@@ -182,6 +206,46 @@ const getActiveAssignment = (order: Order) => {
   if (!order.activeAssignments || order.activeAssignments.length === 0) return null
   // Return the first assignment (or the most relevant - taken over pending)
   return order.activeAssignments.find(a => a.status === 'taken') || order.activeAssignments[0]
+}
+
+// Handle action and close modal
+const handleAction = (action: string, order: Order) => {
+  closeActionsModal()
+  switch (action) {
+    case 'view':
+      emit('view', order)
+      break
+    case 'edit':
+      emit('edit', order)
+      break
+    case 'edit-items':
+      emit('edit-items', order)
+      break
+    case 'confirm':
+      emit('confirm', order)
+      break
+    case 'cancel':
+      emit('cancel', order)
+      break
+    case 'assign-delivery':
+      emit('assign-delivery', order)
+      break
+    case 'assign-worker':
+      emit('assign-worker', order)
+      break
+    case 'history':
+      emit('history', order)
+      break
+    case 'archive':
+      emit('archive', order)
+      break
+    case 'unarchive':
+      emit('unarchive', order)
+      break
+    case 'delete':
+      emit('delete', order)
+      break
+  }
 }
 </script>
 
@@ -349,103 +413,12 @@ const getActiveAssignment = (order: Order) => {
               <span v-else class="text-xs text-gray-400">-</span>
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-right">
-              <div class="flex items-center justify-end gap-2">
-                <!-- View Details button - navigates to order details page -->
-                <NuxtLink
-                  :to="`/dashboard/orders/${order.id}`"
-                  class="rounded p-1 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
-                  :title="t('common.view')"
-                >
-                  <EyeIcon class="h-5 w-5" />
-                </NuxtLink>
-                <!-- Confirm button (only for pending orders in confirmation phase) -->
-                <button
-                  v-if="order.phase === 'confirmation' && order.state !== 'confirmed'"
-                  class="rounded p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
-                  :title="t('orders.confirmOrder')"
-                  @click="emit('confirm', order)"
-                >
-                  <CheckCircleIcon class="h-5 w-5" />
-                </button>
-                <!-- Cancel button -->
-                <button
-                  v-if="order.state !== 'cancelled' && order.state !== 'delivered'"
-                  class="rounded p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  :title="t('orders.cancelOrder')"
-                  @click="emit('cancel', order)"
-                >
-                  <XCircleIcon class="h-5 w-5" />
-                </button>
-                <!-- Edit button -->
-                <button
-                  v-if="!order.cannotEdit"
-                  class="rounded p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                  :title="t('common.edit')"
-                  @click="emit('edit', order)"
-                >
-                  <PencilSquareIcon class="h-5 w-5" />
-                </button>
-                <!-- Edit Items button -->
-                <button
-                  v-if="!order.cannotEdit"
-                  class="rounded p-1 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                  :title="t('orders.manageItems')"
-                  @click="emit('edit-items', order)"
-                >
-                  <ShoppingCartIcon class="h-5 w-5" />
-                </button>
-                <!-- Assign Delivery Company button -->
-                <button
-                  v-if="canAssignDelivery(order)"
-                  class="rounded p-1 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                  :title="t('orders.assignDelivery')"
-                  @click="emit('assign-delivery', order)"
-                >
-                  <TruckIcon class="h-5 w-5" />
-                </button>
-                <!-- Assign Worker button -->
-                <button
-                  v-if="canAssignWorker(order)"
-                  class="rounded p-1 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-                  :title="t('orders.assignWorker')"
-                  @click="emit('assign-worker', order)"
-                >
-                  <UserGroupIcon class="h-5 w-5" />
-                </button>
-                <!-- History button -->
-                <button
-                  class="rounded p-1 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
-                  :title="t('orders.viewHistory')"
-                  @click="emit('history', order)"
-                >
-                  <ClockIcon class="h-5 w-5" />
-                </button>
-                <!-- Archive/Unarchive button -->
-                <button
-                  v-if="!order.isArchived"
-                  class="rounded p-1 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-                  :title="t('orders.archive')"
-                  @click="emit('archive', order)"
-                >
-                  <ArchiveBoxIcon class="h-5 w-5" />
-                </button>
-                <button
-                  v-else
-                  class="rounded p-1 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20"
-                  :title="t('orders.unarchive')"
-                  @click="emit('unarchive', order)"
-                >
-                  <ArchiveBoxXMarkIcon class="h-5 w-5" />
-                </button>
-                <!-- Delete button -->
-                <button
-                  class="rounded p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  :title="t('common.delete')"
-                  @click="emit('delete', order)"
-                >
-                  <TrashIcon class="h-5 w-5" />
-                </button>
-              </div>
+              <button
+                class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                @click="openActionsModal(order)"
+              >
+                <EllipsisHorizontalIcon class="h-5 w-5" />
+              </button>
             </td>
           </tr>
         </tbody>
@@ -476,5 +449,168 @@ const getActiveAssignment = (order: Order) => {
         </button>
       </div>
     </div>
+
+    <!-- Actions Modal -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition ease-out duration-200"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition ease-in duration-150"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="actionsModalOrder"
+          class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center"
+          @click.self="closeActionsModal"
+        >
+          <Transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="translate-y-full sm:translate-y-0 sm:scale-95"
+            enter-to-class="translate-y-0 sm:scale-100"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="translate-y-0 sm:scale-100"
+            leave-to-class="translate-y-full sm:translate-y-0 sm:scale-95"
+          >
+            <div
+              v-if="actionsModalOrder"
+              class="w-full max-w-md rounded-t-2xl bg-white p-6 shadow-xl dark:bg-gray-800 sm:rounded-2xl"
+            >
+              <!-- Header -->
+              <div class="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ t('common.actions') }}
+                  </h3>
+                  <p class="text-sm text-primary-600 dark:text-primary-400">
+                    {{ actionsModalOrder.code }}
+                    <span class="ml-2 font-medium">{{ formatCurrency(actionsModalOrder.price) }}</span>
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    {{ actionsModalOrder.fullName }} - {{ actionsModalOrder.cityName }}
+                  </p>
+                </div>
+                <button
+                  class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-700"
+                  @click="closeActionsModal"
+                >
+                  <XMarkIcon class="h-6 w-6" />
+                </button>
+              </div>
+
+              <!-- Actions Grid -->
+              <div class="grid grid-cols-2 gap-3">
+                <!-- View -->
+                <NuxtLink
+                  :to="`/dashboard/orders/${actionsModalOrder.id}`"
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/50 dark:hover:bg-gray-700"
+                  @click="closeActionsModal"
+                >
+                  <EyeIcon class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('common.view') }}</span>
+                </NuxtLink>
+
+                <!-- Confirm -->
+                <button
+                  v-if="canConfirm(actionsModalOrder)"
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 p-4 transition hover:bg-green-100 dark:border-green-800 dark:bg-green-900/30 dark:hover:bg-green-900/50"
+                  @click="handleAction('confirm', actionsModalOrder)"
+                >
+                  <CheckCircleIcon class="h-6 w-6 text-green-600 dark:text-green-400" />
+                  <span class="text-sm font-medium text-green-700 dark:text-green-300">{{ t('orders.confirmOrder') }}</span>
+                </button>
+
+                <!-- Cancel -->
+                <button
+                  v-if="canCancel(actionsModalOrder)"
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 transition hover:bg-red-100 dark:border-red-800 dark:bg-red-900/30 dark:hover:bg-red-900/50"
+                  @click="handleAction('cancel', actionsModalOrder)"
+                >
+                  <XCircleIcon class="h-6 w-6 text-red-600 dark:text-red-400" />
+                  <span class="text-sm font-medium text-red-700 dark:text-red-300">{{ t('orders.cancelOrder') }}</span>
+                </button>
+
+                <!-- Edit -->
+                <button
+                  v-if="!actionsModalOrder.cannotEdit"
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 p-4 transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/30 dark:hover:bg-blue-900/50"
+                  @click="handleAction('edit', actionsModalOrder)"
+                >
+                  <PencilSquareIcon class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <span class="text-sm font-medium text-blue-700 dark:text-blue-300">{{ t('common.edit') }}</span>
+                </button>
+
+                <!-- Manage Items -->
+                <button
+                  v-if="!actionsModalOrder.cannotEdit"
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-purple-200 bg-purple-50 p-4 transition hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-900/30 dark:hover:bg-purple-900/50"
+                  @click="handleAction('edit-items', actionsModalOrder)"
+                >
+                  <ShoppingCartIcon class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  <span class="text-sm font-medium text-purple-700 dark:text-purple-300">{{ t('orders.manageItems') }}</span>
+                </button>
+
+                <!-- Assign Delivery -->
+                <button
+                  v-if="canAssignDelivery(actionsModalOrder)"
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50 p-4 transition hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+                  @click="handleAction('assign-delivery', actionsModalOrder)"
+                >
+                  <TruckIcon class="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                  <span class="text-sm font-medium text-orange-700 dark:text-orange-300">{{ t('orders.assignDelivery') }}</span>
+                </button>
+
+                <!-- Assign Worker -->
+                <button
+                  v-if="canAssignWorker(actionsModalOrder)"
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 p-4 transition hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50"
+                  @click="handleAction('assign-worker', actionsModalOrder)"
+                >
+                  <UserGroupIcon class="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  <span class="text-sm font-medium text-indigo-700 dark:text-indigo-300">{{ t('orders.assignWorker') }}</span>
+                </button>
+
+                <!-- History -->
+                <button
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/50 dark:hover:bg-gray-700"
+                  @click="handleAction('history', actionsModalOrder)"
+                >
+                  <ClockIcon class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('orders.viewHistory') }}</span>
+                </button>
+
+                <!-- Archive/Unarchive -->
+                <button
+                  v-if="!actionsModalOrder.isArchived"
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 transition hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-900/30 dark:hover:bg-amber-900/50"
+                  @click="handleAction('archive', actionsModalOrder)"
+                >
+                  <ArchiveBoxIcon class="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                  <span class="text-sm font-medium text-amber-700 dark:text-amber-300">{{ t('orders.archive') }}</span>
+                </button>
+                <button
+                  v-else
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-teal-200 bg-teal-50 p-4 transition hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-900/30 dark:hover:bg-teal-900/50"
+                  @click="handleAction('unarchive', actionsModalOrder)"
+                >
+                  <ArchiveBoxXMarkIcon class="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                  <span class="text-sm font-medium text-teal-700 dark:text-teal-300">{{ t('orders.unarchive') }}</span>
+                </button>
+
+                <!-- Delete -->
+                <button
+                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 transition hover:bg-red-100 dark:border-red-800 dark:bg-red-900/30 dark:hover:bg-red-900/50"
+                  @click="handleAction('delete', actionsModalOrder)"
+                >
+                  <TrashIcon class="h-6 w-6 text-red-600 dark:text-red-400" />
+                  <span class="text-sm font-medium text-red-700 dark:text-red-300">{{ t('common.delete') }}</span>
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
