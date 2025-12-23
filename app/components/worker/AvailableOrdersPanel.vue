@@ -229,16 +229,12 @@ const handleSelfAssign = async (order: OrderDto) => {
 
   isAssigning.value = order.id
   try {
-    // Self-assign the order
-    const result = await orderAssignmentsService.selfAssign({
+    // Self-assign the order - creates assignment with "pending" status
+    // Worker will see it in their Confirmations tab and can "take" it when ready
+    await orderAssignmentsService.selfAssign({
       orderId: order.id,
       serviceType: 'confirmation',
     })
-
-    // Auto-take the assignment immediately
-    if (result.assignmentId) {
-      await orderAssignmentsService.take(result.assignmentId)
-    }
 
     showSuccess(t('worker.orderGrabbed', { code: order.code }))
     emit('assigned', order)

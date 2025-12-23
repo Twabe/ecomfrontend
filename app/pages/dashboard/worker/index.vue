@@ -159,10 +159,10 @@
             >
               <DialogPanel class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
                 <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  {{ $t('orders.orderDetails') }} - {{ selectedAssignment?.orderCode }}
+                  {{ $t('orders.orderDetails') }} - {{ selectedAssignment?.orderCode || orderDetails?.code }}
                 </DialogTitle>
 
-                <div v-if="selectedAssignment && orderDetails" class="space-y-4">
+                <div v-if="orderDetails" class="space-y-4">
                   <!-- Customer Info -->
                   <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -236,8 +236,8 @@
                 </div>
 
                 <div class="flex justify-between gap-3 mt-6">
-                  <!-- Edit Actions (permission-based) -->
-                  <div v-if="canUpdateOrders" class="flex gap-2">
+                  <!-- Edit Actions (permission-based) - Hidden for available/unassigned orders -->
+                  <div v-if="canUpdateOrders && !isViewingAvailableOrder" class="flex gap-2">
                     <button
                       type="button"
                       class="btn-secondary text-sm"
@@ -645,6 +645,8 @@ const showEditOrderModal = ref(false)
 const showManageItemsModal = ref(false)
 const selectedAssignment = ref<WorkerAssignmentDto | null>(null)
 const orderDetails = ref<OrderDto | null>(null)
+// Track if viewing an available (unassigned) order - to hide edit buttons
+const isViewingAvailableOrder = ref(false)
 const assignDeliveryOrder = ref<Order | null>(null)
 const isAssigningDelivery = ref(false)
 
@@ -709,13 +711,28 @@ const handleToggleOnline = async () => {
   }
 }
 
-// Open order modal
-const openOrderModal = async (assignment: WorkerAssignmentDto) => {
-  selectedAssignment.value = assignment
-  try {
-    orderDetails.value = await ordersWorkflow.getOrder(assignment.orderId)
-  } catch {
-    orderDetails.value = null
+// Open order modal - handles both WorkerAssignmentDto (from assigned tabs) and OrderDto (from available tab)
+const openOrderModal = async (data: WorkerAssignmentDto | OrderDto) => {
+  // Check if this is an OrderDto (from available orders tab) or WorkerAssignmentDto
+  // OrderDto has 'id' and 'code', WorkerAssignmentDto has 'orderId' and 'orderCode'
+  const isOrderDto = 'code' in data && !('orderId' in data)
+
+  isViewingAvailableOrder.value = isOrderDto
+
+  if (isOrderDto) {
+    // From available orders - data is OrderDto
+    const order = data as OrderDto
+    selectedAssignment.value = null // No assignment yet
+    orderDetails.value = order // Use the passed order directly
+  } else {
+    // From assigned tabs - data is WorkerAssignmentDto
+    const assignment = data as WorkerAssignmentDto
+    selectedAssignment.value = assignment
+    try {
+      orderDetails.value = await ordersWorkflow.getOrder(assignment.orderId)
+    } catch {
+      orderDetails.value = null
+    }
   }
   showOrderModal.value = true
 }
@@ -724,6 +741,7 @@ const closeOrderModal = () => {
   showOrderModal.value = false
   selectedAssignment.value = null
   orderDetails.value = null
+  isViewingAvailableOrder.value = false
 }
 
 // Edit order modal - opens OrderFormModal
@@ -792,21 +810,15 @@ const submitConfirm = async () => {
   if (!selectedAssignment.value) return
   isSubmitting.value = true
   try {
-    // STEP 1: Confirm order FIRST (validates stock, business rules)
-    // If this fails, assignment stays "taken" and user can retry
+    // Confirm order - backend automatically completes the confirmation assignment
+    // No need to call orderAssignmentsService.complete() separately
     await ordersWorkflow.confirmOrder({
       orderId: selectedAssignment.value.orderId,
       moveToShipping: true,
       comment: confirmForm.value.comment || undefined
     })
 
-    // STEP 2: Complete assignment AFTER order is confirmed
-    // This ensures we only mark as complete when order is truly confirmed
-    await orderAssignmentsService.complete(selectedAssignment.value.id, {
-      result: 'confirmed',
-      notes: confirmForm.value.comment || undefined
-    })
-
+    notification.success(t('orders.orderConfirmed'))
     closeConfirmModal()
     await refreshAll()
   } catch (error: any) {
@@ -848,20 +860,15 @@ const submitCancel = async () => {
   if (!selectedAssignment.value) return
   isSubmitting.value = true
   try {
-    // STEP 1: Cancel order FIRST (validates business rules)
-    // If this fails, assignment stays "taken" and user can retry
+    // Cancel order - backend automatically completes ALL active assignments
+    // No need to call orderAssignmentsService.complete() separately
     await ordersWorkflow.cancelOrder({
       orderId: selectedAssignment.value.orderId,
       reasonId: cancelForm.value.reasonId || undefined,
       customReason: cancelForm.value.customReason || undefined
     })
 
-    // STEP 2: Complete assignment AFTER order is cancelled
-    // This ensures we only mark as complete when order is truly cancelled
-    await orderAssignmentsService.complete(selectedAssignment.value.id, {
-      result: 'cancelled'
-    })
-
+    notification.success(t('orders.orderCancelled'))
     closeCancelModal()
     await refreshAll()
   } catch (error: any) {

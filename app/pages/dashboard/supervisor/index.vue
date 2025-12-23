@@ -212,13 +212,24 @@
                   <span class="text-sm text-gray-500 dark:text-gray-400">{{ timeAgo(order.createdOn) }}</span>
                 </td>
                 <td class="px-4 py-3">
-                  <button
-                    @click="openSingleReassign(order)"
-                    class="text-primary-600 hover:text-primary-800 dark:text-primary-400"
-                    :title="$t('supervisor.assign')"
-                  >
-                    <ArrowsRightLeftIcon class="w-5 h-5" />
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <!-- View Order Details -->
+                    <NuxtLink
+                      :to="`/dashboard/orders/${order.id}?from=supervisor`"
+                      class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                      :title="$t('supervisor.viewDetails')"
+                    >
+                      <EyeIcon class="w-4 h-4" />
+                    </NuxtLink>
+                    <!-- Assign -->
+                    <button
+                      @click="openSingleReassign(order)"
+                      class="p-1.5 text-primary-600 hover:text-primary-800 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded"
+                      :title="$t('supervisor.assign')"
+                    >
+                      <ArrowsRightLeftIcon class="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -362,13 +373,24 @@
                   <span v-else class="text-gray-400">-</span>
                 </td>
                 <td class="px-4 py-3">
-                  <button
-                    @click="openSingleReassignFromConfirmation(order)"
-                    class="text-primary-600 hover:text-primary-800 dark:text-primary-400"
-                    :title="order.assignmentStatus === 'unassigned' ? $t('supervisor.assign') : $t('supervisor.reassign')"
-                  >
-                    <ArrowsRightLeftIcon class="w-5 h-5" />
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <!-- View Order Details -->
+                    <NuxtLink
+                      :to="`/dashboard/orders/${order.orderId}?from=supervisor`"
+                      class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                      :title="$t('supervisor.viewDetails')"
+                    >
+                      <EyeIcon class="w-4 h-4" />
+                    </NuxtLink>
+                    <!-- Assign/Reassign -->
+                    <button
+                      @click="openSingleReassignFromConfirmation(order)"
+                      class="p-1.5 text-primary-600 hover:text-primary-800 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded"
+                      :title="order.assignmentStatus === 'unassigned' ? $t('supervisor.assign') : $t('supervisor.reassign')"
+                    >
+                      <ArrowsRightLeftIcon class="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -492,13 +514,24 @@
                   <span v-else class="text-gray-400">-</span>
                 </td>
                 <td class="px-4 py-3">
-                  <button
-                    @click="openSingleReassignFromQuality(order)"
-                    class="text-primary-600 hover:text-primary-800 dark:text-primary-400"
-                    :title="order.assignmentStatus === 'unassigned' ? $t('supervisor.assign') : $t('supervisor.reassign')"
-                  >
-                    <ArrowsRightLeftIcon class="w-5 h-5" />
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <!-- View Order Details -->
+                    <NuxtLink
+                      :to="`/dashboard/orders/${order.orderId}?from=supervisor`"
+                      class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                      :title="$t('supervisor.viewDetails')"
+                    >
+                      <EyeIcon class="w-4 h-4" />
+                    </NuxtLink>
+                    <!-- Assign/Reassign -->
+                    <button
+                      @click="openSingleReassignFromQuality(order)"
+                      class="p-1.5 text-primary-600 hover:text-primary-800 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded"
+                      :title="order.assignmentStatus === 'unassigned' ? $t('supervisor.assign') : $t('supervisor.reassign')"
+                    >
+                      <ArrowsRightLeftIcon class="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -622,13 +655,24 @@
                   <span v-else class="text-gray-400">-</span>
                 </td>
                 <td class="px-4 py-3">
-                  <button
-                    @click="openSingleReassignFromSuivi(order)"
-                    class="text-primary-600 hover:text-primary-800 dark:text-primary-400"
-                    :title="$t('supervisor.reassign')"
-                  >
-                    <ArrowsRightLeftIcon class="w-5 h-5" />
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <!-- View Order Details -->
+                    <NuxtLink
+                      :to="`/dashboard/orders/${order.orderId}?from=supervisor`"
+                      class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                      :title="$t('supervisor.viewDetails')"
+                    >
+                      <EyeIcon class="w-4 h-4" />
+                    </NuxtLink>
+                    <!-- Reassign -->
+                    <button
+                      @click="openSingleReassignFromSuivi(order)"
+                      class="p-1.5 text-primary-600 hover:text-primary-800 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded"
+                      :title="$t('supervisor.reassign')"
+                    >
+                      <ArrowsRightLeftIcon class="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
