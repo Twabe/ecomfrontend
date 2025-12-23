@@ -16,6 +16,7 @@ interface Filters {
   deliveryCompanyId: string
   storeId: string
   sourceId: string
+  isArchived?: boolean | null
 }
 
 const props = defineProps<{
@@ -34,7 +35,8 @@ const filters = defineModel<Filters>('filters', {
     cityId: '',
     deliveryCompanyId: '',
     storeId: '',
-    sourceId: ''
+    sourceId: '',
+    isArchived: null
   })
 })
 
@@ -121,6 +123,16 @@ const showFilters = ref(false)
       >
         <option value="">{{ t('nav.sources') }}</option>
         <option v-for="source in sources" :key="source.id" :value="source.id">{{ source.title }}</option>
+      </select>
+
+      <!-- Archive Filter -->
+      <select
+        v-model="filters.isArchived"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+      >
+        <option :value="null">{{ t('orders.archiveFilter.all') }}</option>
+        <option :value="false">{{ t('orders.archiveFilter.active') }}</option>
+        <option :value="true">{{ t('orders.archiveFilter.archived') }}</option>
       </select>
     </div>
   </div>

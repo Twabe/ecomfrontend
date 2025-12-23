@@ -95,6 +95,34 @@ export interface BulkAssignDeliveryCompanyRequest {
   subDeliveryCompanyId?: string
 }
 
+// Types for archive orders
+export interface ArchiveOrdersRequest {
+  orderIds: string[]
+  comment?: string
+}
+
+export interface ArchiveOrdersResponse {
+  totalOrders: number
+  successfullyArchived: number
+  failed: number
+  errors: string[]
+  archivedOrderCodes: string[]
+}
+
+// Types for unarchive orders
+export interface UnarchiveOrdersRequest {
+  orderIds: string[]
+  comment?: string
+}
+
+export interface UnarchiveOrdersResponse {
+  totalOrders: number
+  successfullyUnarchived: number
+  failed: number
+  errors: string[]
+  unarchivedOrderCodes: string[]
+}
+
 export interface BulkAssignDeliveryCompanyResponse {
   totalOrders: number
   successfullyAssigned: number
@@ -628,6 +656,48 @@ export function useOrdersWorkflowService() {
     return exportMutation.mutateAsync({ data: { orderIds } })
   }
 
+  // ============================================
+  // Archive Operations
+  // ============================================
+
+  /**
+   * Archive orders
+   */
+  const archiveOrders = async (data: ArchiveOrdersRequest): Promise<ArchiveOrdersResponse> => {
+    const api = useApi()
+    const result = await api.post<ArchiveOrdersResponse>(
+      '/api/v1/orders/archive',
+      data
+    )
+    if (result.successfullyArchived > 0) {
+      success(`${result.successfullyArchived} order(s) archived successfully`)
+    }
+    if (result.failed > 0) {
+      error(`${result.failed} order(s) failed to archive`)
+    }
+    invalidateAll()
+    return result
+  }
+
+  /**
+   * Unarchive orders
+   */
+  const unarchiveOrders = async (data: UnarchiveOrdersRequest): Promise<UnarchiveOrdersResponse> => {
+    const api = useApi()
+    const result = await api.post<UnarchiveOrdersResponse>(
+      '/api/v1/orders/unarchive',
+      data
+    )
+    if (result.successfullyUnarchived > 0) {
+      success(`${result.successfullyUnarchived} order(s) unarchived successfully`)
+    }
+    if (result.failed > 0) {
+      error(`${result.failed} order(s) failed to unarchive`)
+    }
+    invalidateAll()
+    return result
+  }
+
   // Mutation loading states
   const isMutating = computed(() =>
     confirmMutation.isPending.value ||
@@ -687,6 +757,10 @@ export function useOrdersWorkflowService() {
     updateOrderItem,
     removeOrderItem,
     exportOrders,
+
+    // Archive operations
+    archiveOrders,
+    unarchiveOrders,
 
     // State
     isMutating,

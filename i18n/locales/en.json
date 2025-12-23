@@ -249,7 +249,14 @@
       "cancelled": "Cancelled",
       "returned": "Returned"
     },
-    "assignment": "Assignment"
+    "assignment": "Assignment",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "archiveFilter": {
+      "all": "All orders",
+      "active": "Active",
+      "archived": "Archived"
+    }
   },
   "delivery": {
     "company": "Delivery Company",

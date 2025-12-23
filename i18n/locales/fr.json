@@ -258,7 +258,14 @@
       "returned": "Retournée"
     },
     "confirmedAt": "Confirmé le",
-    "assignment": "Assignation"
+    "assignment": "Assignation",
+    "archive": "Archiver",
+    "unarchive": "Désarchiver",
+    "archiveFilter": {
+      "all": "Tous les états",
+      "active": "Actives",
+      "archived": "Archivées"
+    }
   },
   "delivery": {
     "company": "Société de livraison",

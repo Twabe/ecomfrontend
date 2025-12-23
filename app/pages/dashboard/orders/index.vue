@@ -50,7 +50,9 @@ const {
   markAsDelivered,
   markAsReturned,
   getOrder,
-  bulkAssignDeliveryCompany
+  bulkAssignDeliveryCompany,
+  archiveOrders,
+  unarchiveOrders
 } = useOrdersWorkflowService()
 
 // Assignment service for worker assignments
@@ -81,7 +83,8 @@ const filters = ref({
   cityId: (route.query.cityId as string) || '',
   deliveryCompanyId: (route.query.deliveryCompanyId as string) || '',
   storeId: (route.query.storeId as string) || '',
-  sourceId: (route.query.sourceId as string) || ''
+  sourceId: (route.query.sourceId as string) || '',
+  isArchived: route.query.isArchived === 'true' ? true : route.query.isArchived === 'false' ? false : null as boolean | null
 })
 
 // Selection for bulk actions
@@ -121,7 +124,8 @@ watch(() => route.query, (newQuery) => {
     cityId: (newQuery.cityId as string) || '',
     deliveryCompanyId: (newQuery.deliveryCompanyId as string) || '',
     storeId: (newQuery.storeId as string) || '',
-    sourceId: (newQuery.sourceId as string) || ''
+    sourceId: (newQuery.sourceId as string) || '',
+    isArchived: newQuery.isArchived === 'true' ? true : newQuery.isArchived === 'false' ? false : null
   }
   applyFilters()
 }, { deep: true })
@@ -149,7 +153,8 @@ const applyFilters = () => {
     cityId: filters.value.cityId || undefined,
     deliveryCompanyId: filters.value.deliveryCompanyId || undefined,
     storeId: filters.value.storeId || undefined,
-    sourceId: filters.value.sourceId || undefined
+    sourceId: filters.value.sourceId || undefined,
+    isArchived: filters.value.isArchived ?? undefined
   })
   if (searchQuery.value) {
     setKeyword(searchQuery.value)
@@ -415,6 +420,23 @@ const handleAssignWorker = async (data: {
 const changePage = (page: number) => {
   setPage(page)
 }
+
+// Archive handlers
+const handleArchive = async (order: OrderDto) => {
+  try {
+    await archiveOrders({ orderIds: [order.id!] })
+  } catch (error: any) {
+    notify({ type: 'error', message: error.message || t('messages.error') })
+  }
+}
+
+const handleUnarchive = async (order: OrderDto) => {
+  try {
+    await unarchiveOrders({ orderIds: [order.id!] })
+  } catch (error: any) {
+    notify({ type: 'error', message: error.message || t('messages.error') })
+  }
+}
 </script>
 
 <template>
@@ -467,6 +489,8 @@ const changePage = (page: number) => {
       @history="openHistoryModal"
       @assign-delivery="openAssignDeliveryModal"
       @assign-worker="openAssignWorkerModal"
+      @archive="handleArchive"
+      @unarchive="handleUnarchive"
       @selection-change="handleSelectionChange"
       @page-change="changePage"
     />

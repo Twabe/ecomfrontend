@@ -241,7 +241,14 @@
       "cancelled": "ملغي",
       "returned": "مرتجع"
     },
-    "assignment": "التكليف"
+    "assignment": "التكليف",
+    "archive": "أرشفة",
+    "unarchive": "إلغاء الأرشفة",
+    "archiveFilter": {
+      "all": "جميع الطلبات",
+      "active": "النشطة",
+      "archived": "المؤرشفة"
+    }
   },
   "delivery": {
     "company": "شركة التوصيل",

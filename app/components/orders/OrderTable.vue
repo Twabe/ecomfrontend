@@ -8,7 +8,9 @@ import {
   ClockIcon,
   TruckIcon,
   UserGroupIcon,
-  EyeIcon
+  EyeIcon,
+  ArchiveBoxIcon,
+  ArchiveBoxXMarkIcon
 } from '@heroicons/vue/24/outline'
 import type { Order } from '~/types/order'
 import { OrderStateColors, OrderPhaseColors } from '~/types/order'
@@ -34,6 +36,8 @@ const emit = defineEmits<{
   history: [order: Order]
   'assign-delivery': [order: Order]
   'assign-worker': [order: Order]
+  archive: [order: Order]
+  unarchive: [order: Order]
   selectionChange: [orderIds: string[]]
   pageChange: [page: number]
 }>()
@@ -415,6 +419,23 @@ const getActiveAssignment = (order: Order) => {
                   @click="emit('history', order)"
                 >
                   <ClockIcon class="h-5 w-5" />
+                </button>
+                <!-- Archive/Unarchive button -->
+                <button
+                  v-if="!order.isArchived"
+                  class="rounded p-1 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                  :title="t('orders.archive')"
+                  @click="emit('archive', order)"
+                >
+                  <ArchiveBoxIcon class="h-5 w-5" />
+                </button>
+                <button
+                  v-else
+                  class="rounded p-1 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20"
+                  :title="t('orders.unarchive')"
+                  @click="emit('unarchive', order)"
+                >
+                  <ArchiveBoxXMarkIcon class="h-5 w-5" />
                 </button>
                 <!-- Delete button -->
                 <button
