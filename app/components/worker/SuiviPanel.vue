@@ -162,7 +162,7 @@
             </span>
             <div class="flex-1"></div>
             <button
-              @click="handleBulkComplete('delivered')"
+              @click="handleBulkComplete(SuiviResult.Delivered)"
               :disabled="isBulkProcessing || isBulkAssignDeliveryProcessing"
               class="btn-primary text-sm py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
             >
@@ -170,7 +170,7 @@
               {{ $t('worker.markAllDelivered') }}
             </button>
             <button
-              @click="handleBulkComplete('returned')"
+              @click="handleBulkComplete(SuiviResult.Returned)"
               :disabled="isBulkProcessing || isBulkAssignDeliveryProcessing"
               class="btn-secondary text-sm py-1.5 px-3 text-orange-600 dark:text-orange-400 disabled:opacity-50"
             >
@@ -392,14 +392,14 @@
             <!-- Actions Row 2: Complete buttons -->
             <div class="flex gap-1.5 mt-1.5">
               <button
-                @click="quickComplete(assignment, 'delivered')"
+                @click="quickComplete(assignment, SuiviResult.Delivered)"
                 class="btn-primary flex-1 text-xs py-1.5 bg-emerald-600 hover:bg-emerald-700"
               >
                 <CheckCircleIcon class="w-3.5 h-3.5 mr-1" />
                 {{ $t('worker.delivered') }}
               </button>
               <button
-                @click="quickComplete(assignment, 'returned')"
+                @click="quickComplete(assignment, SuiviResult.Returned)"
                 class="btn-secondary flex-1 text-xs py-1.5 text-orange-600 dark:text-orange-400"
               >
                 <ArrowUturnLeftIcon class="w-3.5 h-3.5 mr-1" />
@@ -462,7 +462,8 @@ import { useOrdersWorkflowService, type BulkAssignDeliveryCompanyResponse } from
 import { trackingStatesSearch } from '~/api/generated/endpoints/tracking-states/tracking-states'
 import { deliveryCompaniesSearch } from '~/api/generated/endpoints/delivery-companies/delivery-companies'
 import { subDeliveryCompaniesSearch } from '~/api/generated/endpoints/sub-delivery-companies/sub-delivery-companies'
-import type { SuiviResult } from '~/types/orderAssignment'
+import { ServiceTypes, SuiviResult } from '~/constants/order'
+import type { SuiviResultType } from '~/constants/order'
 import type { DeliveryCompany } from '~/types/deliverycompany'
 import type { SubDeliveryCompany } from '~/types/subDeliveryCompany'
 
@@ -479,8 +480,8 @@ const orderAssignmentsService = useOrderAssignmentsService()
 const ordersWorkflow = useOrdersWorkflowService()
 
 // Query params for filtering by service type
-const pendingParams = ref({ serviceType: 'suivi' })
-const activeParams = ref({ serviceType: 'suivi' })
+const pendingParams = ref({ serviceType: ServiceTypes.Suivi })
+const activeParams = ref({ serviceType: ServiceTypes.Suivi })
 
 // Vue Query hooks
 const myPendingQuery = orderAssignmentsService.useMyPendingAssignments(pendingParams)
@@ -492,7 +493,7 @@ const myActiveAssignments = computed(() => myActiveQuery.data.value ?? [])
 const isLoading = computed(() => myPendingQuery.isLoading.value || myActiveQuery.isLoading.value)
 
 // Stats query for delivered/issues counters
-const statsServiceType = ref('suivi')
+const statsServiceType = ref(ServiceTypes.Suivi)
 const myStatsQuery = orderAssignmentsService.useMyStats(statsServiceType)
 const deliveredTodayCount = computed(() => myStatsQuery.data.value?.deliveredTodayCount ?? 0)
 const issuesCount = computed(() => myStatsQuery.data.value?.issuesCount ?? 0)
@@ -619,12 +620,12 @@ const openCompleteModal = (assignment: WorkerAssignmentDto) => {
   showCompleteModal.value = true
 }
 
-const quickComplete = async (assignment: WorkerAssignmentDto, result: 'delivered' | 'returned') => {
+const quickComplete = async (assignment: WorkerAssignmentDto, result: typeof SuiviResult.Delivered | typeof SuiviResult.Returned) => {
   // Find appropriate tracking state
   const trackingState = shippingTrackingStates.value.find(s => {
     const stateLower = s.state.toLowerCase()
-    if (result === 'delivered') {
-      return stateLower.includes('livré') || stateLower.includes('delivered')
+    if (result === SuiviResult.Delivered) {
+      return stateLower.includes('livré') || stateLower.includes(SuiviResult.Delivered)
     } else {
       return stateLower.includes('retour') || stateLower.includes('return')
     }
@@ -641,7 +642,7 @@ const quickComplete = async (assignment: WorkerAssignmentDto, result: 'delivered
     const requestData = {
       trackingStateId: trackingState.id,
       result,
-      codAmountCollected: result === 'delivered' ? (assignment.totalPrice || assignment.orderPrice) : undefined
+      codAmountCollected: result === SuiviResult.Delivered ? (assignment.totalPrice || assignment.orderPrice) : undefined
     }
     console.log('[SuiviPanel] completeSuivi request:', { assignmentId: assignment.id, ...requestData })
     console.log('[SuiviPanel] shippingTrackingStates:', shippingTrackingStates.value)
@@ -658,7 +659,7 @@ const quickComplete = async (assignment: WorkerAssignmentDto, result: 'delivered
 
 const handleCompleteSuivi = async (data: {
   trackingStateId: string
-  result: SuiviResult
+  result: SuiviResultType
   notes?: string
   codAmountCollected?: number
   postponedUntil?: string
@@ -683,14 +684,14 @@ const handleCompleteSuivi = async (data: {
 }
 
 // Bulk complete suivi
-const handleBulkComplete = async (result: 'delivered' | 'returned') => {
+const handleBulkComplete = async (result: typeof SuiviResult.Delivered | typeof SuiviResult.Returned) => {
   if (selectedAssignments.value.size === 0) return
 
   // Find appropriate tracking state
   const trackingState = shippingTrackingStates.value.find(s => {
     const stateLower = s.state.toLowerCase()
-    if (result === 'delivered') {
-      return stateLower.includes('livré') || stateLower.includes('delivered')
+    if (result === SuiviResult.Delivered) {
+      return stateLower.includes('livré') || stateLower.includes(SuiviResult.Delivered)
     } else {
       return stateLower.includes('retour') || stateLower.includes('return')
     }

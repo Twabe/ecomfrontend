@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PlusIcon, DocumentPlusIcon } from '@heroicons/vue/24/outline'
+import { OrderState } from '~/constants/order'
 import {
   useInvoicesService,
   useOrdersService,
@@ -159,14 +160,14 @@ const openGenerateModal = async () => {
   showGenerateModal.value = true
   // Load delivered orders that are not yet invoiced
   setOrderFilters({
-    state: 'delivered',
+    state: OrderState.Delivered,
     isInvoiced: false
   })
 }
 
 const handleSearchOrdersForGenerate = async (params: { deliveryCompanyId?: string; storeId?: string }) => {
   setOrderFilters({
-    state: 'delivered',
+    state: OrderState.Delivered,
     isInvoiced: false,
     deliveryCompanyId: params.deliveryCompanyId,
     storeId: params.storeId

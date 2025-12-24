@@ -2,6 +2,7 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import type { Order } from '~/types/order'
+import { ServiceTypes, OrderPhase, OrderState } from '~/constants/order'
 
 interface DeliveryCompany {
   id: string
@@ -38,9 +39,9 @@ const validOrders = computed(() => {
     const phase = order.phase?.toLowerCase()
     const state = order.state?.toLowerCase()
     // Block terminal states
-    if (['cancelled', 'canceled', 'delivered', 'returned'].includes(state || '')) return false
+    if ([OrderState.Cancelled, 'canceled', OrderState.Delivered, OrderState.Returned].includes(state || '')) return false
     // Only allow for shipping phase or confirmed orders
-    return ['suivi', 'shipping', 'quality'].includes(phase || '') || state === 'confirmed'
+    return [ServiceTypes.Suivi, OrderPhase.Shipping, ServiceTypes.Quality].includes(phase as any) || state === OrderState.Confirmed
   })
 })
 

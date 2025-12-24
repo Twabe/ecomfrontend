@@ -19,6 +19,7 @@ import {
   DocumentTextIcon,
 } from '@heroicons/vue/24/outline'
 import { useOrderHistoriesService, type OrderHistoryDto } from '~/services'
+import { ServiceTypes } from '~/constants/order'
 
 const props = defineProps<{
   show: boolean
@@ -117,10 +118,10 @@ const getStateColor = (state?: string) => {
 
 // Service type labels
 const serviceTypeLabels: Record<string, string> = {
-  confirmation: 'Confirmation',
-  suivi: 'Suivi',
-  quality: 'Qualite',
-  callback: 'Rappel',
+  [ServiceTypes.Confirmation]: 'Confirmation',
+  [ServiceTypes.Suivi]: 'Suivi',
+  [ServiceTypes.Quality]: 'Qualite',
+  [ServiceTypes.Callback]: 'Rappel',
 }
 
 const formatDate = (dateString: string) => {
@@ -148,8 +149,8 @@ const stats = computed(() => {
   const items = history.value ?? []
   return {
     total: items.length,
-    confirmations: items.filter(i => i.serviceType === 'confirmation').length,
-    suivi: items.filter(i => i.serviceType === 'suivi').length,
+    confirmations: items.filter(i => i.serviceType === ServiceTypes.Confirmation).length,
+    suivi: items.filter(i => i.serviceType === ServiceTypes.Suivi).length,
     stateChanges: items.filter(i => i.actionType === 'state_change').length,
     assignments: items.filter(i => i.actionType?.startsWith('assignment_')).length,
   }

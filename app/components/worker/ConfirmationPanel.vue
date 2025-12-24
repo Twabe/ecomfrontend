@@ -278,6 +278,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useOrderAssignmentsService, type WorkerAssignmentDto } from '~/services'
 import type { CallbackFilter, WorkerServiceConfigDto } from '~/types/orderAssignment'
+import { ServiceTypes } from '~/constants/order'
 
 const props = defineProps<{
   myConfig?: WorkerServiceConfigDto
@@ -295,8 +296,8 @@ const { t } = useI18n()
 const orderAssignmentsService = useOrderAssignmentsService()
 
 // Query params for filtering by service type
-const pendingParams = ref({ serviceType: 'confirmation' })
-const activeParams = ref({ serviceType: 'confirmation' })
+const pendingParams = ref({ serviceType: ServiceTypes.Confirmation })
+const activeParams = ref({ serviceType: ServiceTypes.Confirmation })
 
 // Vue Query hooks
 const myPendingQuery = orderAssignmentsService.useMyPendingAssignments(pendingParams)

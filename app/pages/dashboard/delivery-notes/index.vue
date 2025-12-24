@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PlusIcon, DocumentPlusIcon } from '@heroicons/vue/24/outline'
+import { OrderState } from '~/constants/order'
 import {
   useDeliveryNotesService,
   useOrdersService,
@@ -151,7 +152,7 @@ const openCreateWithOrdersModal = async () => {
   showOrdersModal.value = true
   // Load confirmed orders that are not yet in a delivery note
   setOrderFilters({
-    state: 'confirmed'
+    state: OrderState.Confirmed
   })
 }
 
@@ -161,13 +162,13 @@ const openAddOrdersModal = async (note: DeliveryNoteDto) => {
   ordersModalMode.value = 'add'
   showOrdersModal.value = true
   setOrderFilters({
-    state: 'confirmed'
+    state: OrderState.Confirmed
   })
 }
 
 const handleSearchOrdersForModal = async (params: { deliveryCompanyId?: string; subDeliveryCompanyId?: string }) => {
   setOrderFilters({
-    state: 'confirmed',
+    state: OrderState.Confirmed,
     deliveryCompanyId: params.deliveryCompanyId
   })
 }

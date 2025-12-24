@@ -58,7 +58,7 @@
                 </div>
 
                 <!-- Tracking State (for non-delivered) -->
-                <div v-if="form.result && form.result !== 'delivered'" class="mb-4">
+                <div v-if="form.result && form.result !== SuiviResult.Delivered" class="mb-4">
                   <label class="label">{{ $t('worker.trackingState') }} *</label>
                   <select v-model="form.trackingStateId" class="input" required>
                     <option value="">{{ $t('common.select') }}...</option>
@@ -73,7 +73,7 @@
                 </div>
 
                 <!-- COD Amount (for delivered) -->
-                <div v-if="form.result === 'delivered'" class="mb-4">
+                <div v-if="form.result === SuiviResult.Delivered" class="mb-4">
                   <label class="label">{{ $t('worker.codAmount') }}</label>
                   <div class="relative">
                     <input
@@ -94,7 +94,7 @@
                 </div>
 
                 <!-- Callback Date (for postponed) -->
-                <div v-if="form.result === 'postponed'" class="mb-4">
+                <div v-if="form.result === SuiviResult.Postponed" class="mb-4">
                   <label class="label">{{ $t('worker.callbackDate') }} *</label>
                   <input
                     v-model="form.postponedUntil"
@@ -127,8 +127,8 @@
                     type="submit"
                     :class="[
                       'btn-primary',
-                      form.result === 'delivered' ? 'bg-emerald-600 hover:bg-emerald-700' : '',
-                      form.result === 'returned' ? 'bg-orange-600 hover:bg-orange-700' : ''
+                      form.result === SuiviResult.Delivered ? 'bg-emerald-600 hover:bg-emerald-700' : '',
+                      form.result === SuiviResult.Returned ? 'bg-orange-600 hover:bg-orange-700' : ''
                     ]"
                     :disabled="isSubmitting || !isValid"
                   >
@@ -158,7 +158,9 @@ import {
   XCircleIcon,
   CalendarIcon
 } from '@heroicons/vue/24/outline'
-import type { WorkerAssignmentDto, SuiviResult } from '~/types/orderAssignment'
+import { SuiviResult } from '~/constants/order'
+import type { SuiviResultType } from '~/constants/order'
+import type { WorkerAssignmentDto } from '~/types/orderAssignment'
 
 interface TrackingState {
   id: string
@@ -175,7 +177,7 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
   (e: 'submit', data: {
     trackingStateId: string
-    result: SuiviResult
+    result: SuiviResultType
     notes?: string
     codAmountCollected?: number
     postponedUntil?: string
@@ -185,7 +187,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const form = ref<{
-  result: SuiviResult | ''
+  result: SuiviResultType | ''
   trackingStateId: string
   notes: string
   codAmountCollected: number | undefined
@@ -210,37 +212,37 @@ const isSubmitting = ref(false)
 // Result options
 const resultOptions = [
   {
-    value: 'delivered' as SuiviResult,
+    value: SuiviResult.Delivered,
     label: t('worker.delivered'),
     icon: CheckCircleIcon,
     selectedClass: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
   },
   {
-    value: 'returned' as SuiviResult,
+    value: SuiviResult.Returned,
     label: t('worker.returned'),
     icon: ArrowUturnLeftIcon,
     selectedClass: 'border-orange-500 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
   },
   {
-    value: 'in_progress' as SuiviResult,
+    value: SuiviResult.InProgress,
     label: t('worker.inProgress'),
     icon: ClockIcon,
     selectedClass: 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
   },
   {
-    value: 'no_response' as SuiviResult,
+    value: SuiviResult.NoResponse,
     label: t('worker.noResponse'),
     icon: PhoneXMarkIcon,
     selectedClass: 'border-gray-500 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
   },
   {
-    value: 'refused' as SuiviResult,
+    value: SuiviResult.Refused,
     label: t('worker.refused'),
     icon: XCircleIcon,
     selectedClass: 'border-red-500 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'
   },
   {
-    value: 'postponed' as SuiviResult,
+    value: SuiviResult.Postponed,
     label: t('worker.postponed'),
     icon: CalendarIcon,
     selectedClass: 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
@@ -250,11 +252,11 @@ const resultOptions = [
 // Validation
 const isValid = computed(() => {
   if (!form.value.result) return false
-  if (form.value.result === 'delivered') {
+  if (form.value.result === SuiviResult.Delivered) {
     // Delivered doesn't require tracking state selection
     return true
   }
-  if (form.value.result === 'postponed') {
+  if (form.value.result === SuiviResult.Postponed) {
     // Postponed requires callback date
     return !!form.value.postponedUntil
   }
@@ -263,9 +265,9 @@ const isValid = computed(() => {
 
 // Submit label
 const submitLabel = computed(() => {
-  if (form.value.result === 'delivered') return t('worker.confirmDelivery')
-  if (form.value.result === 'returned') return t('worker.confirmReturn')
-  if (form.value.result === 'postponed') return t('worker.scheduleCallback')
+  if (form.value.result === SuiviResult.Delivered) return t('worker.confirmDelivery')
+  if (form.value.result === SuiviResult.Returned) return t('worker.confirmReturn')
+  if (form.value.result === SuiviResult.Postponed) return t('worker.scheduleCallback')
   return t('worker.updateStatus')
 })
 
@@ -287,11 +289,11 @@ const submit = () => {
 
   // For delivered, find or use a "delivered" tracking state
   let trackingStateId = form.value.trackingStateId
-  if (form.value.result === 'delivered' && !trackingStateId) {
+  if (form.value.result === SuiviResult.Delivered && !trackingStateId) {
     // Try to find a delivered state
     const deliveredState = props.trackingStates.find(s =>
       s.state.toLowerCase().includes('livré') ||
-      s.state.toLowerCase().includes('delivered')
+      s.state.toLowerCase().includes(SuiviResult.Delivered)
     )
     trackingStateId = deliveredState?.id || props.trackingStates[0]?.id || ''
   }
@@ -308,8 +310,8 @@ const submit = () => {
     trackingStateId,
     result: form.value.result,
     notes: form.value.notes || undefined,
-    codAmountCollected: form.value.result === 'delivered' ? form.value.codAmountCollected : undefined,
-    postponedUntil: form.value.result === 'postponed' ? form.value.postponedUntil : undefined
+    codAmountCollected: form.value.result === SuiviResult.Delivered ? form.value.codAmountCollected : undefined,
+    postponedUntil: form.value.result === SuiviResult.Postponed ? form.value.postponedUntil : undefined
   })
 }
 

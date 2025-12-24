@@ -353,13 +353,27 @@ export interface ReassignOrdersResponse {
   errors: string[]
 }
 
-// Order Phases
+// Re-export constants from centralized location
+export {
+  OrderPhase,
+  OrderPhaseLabels,
+  OrderState,
+  OrderStateLabels,
+  TerminalStates,
+  isTerminalState,
+} from '~/constants/order'
+
+// Re-export types separately (required by verbatimModuleSyntax)
+export type { OrderPhaseType, OrderStateType } from '~/constants/order'
+
+// Legacy alias for backward compatibility (UPPERCASE keys)
 export const OrderPhases = {
+  NEW: 'new',
   CONFIRMATION: 'confirmation',
   SHIPPING: 'shipping'
 } as const
 
-// Common Order States
+// Legacy alias for backward compatibility (UPPERCASE keys)
 export const OrderStates = {
   NEW: 'new',
   PENDING: 'pending',
@@ -385,6 +399,7 @@ export const OrderStateColors: Record<string, string> = {
 
 // Phase Colors
 export const OrderPhaseColors: Record<string, string> = {
+  new: 'bg-gray-100 text-gray-800',
   confirmation: 'bg-amber-100 text-amber-800',
   shipping: 'bg-cyan-100 text-cyan-800'
 }

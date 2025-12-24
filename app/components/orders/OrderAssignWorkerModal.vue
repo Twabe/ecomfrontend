@@ -2,6 +2,7 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import type { Order } from '~/types/order'
+import { ServiceTypes, OrderPhase, OrderState, type ServiceType } from '~/constants/order'
 
 interface Worker {
   id: string
@@ -9,8 +10,6 @@ interface Worker {
   lastName?: string
   userName?: string
 }
-
-type ServiceType = 'confirmation' | 'quality' | 'suivi'
 
 const props = defineProps<{
   show: boolean
@@ -36,10 +35,10 @@ const { t } = useI18n()
 const isIndividualMode = ref(false)
 const selectedWorkerId = ref('')
 const selectedServiceTypes = ref<ServiceType[]>([])
-const individualAssignments = ref<Record<ServiceType, string>>({
-  confirmation: '',
-  quality: '',
-  suivi: ''
+const individualAssignments = ref<Partial<Record<ServiceType, string>>>({
+  [ServiceTypes.Confirmation]: '',
+  [ServiceTypes.Quality]: '',
+  [ServiceTypes.Suivi]: ''
 })
 const notes = ref('')
 const isSubmitting = ref(false)
@@ -53,25 +52,25 @@ const availableServiceTypes = computed((): Array<{ value: ServiceType; label: st
   const states = new Set(validOrders.value.map(o => o.state?.toLowerCase()))
 
   // For new orders, allow pre-assigning all services in chain
-  const isNewOrder = phases.has('new')
+  const isNewOrder = phases.has(OrderPhase.New)
 
   // Confirmation is available for new and confirmation phase orders
-  if (phases.has('new') || phases.has('confirmation')) {
-    services.push({ value: 'confirmation', label: t('supervisor.confirmation') })
+  if (phases.has(OrderPhase.New) || phases.has(OrderPhase.Confirmation)) {
+    services.push({ value: ServiceTypes.Confirmation, label: t('supervisor.confirmation') })
   }
 
   // Quality is available for confirmed orders or quality phase (if enabled)
   // Also available for new orders to pre-assign as chain
   if (props.isQualityEnabled) {
-    if (isNewOrder || states.has('confirmed') || phases.has('quality') || phases.has('shipping')) {
-      services.push({ value: 'quality', label: t('supervisor.quality') })
+    if (isNewOrder || states.has(OrderState.Confirmed) || phases.has(ServiceTypes.Quality) || phases.has(OrderPhase.Shipping)) {
+      services.push({ value: ServiceTypes.Quality, label: t('supervisor.quality') })
     }
   }
 
   // Suivi is available for confirmed orders or shipping/suivi phase
   // Also available for new orders to pre-assign as chain
-  if (isNewOrder || states.has('confirmed') || phases.has('quality') || phases.has('shipping') || phases.has('suivi')) {
-    services.push({ value: 'suivi', label: t('supervisor.suivi') })
+  if (isNewOrder || states.has(OrderState.Confirmed) || phases.has(ServiceTypes.Quality) || phases.has(OrderPhase.Shipping) || phases.has(ServiceTypes.Suivi)) {
+    services.push({ value: ServiceTypes.Suivi, label: t('supervisor.suivi') })
   }
 
   return services
@@ -81,7 +80,7 @@ const availableServiceTypes = computed((): Array<{ value: ServiceType; label: st
 const validOrders = computed(() => {
   return props.orders.filter(order => {
     const state = order.state?.toLowerCase()
-    return !['cancelled', 'canceled', 'delivered', 'returned'].includes(state || '')
+    return ![OrderState.Cancelled, 'canceled', OrderState.Delivered, OrderState.Returned].includes(state || '')
   })
 })
 
@@ -96,10 +95,10 @@ watch(() => props.show, (val) => {
     selectedWorkerId.value = ''
     selectedServiceTypes.value = []
     individualAssignments.value = {
-      confirmation: '',
-      quality: '',
-      suivi: ''
-    }
+      [ServiceTypes.Confirmation]: '',
+      [ServiceTypes.Quality]: '',
+      [ServiceTypes.Suivi]: ''
+    } as Partial<Record<ServiceType, string>>
     notes.value = ''
     isSubmitting.value = false
   }
@@ -109,10 +108,10 @@ watch(() => props.show, (val) => {
 watch(isIndividualMode, () => {
   selectedServiceTypes.value = []
   individualAssignments.value = {
-    confirmation: '',
-    quality: '',
-    suivi: ''
-  }
+    [ServiceTypes.Confirmation]: '',
+    [ServiceTypes.Quality]: '',
+    [ServiceTypes.Suivi]: ''
+  } as Partial<Record<ServiceType, string>>
 })
 
 // Validation

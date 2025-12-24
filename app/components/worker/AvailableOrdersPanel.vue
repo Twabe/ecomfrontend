@@ -158,6 +158,7 @@ import {
   useOrderAssignmentsService,
   type OrderDto,
 } from '~/services'
+import { ServiceTypes } from '~/constants/order'
 
 const emit = defineEmits<{
   (e: 'assigned', order: OrderDto): void
@@ -233,7 +234,7 @@ const handleSelfAssign = async (order: OrderDto) => {
     // Worker will see it in their Confirmations tab and can "take" it when ready
     await orderAssignmentsService.selfAssign({
       orderId: order.id,
-      serviceType: 'confirmation',
+      serviceType: ServiceTypes.Confirmation,
     })
 
     showSuccess(t('worker.orderGrabbed', { code: order.code }))

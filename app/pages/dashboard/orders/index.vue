@@ -19,6 +19,7 @@ import {
   type ConfirmOrderRequest,
   type CancelOrderRequest
 } from '~/services'
+import { OrderPhase, OrderState } from '~/constants/order'
 
 definePageMeta({
   layout: 'tenant',
@@ -115,7 +116,7 @@ const isEditMode = ref(false)
 const canEditOrderItems = computed(() => {
   if (!selectedOrder.value) return true // Default to true for create mode
   const state = selectedOrder.value.state?.toLowerCase()
-  return state !== 'confirmed' && state !== 'delivered'
+  return state !== OrderState.Confirmed && state !== OrderState.Delivered
 })
 
 // Watch for route query changes (when user clicks sidebar links)
@@ -151,12 +152,12 @@ const hidePhaseStatusFilters = computed(() => {
 
 // Check if we're in shipping phase (for bulk action buttons)
 const isShippingPhase = computed(() => {
-  return route.query.phase === 'shipping'
+  return route.query.phase === OrderPhase.Shipping
 })
 
 // Check if we're in confirmation phase (for bulk confirm/cancel buttons)
 const isConfirmationPhase = computed(() => {
-  return route.query.phase === 'new' || route.query.phase === 'confirmation'
+  return route.query.phase === OrderPhase.New || route.query.phase === OrderPhase.Confirmation
 })
 
 const applyFilters = () => {

@@ -4,6 +4,7 @@ import {
   FunnelIcon,
   ChevronDownIcon
 } from '@heroicons/vue/24/outline'
+import { OrderPhase, OrderState } from '~/constants/order'
 import type { City } from '~/types/city'
 import type { DeliveryCompany } from '~/types/deliveryCompany'
 import type { Store } from '~/types/store'
@@ -74,8 +75,8 @@ const showFilters = ref(false)
         class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
       >
         <option value="">{{ t('orders.phase') }}</option>
-        <option value="confirmation">{{ t('orders.phases.confirmation') }}</option>
-        <option value="shipping">{{ t('orders.phases.shipping') }}</option>
+        <option :value="OrderPhase.Confirmation">{{ t('orders.phases.confirmation') }}</option>
+        <option :value="OrderPhase.Shipping">{{ t('orders.phases.shipping') }}</option>
       </select>
 
       <select
@@ -84,13 +85,13 @@ const showFilters = ref(false)
         class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
       >
         <option value="">{{ t('orders.status') }}</option>
-        <option value="new">{{ t('orders.statuses.new') }}</option>
-        <option value="pending">{{ t('orders.statuses.pending') }}</option>
-        <option value="confirmed">{{ t('orders.statuses.confirmed') }}</option>
-        <option value="shipped">{{ t('orders.statuses.shipped') }}</option>
-        <option value="delivered">{{ t('orders.statuses.delivered') }}</option>
-        <option value="cancelled">{{ t('orders.statuses.cancelled') }}</option>
-        <option value="returned">{{ t('orders.statuses.returned') }}</option>
+        <option :value="OrderState.New">{{ t('orders.statuses.new') }}</option>
+        <option :value="OrderState.Pending">{{ t('orders.statuses.pending') }}</option>
+        <option :value="OrderState.Confirmed">{{ t('orders.statuses.confirmed') }}</option>
+        <option :value="OrderState.Shipped">{{ t('orders.statuses.shipped') }}</option>
+        <option :value="OrderState.Delivered">{{ t('orders.statuses.delivered') }}</option>
+        <option :value="OrderState.Cancelled">{{ t('orders.statuses.cancelled') }}</option>
+        <option :value="OrderState.Returned">{{ t('orders.statuses.returned') }}</option>
       </select>
 
       <select

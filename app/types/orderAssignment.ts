@@ -1,4 +1,22 @@
-// Assignment status constants
+// Import types for local use
+import type { AssignmentStatusType, ServiceType } from '~/constants/order'
+
+// Re-export constants from centralized location
+export {
+  AssignmentStatus,
+  AssignmentStatusLabels,
+  ActiveAssignmentStatuses,
+  isActiveAssignment,
+  ServiceTypes,
+  ServiceTypeLabels,
+  SuiviResult,
+  SuiviResultLabels,
+} from '~/constants/order'
+
+// Re-export types separately (required by verbatimModuleSyntax)
+export type { AssignmentStatusType, ServiceType, SuiviResultType } from '~/constants/order'
+
+// Legacy alias for backward compatibility (UPPERCASE keys)
 export const AssignmentStatuses = {
   PENDING: 'pending',
   TAKEN: 'taken',
@@ -8,9 +26,8 @@ export const AssignmentStatuses = {
   EXPIRED: 'expired'
 } as const
 
-export type AssignmentStatus = typeof AssignmentStatuses[keyof typeof AssignmentStatuses]
-
-export const AssignmentStatusColors: Record<AssignmentStatus, string> = {
+// Color mappings for UI
+export const AssignmentStatusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
   taken: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
@@ -18,16 +35,6 @@ export const AssignmentStatusColors: Record<AssignmentStatus, string> = {
   reassigned: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   expired: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
 }
-
-// Service types
-export const ServiceTypes = {
-  CONFIRMATION: 'confirmation',
-  SUIVI: 'suivi',
-  QUALITY: 'quality',
-  CALLBACK: 'callback'
-} as const
-
-export type ServiceType = typeof ServiceTypes[keyof typeof ServiceTypes]
 
 // Strategy types for auto-assignment
 export const AssignmentStrategies = {
@@ -65,7 +72,7 @@ export interface OrderAssignment {
   orderId: string
   workerId: string
   serviceType: ServiceType
-  status: AssignmentStatus
+  status: AssignmentStatusType
   assignedAt: string
   takenAt?: string
   completedAt?: string
@@ -83,7 +90,7 @@ export interface WorkerAssignmentDto {
   orderId: string
   orderCode: string
   serviceType: ServiceType
-  status: AssignmentStatus
+  status: AssignmentStatusType
   assignedAt: string
   takenAt?: string
   priority: number
@@ -301,7 +308,7 @@ export interface SupervisorAssignmentDto {
   workerId: string
   workerName?: string
   serviceType: ServiceType
-  status: AssignmentStatus
+  status: AssignmentStatusType
   assignedAt: string
   takenAt?: string
   priority: number
@@ -329,6 +336,7 @@ export interface ScheduleCallbackResponse {
 }
 
 // Complete Suivi
+// Legacy type alias for backward compatibility - use SuiviResultType from ~/constants/order
 export type SuiviResult = 'delivered' | 'returned' | 'in_progress' | 'no_response' | 'refused' | 'postponed'
 
 export interface CompleteSuiviRequest {

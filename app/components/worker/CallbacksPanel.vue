@@ -560,6 +560,7 @@ import {
 } from '~/services'
 import AssignDeliveryModal from '~/components/orders/AssignDeliveryModal.vue'
 import BulkAssignDeliveryModal from '~/components/orders/BulkAssignDeliveryModal.vue'
+import { ServiceTypes, OrderState, SuiviResult } from '~/constants/order'
 
 const emit = defineEmits<{
   (e: 'confirm', assignment: WorkerAssignmentDto): void
@@ -638,12 +639,12 @@ const clearSuiviSelection = () => {
 const canAssignDelivery = (callback: WorkerAssignmentDto) => {
   // If order is in suivi service type, it means it already passed confirmation
   // and should be eligible for delivery assignment
-  if (callback.serviceType === 'suivi') {
+  if (callback.serviceType === ServiceTypes.Suivi) {
     return true
   }
   // For other cases, check orderState
   const state = callback.orderState?.toLowerCase()
-  return state === 'confirmed' || state === 'ready_for_delivery' || state === 'awaiting_delivery'
+  return state === OrderState.Confirmed || state === 'ready_for_delivery' || state === 'awaiting_delivery'
 }
 
 // Categorize all callbacks by time
@@ -697,10 +698,10 @@ const filteredCallbacks = computed(() => {
 
 // Split filtered callbacks by service type
 const confirmationCallbacks = computed(() =>
-  filteredCallbacks.value.filter(cb => cb.serviceType === 'confirmation')
+  filteredCallbacks.value.filter(cb => cb.serviceType === ServiceTypes.Confirmation)
 )
 const suiviCallbacks = computed(() =>
-  filteredCallbacks.value.filter(cb => cb.serviceType === 'suivi')
+  filteredCallbacks.value.filter(cb => cb.serviceType === ServiceTypes.Suivi)
 )
 
 // Format helpers
@@ -857,7 +858,7 @@ const findTrackingState = async (predicate: (ts: any) => boolean) => {
 const handleQuickDelivered = async (callback: WorkerAssignmentDto) => {
   // Find "delivered" tracking state - TrackingStateDto uses 'state' field not 'code' or 'name'
   const deliveredState = await findTrackingState(
-    ts => ts.state?.toLowerCase() === 'delivered' || ts.state?.toLowerCase().includes('livré')
+    ts => ts.state?.toLowerCase() === SuiviResult.Delivered || ts.state?.toLowerCase().includes('livré')
   )
 
   if (!deliveredState) {
@@ -867,7 +868,7 @@ const handleQuickDelivered = async (callback: WorkerAssignmentDto) => {
 
   try {
     await orderAssignmentsService.completeSuivi(callback.id, {
-      result: 'delivered',
+      result: SuiviResult.Delivered,
       trackingStateId: deliveredState.id
     })
     await myCallbacksQuery.refetch()
@@ -879,7 +880,7 @@ const handleQuickDelivered = async (callback: WorkerAssignmentDto) => {
 const handleQuickReturned = async (callback: WorkerAssignmentDto) => {
   // Find "returned" tracking state - TrackingStateDto uses 'state' field
   const returnedState = await findTrackingState(
-    ts => ts.state?.toLowerCase() === 'returned' || ts.state?.toLowerCase().includes('retour')
+    ts => ts.state?.toLowerCase() === SuiviResult.Returned || ts.state?.toLowerCase().includes('retour')
   )
 
   if (!returnedState) {
@@ -889,7 +890,7 @@ const handleQuickReturned = async (callback: WorkerAssignmentDto) => {
 
   try {
     await orderAssignmentsService.completeSuivi(callback.id, {
-      result: 'returned',
+      result: SuiviResult.Returned,
       trackingStateId: returnedState.id
     })
     await myCallbacksQuery.refetch()
@@ -1003,7 +1004,7 @@ const handleBulkDelivered = async () => {
 
   // Find "delivered" tracking state - TrackingStateDto uses 'state' field
   const deliveredState = await findTrackingState(
-    ts => ts.state?.toLowerCase() === 'delivered' || ts.state?.toLowerCase().includes('livré')
+    ts => ts.state?.toLowerCase() === SuiviResult.Delivered || ts.state?.toLowerCase().includes('livré')
   )
 
   if (!deliveredState) {
@@ -1017,7 +1018,7 @@ const handleBulkDelivered = async () => {
     const deliverableCallbacks = selectedSuiviCallbacks.value.filter(cb => canAssignDelivery(cb))
     const promises = deliverableCallbacks.map(cb =>
       orderAssignmentsService.completeSuivi(cb.id, {
-        result: 'delivered',
+        result: SuiviResult.Delivered,
         trackingStateId: deliveredState.id
       })
     )

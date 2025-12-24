@@ -139,6 +139,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useOrderAssignmentsService, type WorkerAssignmentDto } from '~/services'
 import type { QualityCheckItem } from '~/types/orderAssignment'
+import { ServiceTypes } from '~/constants/order'
 
 const emit = defineEmits<{
   (e: 'view-order', assignment: WorkerAssignmentDto): void
@@ -151,8 +152,8 @@ const notification = useNotification()
 const orderAssignmentsService = useOrderAssignmentsService()
 
 // Query params for filtering by service type
-const pendingParams = ref({ serviceType: 'quality' })
-const activeParams = ref({ serviceType: 'quality' })
+const pendingParams = ref({ serviceType: ServiceTypes.Quality })
+const activeParams = ref({ serviceType: ServiceTypes.Quality })
 
 // Vue Query hooks
 const myPendingQuery = orderAssignmentsService.useMyPendingAssignments(pendingParams)

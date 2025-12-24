@@ -21,6 +21,7 @@ import {
 import { useOrdersWorkflowService, useDeliveryCompaniesService, useSubDeliveryCompaniesService, useReasonsService } from '~/services'
 import { useOrderHistoriesService, type OrderHistoryDto } from '~/services/order-histories/useOrderHistoriesService'
 import { OrderStateColors, OrderPhaseColors } from '~/types/order'
+import { OrderPhase, OrderState } from '~/constants/order'
 import type { OrderDto } from '~/api/generated/models'
 
 definePageMeta({
@@ -112,31 +113,31 @@ const getPhaseColor = (phase?: string | null) => OrderPhaseColors[phase?.toLower
 const canConfirm = computed(() => {
   // Archived orders cannot be modified
   if (order.value?.isArchived) return false
-  return order.value?.phase === 'new' || (order.value?.phase === 'confirmation' && order.value?.state === 'new')
+  return order.value?.phase === OrderPhase.New || (order.value?.phase === OrderPhase.Confirmation && order.value?.state === OrderState.New)
 })
 
 const canCancel = computed(() => {
   // Archived orders cannot be modified
   if (order.value?.isArchived) return false
-  return order.value?.state !== 'delivered' && order.value?.state !== 'cancelled' && order.value?.state !== 'returned'
+  return order.value?.state !== OrderState.Delivered && order.value?.state !== OrderState.Cancelled && order.value?.state !== OrderState.Returned
 })
 
 const canAssignDelivery = computed(() => {
   // Archived orders cannot be modified
   if (order.value?.isArchived) return false
-  return order.value?.state === 'confirmed' && !order.value?.deliveryCompanyId
+  return order.value?.state === OrderState.Confirmed && !order.value?.deliveryCompanyId
 })
 
 const canMarkDelivered = computed(() => {
   // Archived orders cannot be modified
   if (order.value?.isArchived) return false
-  return order.value?.phase === 'shipping' && order.value?.state !== 'delivered' && order.value?.state !== 'returned'
+  return order.value?.phase === OrderPhase.Shipping && order.value?.state !== OrderState.Delivered && order.value?.state !== OrderState.Returned
 })
 
 const canMarkReturned = computed(() => {
   // Archived orders cannot be modified
   if (order.value?.isArchived) return false
-  return order.value?.phase === 'shipping' && order.value?.state !== 'delivered' && order.value?.state !== 'returned'
+  return order.value?.phase === OrderPhase.Shipping && order.value?.state !== OrderState.Delivered && order.value?.state !== OrderState.Returned
 })
 
 // Get filtered sub-companies

@@ -16,6 +16,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import type { Order } from '~/types/order'
 import { OrderStateColors, OrderPhaseColors } from '~/types/order'
+import { OrderPhase, OrderState, ServiceTypes, AssignmentStatus, TerminalStates } from '~/constants/order'
 
 // Track which order's actions modal is open
 const actionsModalOrder = ref<Order | null>(null)
@@ -110,9 +111,9 @@ const canAssignDelivery = (order: Order) => {
   const phase = order.phase?.toLowerCase()
   const state = order.state?.toLowerCase()
   // Block terminal states
-  if (['cancelled', 'canceled', 'delivered', 'returned'].includes(state || '')) return false
+  if (TerminalStates.includes(state || '')) return false
   // Only allow for shipping phase or confirmed orders
-  return ['suivi', 'shipping', 'quality'].includes(phase || '') || state === 'confirmed'
+  return [ServiceTypes.Suivi, OrderPhase.Shipping, ServiceTypes.Quality].includes(phase || '') || state === OrderState.Confirmed
 }
 
 // Check if order can have worker assigned
@@ -121,14 +122,14 @@ const canAssignWorker = (order: Order) => {
   if (order.isArchived) return false
   const state = order.state?.toLowerCase()
   // Block terminal states
-  return !['cancelled', 'canceled', 'delivered', 'returned'].includes(state || '')
+  return !TerminalStates.includes(state || '')
 }
 
 // Check if order can be confirmed
 const canConfirm = (order: Order) => {
   // Archived orders cannot be modified
   if (order.isArchived) return false
-  return order.phase === 'confirmation' && order.state !== 'confirmed'
+  return order.phase === OrderPhase.Confirmation && order.state !== OrderState.Confirmed
 }
 
 // Check if order can be cancelled
@@ -137,7 +138,7 @@ const canCancel = (order: Order) => {
   if (order.isArchived) return false
   // Terminal states cannot be cancelled
   const state = order.state?.toLowerCase()
-  return !['cancelled', 'canceled', 'delivered', 'returned'].includes(state || '')
+  return !TerminalStates.includes(state || '')
 }
 
 // Check if order can be edited
@@ -146,7 +147,7 @@ const canEdit = (order: Order) => {
   if (order.isArchived) return false
   // Terminal states cannot be edited
   const state = order.state?.toLowerCase()
-  if (['delivered', 'returned', 'cancelled', 'canceled'].includes(state || '')) return false
+  if (TerminalStates.includes(state || '')) return false
   return !order.cannotEdit
 }
 
@@ -167,9 +168,9 @@ const formatDate = (date: string) => {
 // Assignment status colors
 const getAssignmentStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
-    case 'pending': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
-    case 'taken': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-    case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    case AssignmentStatus.Pending: return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+    case AssignmentStatus.Taken: return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+    case AssignmentStatus.Completed: return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
     default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
   }
 }
@@ -177,10 +178,10 @@ const getAssignmentStatusColor = (status: string) => {
 // Service type colors
 const getServiceTypeColor = (serviceType: string) => {
   switch (serviceType?.toLowerCase()) {
-    case 'confirmation': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
-    case 'quality': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400'
-    case 'suivi': return 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400'
-    case 'callback': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    case ServiceTypes.Confirmation: return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+    case ServiceTypes.Quality: return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400'
+    case ServiceTypes.Suivi: return 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400'
+    case ServiceTypes.Callback: return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
     default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
   }
 }
@@ -224,7 +225,7 @@ const formatDuration = (assignedAt: string | null, takenAt: string | null) => {
 const getActiveAssignment = (order: Order) => {
   if (!order.activeAssignments || order.activeAssignments.length === 0) return null
   // Return the first assignment (or the most relevant - taken over pending)
-  return order.activeAssignments.find(a => a.status === 'taken') || order.activeAssignments[0]
+  return order.activeAssignments.find(a => a.status === AssignmentStatus.Taken) || order.activeAssignments[0]
 }
 
 // Handle action and close modal

@@ -98,7 +98,7 @@
       />
     </div>
 
-    <div v-else-if="activeTab === 'confirmation'">
+    <div v-else-if="activeTab === ServiceTypes.Confirmation">
       <WorkerConfirmationPanel
         ref="confirmationPanelRef"
         :my-config="myConfig"
@@ -108,11 +108,11 @@
       />
     </div>
 
-    <div v-else-if="activeTab === 'suivi'">
+    <div v-else-if="activeTab === ServiceTypes.Suivi">
       <WorkerSuiviPanel ref="suiviPanelRef" @assign-delivery="handleAssignDelivery" @view-order="openOrderModal" />
     </div>
 
-    <div v-else-if="activeTab === 'quality'">
+    <div v-else-if="activeTab === ServiceTypes.Quality">
       <WorkerQualityPanel ref="qualityPanelRef" @view-order="openOrderModal" />
     </div>
 
@@ -123,15 +123,15 @@
     <!-- Fallback: Single service view (when worker has only one service) -->
     <div v-else-if="availableTabs.length === 1">
       <WorkerConfirmationPanel
-        v-if="availableTabs[0].key === 'confirmation'"
+        v-if="availableTabs[0].key === ServiceTypes.Confirmation"
         ref="confirmationPanelRef"
         :my-config="myConfig"
         @confirm="handleConfirm"
         @cancel="handleCancel"
         @view-order="openOrderModal"
       />
-      <WorkerSuiviPanel v-else-if="availableTabs[0].key === 'suivi'" ref="suiviPanelRef" @assign-delivery="handleAssignDelivery" @view-order="openOrderModal" />
-      <WorkerQualityPanel v-else-if="availableTabs[0].key === 'quality'" ref="qualityPanelRef" @view-order="openOrderModal" />
+      <WorkerSuiviPanel v-else-if="availableTabs[0].key === ServiceTypes.Suivi" ref="suiviPanelRef" @assign-delivery="handleAssignDelivery" @view-order="openOrderModal" />
+      <WorkerQualityPanel v-else-if="availableTabs[0].key === ServiceTypes.Quality" ref="qualityPanelRef" @view-order="openOrderModal" />
     </div>
 
     <!-- No Services Message -->
@@ -450,6 +450,7 @@
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import type { AssignDeliveryCompanyRequest, Order } from '~/types/order'
+import { ServiceTypes, OrderPhase, OrderState } from '~/constants/order'
 import {
   ArrowPathIcon,
   UserIcon,
@@ -548,8 +549,8 @@ const canEditOrderItems = computed(() => {
   // Cannot edit if:
   // - State is confirmed or delivered
   // - OR Phase is shipping (Suivi orders - items locked after confirmation)
-  if (state === 'confirmed' || state === 'delivered') return false
-  if (phase === 'shipping') return false
+  if (state === OrderState.Confirmed || state === OrderState.Delivered) return false
+  if (phase === OrderPhase.Shipping) return false
   return true
 })
 
@@ -576,10 +577,10 @@ const availableTabs = computed(() => {
   // 1. Confirmation tab
   if (myConfig.value?.canDoConfirmation) {
     // Filter out assignments with scheduled callbacks (they show in Callbacks tab)
-    const confirmationPending = myPendingAssignments.value.filter(a => a.serviceType === 'confirmation' && !a.callbackScheduledAt).length
-    const confirmationActive = myActiveAssignments.value.filter(a => a.serviceType === 'confirmation' && !a.callbackScheduledAt).length
+    const confirmationPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Confirmation && !a.callbackScheduledAt).length
+    const confirmationActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Confirmation && !a.callbackScheduledAt).length
     tabs.push({
-      key: 'confirmation',
+      key: ServiceTypes.Confirmation,
       label: t('worker.confirmation'),
       icon: CheckCircleIcon,
       count: confirmationPending + confirmationActive
@@ -590,13 +591,13 @@ const availableTabs = computed(() => {
   //    a) EnableQualityCheck is true AND worker canDoQuality, OR
   //    b) Worker has any pending/active Quality assignments (even if setting was disabled)
   //    This ensures workers can complete their existing Quality work even after setting changes
-  const qualityPending = myPendingAssignments.value.filter(a => a.serviceType === 'quality').length
-  const qualityActive = myActiveAssignments.value.filter(a => a.serviceType === 'quality').length
+  const qualityPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Quality).length
+  const qualityActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Quality).length
   const hasQualityAssignments = qualityPending + qualityActive > 0
 
   if ((isQualityEnabled.value && myConfig.value?.canDoQuality) || hasQualityAssignments) {
     tabs.push({
-      key: 'quality',
+      key: ServiceTypes.Quality,
       label: t('worker.quality'),
       icon: ShieldCheckIcon,
       count: qualityPending + qualityActive
@@ -605,10 +606,10 @@ const availableTabs = computed(() => {
 
   // 3. Suivi tab
   if (myConfig.value?.canDoSuivi) {
-    const suiviPending = myPendingAssignments.value.filter(a => a.serviceType === 'suivi').length
-    const suiviActive = myActiveAssignments.value.filter(a => a.serviceType === 'suivi').length
+    const suiviPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi).length
+    const suiviActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi).length
     tabs.push({
-      key: 'suivi',
+      key: ServiceTypes.Suivi,
       label: t('worker.suivi'),
       icon: TruckIcon,
       count: suiviPending + suiviActive
@@ -679,11 +680,11 @@ const refreshAll = async () => {
   // Refresh active panel
   if (activeTab.value === 'available' && availablePanelRef.value) {
     await availablePanelRef.value.refresh()
-  } else if (activeTab.value === 'confirmation' && confirmationPanelRef.value) {
+  } else if (activeTab.value === ServiceTypes.Confirmation && confirmationPanelRef.value) {
     await confirmationPanelRef.value.refresh()
-  } else if (activeTab.value === 'suivi' && suiviPanelRef.value) {
+  } else if (activeTab.value === ServiceTypes.Suivi && suiviPanelRef.value) {
     await suiviPanelRef.value.refresh()
-  } else if (activeTab.value === 'quality' && qualityPanelRef.value) {
+  } else if (activeTab.value === ServiceTypes.Quality && qualityPanelRef.value) {
     await qualityPanelRef.value.refresh()
   } else if (activeTab.value === 'callbacks' && callbacksPanelRef.value) {
     await callbacksPanelRef.value.refresh()
@@ -696,7 +697,7 @@ const handleOrderAssigned = async () => {
   await refreshAll()
   // Switch to confirmation tab to work on the order
   if (myConfig.value?.canDoConfirmation) {
-    activeTab.value = 'confirmation'
+    activeTab.value = ServiceTypes.Confirmation
   }
 }
 

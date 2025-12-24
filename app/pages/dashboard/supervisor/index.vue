@@ -51,9 +51,9 @@
         </button>
         <button
           v-if="isQualityEnabled"
-          @click="activeTab = 'quality'"
+          @click="activeTab = ServiceTypes.Quality"
           class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
-          :class="activeTab === 'quality'
+          :class="activeTab === ServiceTypes.Quality
             ? 'border-primary-600 text-primary-600 dark:text-primary-400'
             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'"
         >
@@ -63,9 +63,9 @@
           </span>
         </button>
         <button
-          @click="activeTab = 'suivi'"
+          @click="activeTab = ServiceTypes.Suivi"
           class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
-          :class="activeTab === 'suivi'
+          :class="activeTab === ServiceTypes.Suivi
             ? 'border-primary-600 text-primary-600 dark:text-primary-400'
             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'"
         >
@@ -260,8 +260,8 @@
           >
             <option value="">{{ $t('common.all') }}</option>
             <option value="unassigned">{{ $t('supervisor.statusUnassigned') }}</option>
-            <option value="pending">{{ $t('supervisor.statusPending') }}</option>
-            <option value="taken">{{ $t('supervisor.statusTaken') }}</option>
+            <option :value="AssignmentStatus.Pending">{{ $t('supervisor.statusPending') }}</option>
+            <option :value="AssignmentStatus.Taken">{{ $t('supervisor.statusTaken') }}</option>
           </select>
           <!-- Select All -->
           <div class="flex items-center gap-2">
@@ -400,7 +400,7 @@
     </div>
 
     <!-- Quality Tab -->
-    <div v-if="activeTab === 'quality'" class="card">
+    <div v-if="activeTab === ServiceTypes.Quality" class="card">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
           {{ $t('supervisor.qualityOrders') }}
@@ -414,8 +414,8 @@
           >
             <option value="">{{ $t('common.all') }}</option>
             <option value="unassigned">{{ $t('supervisor.statusUnassigned') }}</option>
-            <option value="pending">{{ $t('supervisor.statusPending') }}</option>
-            <option value="taken">{{ $t('supervisor.statusTaken') }}</option>
+            <option :value="AssignmentStatus.Pending">{{ $t('supervisor.statusPending') }}</option>
+            <option :value="AssignmentStatus.Taken">{{ $t('supervisor.statusTaken') }}</option>
           </select>
           <!-- Select All -->
           <div class="flex items-center gap-2">
@@ -541,7 +541,7 @@
     </div>
 
     <!-- Suivi Tab -->
-    <div v-if="activeTab === 'suivi'" class="card">
+    <div v-if="activeTab === ServiceTypes.Suivi" class="card">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
           {{ $t('supervisor.suiviOrders') }}
@@ -555,8 +555,8 @@
           >
             <option value="">{{ $t('common.all') }}</option>
             <option value="unassigned">{{ $t('supervisor.statusUnassigned') }}</option>
-            <option value="pending">{{ $t('supervisor.statusPending') }}</option>
-            <option value="taken">{{ $t('supervisor.statusTaken') }}</option>
+            <option :value="AssignmentStatus.Pending">{{ $t('supervisor.statusPending') }}</option>
+            <option :value="AssignmentStatus.Taken">{{ $t('supervisor.statusTaken') }}</option>
           </select>
           <!-- Select All -->
           <div class="flex items-center gap-2">
@@ -1034,9 +1034,7 @@ import {
   type WorkerServiceConfigDto,
   type WorkerStatsSummary
 } from '~/services'
-
-// ServiceType from API
-type ServiceType = 'confirmation' | 'suivi' | 'quality' | 'callback'
+import { ServiceTypes, AssignmentStatus, OrderPhase, OrderState, type ServiceType } from '~/constants/order'
 
 definePageMeta({
   layout: 'tenant',
@@ -1175,17 +1173,17 @@ const selectAllSuivi = computed(() =>
 const showReassignModal = ref(false)
 const reassignForm = ref({
   workerId: '',
-  serviceTypes: ['confirmation'] as ServiceType[],
+  serviceTypes: [ServiceTypes.Confirmation] as ServiceType[],
   notes: ''
 })
 
 // Individual Assignment Mode
 const isIndividualMode = ref(false)
 const individualAssignments = ref<Record<ServiceType, string>>({
-  confirmation: '',
-  suivi: '',
-  quality: '',
-  callback: ''
+  [ServiceTypes.Confirmation]: '',
+  [ServiceTypes.Suivi]: '',
+  [ServiceTypes.Quality]: '',
+  [ServiceTypes.Callback]: ''
 })
 
 // Reassign Mode: Service selection for existing assignments
@@ -1224,7 +1222,7 @@ const isSubmitDisabled = computed(() => {
 const getActiveServicesForSelectedOrders = () => {
   const services: ActiveServiceInfo[] = []
   const seenServices = new Set<string>()
-  const activeStatuses = ['pending', 'taken']
+  const activeStatuses = [AssignmentStatus.Pending, AssignmentStatus.Taken]
 
   for (const orderId of selectedOrders.value) {
     // Find in confirmationOrders
@@ -1252,15 +1250,15 @@ const getActiveServicesForSelectedOrders = () => {
 // Quality only appears if EnableQualityCheck is true
 const availableServiceTypes = computed(() => {
   const services: Array<{ value: ServiceType; label: string }> = [
-    { value: 'confirmation', label: 'Confirmation' }
+    { value: ServiceTypes.Confirmation, label: 'Confirmation' }
   ]
 
   // Only include Quality if enabled in settings
   if (isQualityEnabled.value) {
-    services.push({ value: 'quality', label: 'Quality' })
+    services.push({ value: ServiceTypes.Quality, label: 'Quality' })
   }
 
-  services.push({ value: 'suivi', label: 'Suivi' })
+  services.push({ value: ServiceTypes.Suivi, label: 'Suivi' })
 
   return services
 })
@@ -1304,9 +1302,9 @@ const getStatusBadgeClass = (status: string) => {
   switch (status) {
     case 'unassigned':
       return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-    case 'pending':
+    case AssignmentStatus.Pending:
       return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-    case 'taken':
+    case AssignmentStatus.Taken:
       return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
@@ -1316,13 +1314,13 @@ const getStatusBadgeClass = (status: string) => {
 // Service type badge helper
 const getServiceTypeBadgeClass = (serviceType: string) => {
   switch (serviceType?.toLowerCase()) {
-    case 'confirmation':
+    case ServiceTypes.Confirmation:
       return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-    case 'suivi':
+    case ServiceTypes.Suivi:
       return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-    case 'quality':
+    case ServiceTypes.Quality:
       return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-    case 'callback':
+    case ServiceTypes.Callback:
       return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200'
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
@@ -1478,9 +1476,14 @@ const toggleSelectAllSuivi = () => {
 // Reassign modal
 const openReassignModal = async () => {
   if (selectedOrders.value.length === 0) return
-  reassignForm.value = { workerId: '', serviceTypes: ['confirmation'], notes: '' }
+  reassignForm.value = { workerId: '', serviceTypes: [ServiceTypes.Confirmation], notes: '' }
   isIndividualMode.value = false
-  individualAssignments.value = { confirmation: '', suivi: '', quality: '', callback: '' }
+  individualAssignments.value = {
+    [ServiceTypes.Confirmation]: '',
+    [ServiceTypes.Suivi]: '',
+    [ServiceTypes.Quality]: '',
+    [ServiceTypes.Callback]: ''
+  }
 
   // For reassign tabs: get active services from the correct data source
   if (activeTab.value !== 'new') {
@@ -1488,7 +1491,7 @@ const openReassignModal = async () => {
     selectedServicesToReassign.value = []
 
     const servicesMap = new Map<string, ActiveServiceInfo>()
-    const activeStatuses = ['pending', 'taken']
+    const activeStatuses = [AssignmentStatus.Pending, AssignmentStatus.Taken]
 
     if (activeTab.value === 'confirmations') {
       // Tab Confirmations: get active confirmation services + offer Quality/Suivi for assignment
@@ -1511,9 +1514,9 @@ const openReassignModal = async () => {
         }
 
         // Add Quality option if enabled and not already assigned
-        if (isQualityEnabled.value && !servicesMap.has('quality')) {
-          servicesMap.set('quality', {
-            serviceType: 'quality',
+        if (isQualityEnabled.value && !servicesMap.has(ServiceTypes.Quality)) {
+          servicesMap.set(ServiceTypes.Quality, {
+            serviceType: ServiceTypes.Quality,
             workerName: null,
             status: 'new',
             orderId: orderId
@@ -1521,16 +1524,16 @@ const openReassignModal = async () => {
         }
 
         // Add Suivi option if not already assigned
-        if (!servicesMap.has('suivi')) {
-          servicesMap.set('suivi', {
-            serviceType: 'suivi',
+        if (!servicesMap.has(ServiceTypes.Suivi)) {
+          servicesMap.set(ServiceTypes.Suivi, {
+            serviceType: ServiceTypes.Suivi,
             workerName: null,
             status: 'new',
             orderId: orderId
           })
         }
       }
-    } else if (activeTab.value === 'quality') {
+    } else if (activeTab.value === ServiceTypes.Quality) {
       // Tab Quality: get services from qualityOrders
       for (const orderId of selectedOrders.value) {
         const matchingOrders = qualityOrders.value.filter(o => o.orderId === orderId)
@@ -1550,16 +1553,16 @@ const openReassignModal = async () => {
           }
         }
         // Also show suivi as an option since quality → suivi is the next step
-        if (!servicesMap.has('suivi')) {
-          servicesMap.set('suivi', {
-            serviceType: 'suivi',
+        if (!servicesMap.has(ServiceTypes.Suivi)) {
+          servicesMap.set(ServiceTypes.Suivi, {
+            serviceType: ServiceTypes.Suivi,
             workerName: null,
             status: 'new',
             orderId: orderId
           })
         }
       }
-    } else if (activeTab.value === 'suivi') {
+    } else if (activeTab.value === ServiceTypes.Suivi) {
       // Tab Suivi: get active suivi services from suiviOrders
       // Include 'unassigned' orders so supervisor can assign them
       for (const orderId of selectedOrders.value) {
@@ -1570,7 +1573,7 @@ const openReassignModal = async () => {
           const isActiveOrUnassigned = activeStatuses.includes(status) || status === 'unassigned'
 
           if (isActiveOrUnassigned) {
-            const key = suiviOrder.serviceType || 'suivi'
+            const key = suiviOrder.serviceType || ServiceTypes.Suivi
             if (!servicesMap.has(key)) {
               servicesMap.set(key, {
                 serviceType: key,
@@ -1618,13 +1621,13 @@ const openCallbackReassign = (callback: { orderId?: string }) => {
   selectedOrders.value = [callback.orderId]
   // Pre-select callback service for reassignment
   activeServicesForReassign.value = [{
-    serviceType: 'callback',
+    serviceType: ServiceTypes.Callback,
     workerName: null,
-    status: 'callback',
+    status: ServiceTypes.Callback,
     orderId: callback.orderId
   }]
-  selectedServicesToReassign.value = ['callback']
-  reassignForm.value = { workerId: '', serviceTypes: ['callback'], notes: '' }
+  selectedServicesToReassign.value = [ServiceTypes.Callback]
+  reassignForm.value = { workerId: '', serviceTypes: [ServiceTypes.Callback], notes: '' }
   showReassignModal.value = true
 }
 
@@ -1670,7 +1673,7 @@ const submitReassign = async () => {
         serviceTypes: selectedServicesToReassign.value,
         notes: reassignForm.value.notes || undefined
       })
-    } else if (activeTab.value === 'suivi') {
+    } else if (activeTab.value === ServiceTypes.Suivi) {
       // Tab: Suivi → reassign active suivi assignments
       if (!reassignForm.value.workerId) return
       if (selectedServicesToReassign.value.length === 0) return
