@@ -1081,7 +1081,9 @@
     "releaseSuccess": "Order released successfully",
     "assignmentNotFound": "This assignment no longer exists",
     "assignmentAlreadyProcessed": "This assignment has already been processed",
-    "completeChecklist": "Please complete all required checklist items"
+    "completeChecklist": "Please complete all required checklist items",
+    "nowOnline": "You are now online and available for assignments",
+    "nowOffline": "You are now offline"
   },
   "users": {
     "title": "Users",

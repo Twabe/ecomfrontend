@@ -834,11 +834,17 @@ const handleOrderAssigned = () => {
 }
 
 // Toggle online status
+// Note: Backend creates WorkerServiceConfig if it doesn't exist
 const handleToggleOnline = async () => {
-  if (!myConfig.value?.id) return
   isTogglingOnline.value = true
   try {
-    await workerConfigsService.setOnline(myConfig.value.id, { isOnline: !isOnline.value })
+    // API uses _currentUser.GetUserId() - doesn't need config ID
+    await workerConfigsService.setOnline({ isOnline: !isOnline.value })
+    // Refetch config to get the created/updated record
+    await workerConfigsService.refetchMyConfig()
+    notification.success(isOnline.value ? t('worker.nowOffline') : t('worker.nowOnline'))
+  } catch (error: any) {
+    notification.error(error?.response?.data?.exception || t('common.errorOccurred'))
   } finally {
     isTogglingOnline.value = false
   }

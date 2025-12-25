@@ -86,9 +86,12 @@ export function useWorkerServiceConfigsService(options: { initialParams?: Worker
     return result
   }
 
-  const setOnline = async (id: string, data: SetOnlineStatusRequest): Promise<void> => {
-    await setOnlineMutation.mutateAsync({ id, data })
+  // Note: Backend uses _currentUser.GetUserId() to identify worker, no ID needed
+  // Backend also creates WorkerServiceConfig if it doesn't exist
+  const setOnline = async (data: SetOnlineStatusRequest): Promise<WorkerServiceConfigDto> => {
+    const result = await setOnlineMutation.mutateAsync({ data })
     invalidate()
+    return result
   }
 
   // Get available workers for a specific service type

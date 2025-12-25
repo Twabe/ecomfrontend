@@ -1164,7 +1164,9 @@
     "releaseSuccess": "Commande libérée avec succès",
     "assignmentNotFound": "Cette affectation n'existe plus",
     "assignmentAlreadyProcessed": "Cette affectation a déjà été traitée",
-    "completeChecklist": "Veuillez compléter tous les éléments requis de la checklist"
+    "completeChecklist": "Veuillez compléter tous les éléments requis de la checklist",
+    "nowOnline": "Vous êtes maintenant en ligne et disponible pour les affectations",
+    "nowOffline": "Vous êtes maintenant hors ligne"
   },
   "users": {
     "title": "Utilisateurs",

@@ -1030,7 +1030,9 @@
     "assignmentAlreadyProcessed": "تمت معالجة هذه المهمة مسبقاً",
     "qualityChecklist": "قائمة فحص الجودة",
     "completeChecklist": "يرجى إكمال جميع العناصر المطلوبة",
-    "checklistRequired": "العناصر المميزة بـ (*) مطلوبة"
+    "checklistRequired": "العناصر المميزة بـ (*) مطلوبة",
+    "nowOnline": "أنت الآن متصل ومتاح للمهام",
+    "nowOffline": "أنت الآن غير متصل"
   },
   "users": {
     "title": "المستخدمون",
