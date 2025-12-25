@@ -243,6 +243,7 @@ export interface ConfirmOrderRequest {
   subDeliveryCompanyId?: string
   moveToShipping?: boolean
   comment?: string
+  qualityChecks?: Record<string, boolean>
 }
 
 // Cancel Order Request

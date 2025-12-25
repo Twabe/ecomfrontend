@@ -62,8 +62,6 @@ export interface UpdateOrderRequest {
   /** @nullable */
   subDeliveryCompanyId?: string | null;
   /** @nullable */
-  workerId?: string | null;
-  /** @nullable */
   moderatorId?: string | null;
   /** @nullable */
   mediaBuyerId?: string | null;

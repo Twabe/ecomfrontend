@@ -8,6 +8,7 @@
 import type { OrderItemDto } from './orderItemDto';
 import type { OrderFeeSimpleDto } from './orderFeeSimpleDto';
 import type { OrderCostSimpleDto } from './orderCostSimpleDto';
+import type { OrderAssignmentSummaryDto } from './orderAssignmentSummaryDto';
 
 export interface OrderDto {
   id?: string;
@@ -76,8 +77,6 @@ export interface OrderDto {
   /** @nullable */
   platformSource?: string | null;
   /** @nullable */
-  workerId?: string | null;
-  /** @nullable */
   moderatorId?: string | null;
   /** @nullable */
   mediaBuyerId?: string | null;
@@ -111,4 +110,5 @@ export interface OrderDto {
   cannotEdit?: boolean;
   isBlacklisted?: boolean;
   createdOn?: string;
+  activeAssignments?: OrderAssignmentSummaryDto[];
 }

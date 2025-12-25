@@ -17,7 +17,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000"
+      "url": "https://localhost:5001"
     }
   ],
   "paths": {
@@ -505,6 +505,50 @@
         ]
       }
     },
+    "/api/webhooks/{storeId}/receive": {
+      "post": {
+        "tags": [
+          "YouCanIntegration"
+        ],
+        "summary": "Receives webhooks from YouCan for order.created events.\nThis is the endpoint registered with YouCan during OAuth flow.",
+        "operationId": "YouCanIntegration_ReceiveWebhook",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "description": "The Store ID that was registered with YouCan.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "api-version",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success acknowledgment.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/integrations/youcan/{storeId}/status": {
       "get": {
         "tags": [
@@ -554,6 +598,164 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/integrations/youcan/{storeId}/webhooks": {
+      "get": {
+        "tags": [
+          "YouCanIntegration"
+        ],
+        "summary": "Lists all YouCan webhook subscriptions for a store directly from YouCan API.\nUse this to see what webhooks are registered and clean up old ones.",
+        "operationId": "YouCanIntegration_ListWebhooks",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the store.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "api-version",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of webhook subscriptions from YouCan.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/integrations/youcan/{storeId}/webhooks/{subscriptionId}": {
+      "delete": {
+        "tags": [
+          "YouCanIntegration"
+        ],
+        "summary": "Deletes a specific webhook subscription from YouCan.\nUse this to clean up old/orphaned webhook subscriptions.",
+        "operationId": "YouCanIntegration_DeleteWebhook",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the store.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "description": "The YouCan subscription ID to delete.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          },
+          {
+            "name": "api-version",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success or error.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/integrations/youcan/{storeId}/webhooks/reset": {
+      "post": {
+        "tags": [
+          "YouCanIntegration"
+        ],
+        "summary": "Deletes ALL webhook subscriptions for a store from YouCan and re-subscribes with correct URL.\nUse this to fix webhook URL issues after migrations.",
+        "operationId": "YouCanIntegration_ResetWebhooks",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the store.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "api-version",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success with new subscription details.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
@@ -8185,6 +8387,44 @@
         ]
       }
     },
+    "/api/v1/orderassignments/bulk-complete-suivi": {
+      "post": {
+        "tags": [
+          "OrderAssignments"
+        ],
+        "summary": "Bulk complete suivi assignments.",
+        "operationId": "OrderAssignments_BulkCompleteSuivi",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCompleteSuiviAssignmentsRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkCompleteSuiviAssignmentsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/orderassignments/{id}/complete-quality": {
       "post": {
         "tags": [
@@ -10331,6 +10571,186 @@
         ]
       }
     },
+    "/api/v1/orders/quality-orders": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get quality orders with assignment status.",
+        "operationId": "Orders_GetQualityOrders",
+        "parameters": [
+          {
+            "name": "AssignmentStatus",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "WorkerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            },
+            "x-position": 2
+          },
+          {
+            "name": "CityId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConfirmationOrderDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/orders/suivi-orders": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get suivi orders with assignment status.",
+        "operationId": "Orders_GetSuiviOrders",
+        "parameters": [
+          {
+            "name": "AssignmentStatus",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "WorkerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            },
+            "x-position": 2
+          },
+          {
+            "name": "CityId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConfirmationOrderDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/orders/ready-for-delivery": {
       "post": {
         "tags": [
@@ -10358,7 +10778,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/OrderDto"
+                    "$ref": "#/components/schemas/ReadyForDeliveryOrderDto"
                   }
                 }
               }
@@ -10488,6 +10908,44 @@
         ]
       }
     },
+    "/api/v1/orders/bulk-assign-delivery-company": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Bulk assign delivery company to orders.",
+        "operationId": "Orders_BulkAssignDeliveryCompany",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignDeliveryCompanyRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkAssignDeliveryCompanyResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/orders/bulk-move-to-shipping": {
       "post": {
         "tags": [
@@ -10514,6 +10972,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BulkMoveToShippingResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/orders/archive": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Archive orders.",
+        "operationId": "Orders_Archive",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveOrdersRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArchiveOrdersResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/orders/unarchive": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Unarchive orders.",
+        "operationId": "Orders_Unarchive",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnarchiveOrdersRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnarchiveOrdersResponse"
                 }
               }
             }
@@ -12348,6 +12882,45 @@
         ]
       }
     },
+    "/api/v1/productvariants/bulk": {
+      "post": {
+        "tags": [
+          "ProductVariants"
+        ],
+        "summary": "Bulk create multiple product variants.",
+        "description": "Creates multiple variants for a product in a single request. Skips variants with duplicate SKUs.",
+        "operationId": "ProductVariants_BulkCreate",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateProductVariantsRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkCreateVariantsResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/purchases/search": {
       "post": {
         "tags": [
@@ -12729,6 +13302,506 @@
                   "items": {
                     "$ref": "#/components/schemas/PurchaseHistoryDto"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/purchases/{id}/confirm": {
+      "post": {
+        "tags": [
+          "Purchases"
+        ],
+        "summary": "Confirm a pending purchase.",
+        "operationId": "Purchases_Confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeRequest"
+              }
+            }
+          },
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/purchases/{id}/ship": {
+      "post": {
+        "tags": [
+          "Purchases"
+        ],
+        "summary": "Mark a confirmed purchase as shipped.",
+        "operationId": "Purchases_MarkAsShipped",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeRequest"
+              }
+            }
+          },
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/purchases/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Purchases"
+        ],
+        "summary": "Cancel a purchase.",
+        "operationId": "Purchases_Cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeRequest"
+              }
+            }
+          },
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/qualitychecklistitems/search": {
+      "post": {
+        "tags": [
+          "QualityChecklistItems"
+        ],
+        "summary": "Search quality checklist items using available filters.",
+        "operationId": "QualityChecklistItems_Search",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchQualityChecklistItemsRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginationResponseOfQualityChecklistItemDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/qualitychecklistitems/{id}": {
+      "get": {
+        "tags": [
+          "QualityChecklistItems"
+        ],
+        "summary": "Get quality checklist item details by ID.",
+        "operationId": "QualityChecklistItems_Get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityChecklistItemDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "QualityChecklistItems"
+        ],
+        "summary": "Update an existing quality checklist item.",
+        "operationId": "QualityChecklistItems_Update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQualityChecklistItemRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "QualityChecklistItems"
+        ],
+        "summary": "Delete a quality checklist item.",
+        "operationId": "QualityChecklistItems_Delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/qualitychecklistitems/active": {
+      "get": {
+        "tags": [
+          "QualityChecklistItems"
+        ],
+        "summary": "Get all active quality checklist items for workers during order confirmation.",
+        "operationId": "QualityChecklistItems_GetActive",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QualityChecklistItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/qualitychecklistitems": {
+      "post": {
+        "tags": [
+          "QualityChecklistItems"
+        ],
+        "summary": "Create a new quality checklist item.",
+        "operationId": "QualityChecklistItems_Create",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQualityChecklistItemRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
                 }
               }
             }
@@ -19040,11 +20113,6 @@
             "type": "string",
             "nullable": true
           },
-          "workerId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
           "moderatorId": {
             "type": "string",
             "format": "uuid",
@@ -19125,6 +20193,12 @@
           "createdOn": {
             "type": "string",
             "format": "date-time"
+          },
+          "activeAssignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderAssignmentSummaryDto"
+            }
           }
         }
       },
@@ -19138,12 +20212,26 @@
           },
           "productId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "nullable": true
           },
           "productName": {
             "type": "string"
           },
           "productReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "variantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantSku": {
             "type": "string",
             "nullable": true
           },
@@ -19235,6 +20323,45 @@
           "workerId": {
             "type": "string",
             "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "OrderAssignmentSummaryDto": {
+        "type": "object",
+        "description": "Simplified DTO for embedding in Order details.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "serviceType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "assignedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "takenAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         }
@@ -20426,6 +21553,19 @@
           "productName": {
             "type": "string"
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "variantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantSku": {
+            "type": "string",
+            "nullable": true
+          },
           "quantity": {
             "type": "integer",
             "format": "int32"
@@ -20506,6 +21646,11 @@
             "minLength": 1,
             "nullable": false
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "quantity": {
             "type": "integer",
             "format": "int32",
@@ -20547,6 +21692,11 @@
             "nullable": false
           },
           "productId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "productVariantId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
@@ -20639,6 +21789,19 @@
             "type": "string",
             "nullable": true
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "variantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantSku": {
+            "type": "string",
+            "nullable": true
+          },
           "expenseTypeId": {
             "type": "string",
             "format": "uuid"
@@ -20715,6 +21878,11 @@
             "format": "uuid",
             "nullable": true
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "attachments": {
             "type": "string",
             "nullable": true
@@ -20755,6 +21923,11 @@
             "nullable": true
           },
           "productId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "productVariantId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
@@ -22230,7 +23403,7 @@
       },
       "BulkReassignOrdersRequest": {
         "type": "object",
-        "description": "Bulk reassign orders to a different worker.\nMarks existing active assignments as \"reassigned\" and creates new ones for the new worker.",
+        "description": "Bulk reassign orders to a different worker.\nMarks existing active assignments as \"reassigned\" and creates new ones for the new worker.\nIf no active assignment exists for a service type, creates a new assignment (assign mode).",
         "additionalProperties": false,
         "required": [
           "orderIds",
@@ -22254,7 +23427,7 @@
           },
           "serviceTypes": {
             "type": "array",
-            "description": "Which services to reassign. If empty or null, reassign all pending/taken services.",
+            "description": "Which services to reassign. If empty or null, reassign all pending/taken services.\nFor orders without existing assignments, this list specifies which services to create.",
             "nullable": true,
             "items": {
               "type": "string"
@@ -22988,6 +24161,109 @@
             "format": "date-time",
             "minLength": 1,
             "nullable": false
+          }
+        }
+      },
+      "BulkCompleteSuiviAssignmentsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "totalAssignments": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "successfullyCompleted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkCompleteSuiviItem"
+            }
+          },
+          "totalCodCollected": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "BulkCompleteSuiviItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "assignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "codAmountCollected": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          }
+        }
+      },
+      "BulkCompleteSuiviAssignmentsRequest": {
+        "type": "object",
+        "description": "Bulk complete multiple suivi assignments with the same result.\nUsed when a worker wants to mark multiple orders as delivered/returned at once.\nCOD amount is auto-calculated from each order's TotalPrice.",
+        "additionalProperties": false,
+        "required": [
+          "assignmentIds",
+          "trackingStateId",
+          "result"
+        ],
+        "properties": {
+          "assignmentIds": {
+            "type": "array",
+            "description": "List of assignment IDs to complete.",
+            "minLength": 1,
+            "nullable": false,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "trackingStateId": {
+            "type": "string",
+            "description": "New tracking state ID for all orders.",
+            "format": "uuid",
+            "minLength": 1,
+            "nullable": false
+          },
+          "result": {
+            "type": "string",
+            "description": "Result of the suivi: \"delivered\" or \"returned\".\nFor bulk operations, only final results are allowed.",
+            "minLength": 1,
+            "nullable": false
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes for all completed assignments.",
+            "nullable": true
           }
         }
       },
@@ -23865,6 +25141,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "quantity": {
             "type": "integer",
             "format": "int32"
@@ -23960,11 +25241,6 @@
             "nullable": true
           },
           "subDeliveryCompanyId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "workerId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
@@ -24182,6 +25458,14 @@
           "comment": {
             "type": "string",
             "nullable": true
+          },
+          "qualityChecks": {
+            "type": "object",
+            "description": "Quality checks completed during confirmation (key -> passed).\nOnly used when EnableQualityCheck is enabled in AutoAssignmentSettings.",
+            "nullable": true,
+            "additionalProperties": {
+              "type": "boolean"
+            }
           }
         }
       },
@@ -24265,7 +25549,7 @@
       },
       "MarkOrdersAsDeliveredRequest": {
         "type": "object",
-        "description": "Mark multiple orders as delivered (bulk operation).\nAuto-SMS will be sent via OrderStateChangedEvent.",
+        "description": "Mark multiple orders as delivered (bulk operation).\nAuto-SMS will be sent via OrderStateChangedEvent.\nAlso completes any active assignments (suivi, quality, etc.)",
         "additionalProperties": false,
         "required": [
           "orderIds"
@@ -24469,7 +25753,7 @@
       },
       "GrabOrderRequest": {
         "type": "object",
-        "description": "Worker grabs/takes ownership of an order.",
+        "description": "Worker grabs/takes ownership of an order.\nCreates an OrderAssignment and immediately takes it.",
         "additionalProperties": false,
         "required": [
           "orderId",
@@ -24492,7 +25776,7 @@
       },
       "ReleaseOrderRequest": {
         "type": "object",
-        "description": "Worker releases an order (unassign).",
+        "description": "Worker releases an order (unassign).\nReleases the active OrderAssignment and resets order phase to \"new\".",
         "additionalProperties": false,
         "required": [
           "orderId"
@@ -24503,6 +25787,10 @@
             "format": "uuid",
             "minLength": 1,
             "nullable": false
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -24542,7 +25830,7 @@
       },
       "BulkGrabOrdersRequest": {
         "type": "object",
-        "description": "Worker grabs multiple orders at once.",
+        "description": "Worker grabs multiple orders at once.\nCreates OrderAssignments for each order.",
         "additionalProperties": false,
         "required": [
           "orderIds",
@@ -24648,7 +25936,7 @@
       },
       "ReassignOrdersRequest": {
         "type": "object",
-        "description": "Reassign orders from one worker to another.",
+        "description": "Reassign orders from one worker to another.\nMarks old assignments as \"reassigned\" and creates new assignments for the new worker.",
         "additionalProperties": false,
         "required": [
           "orderIds",
@@ -24815,9 +26103,121 @@
           }
         }
       },
+      "ReadyForDeliveryOrderDto": {
+        "type": "object",
+        "description": "DTO for orders ready for delivery with worker assignment info.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemDto"
+            }
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "cityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "cityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "deliveryCompanyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "deliveryCompanyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "subDeliveryCompanyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "subDeliveryCompanyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "storeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "storeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dateValidated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderAssignmentSummaryDto"
+            }
+          },
+          "confirmedByWorkerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedByWorkerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "suiviWorkerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "suiviWorkerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "qualityWorkerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityWorkerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
       "GetOrdersReadyForDeliveryRequest": {
         "type": "object",
-        "description": "Get orders ready for delivery (in shipping phase, not yet in a delivery note).",
+        "description": "Get orders ready for delivery (in shipping phase, not yet in a delivery note).\nReturns enriched DTO with worker assignment information.",
         "additionalProperties": false,
         "properties": {
           "deliveryCompanyId": {
@@ -24831,6 +26231,11 @@
             "nullable": true
           },
           "cityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "workerId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
@@ -24933,6 +26338,87 @@
           }
         }
       },
+      "BulkAssignDeliveryCompanyResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "totalOrders": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "successfullyAssigned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkAssignDeliveryItem"
+            }
+          }
+        }
+      },
+      "BulkAssignDeliveryItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BulkAssignDeliveryCompanyRequest": {
+        "type": "object",
+        "description": "Bulk assign delivery company to multiple orders.\nUsed by Suivi agents to assign delivery company to all selected orders at once.",
+        "additionalProperties": false,
+        "required": [
+          "orderIds",
+          "deliveryCompanyId"
+        ],
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "minLength": 1,
+            "nullable": false,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "deliveryCompanyId": {
+            "type": "string",
+            "format": "uuid",
+            "minLength": 1,
+            "nullable": false
+          },
+          "subDeliveryCompanyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
       "BulkMoveToShippingResponse": {
         "type": "object",
         "additionalProperties": false,
@@ -24990,6 +26476,112 @@
             "nullable": true
           },
           "newState": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ArchiveOrdersResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "totalOrders": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "successfullyArchived": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "archivedOrderCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ArchiveOrdersRequest": {
+        "type": "object",
+        "description": "Archive multiple orders (bulk operation).\nArchived orders won't appear in main lists unless explicitly filtered.",
+        "additionalProperties": false,
+        "required": [
+          "orderIds"
+        ],
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "minLength": 1,
+            "nullable": false,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UnarchiveOrdersResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "totalOrders": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "successfullyUnarchived": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unarchivedOrderCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UnarchiveOrdersRequest": {
+        "type": "object",
+        "description": "Unarchive multiple orders (bulk operation).\nUnarchived orders will appear back in main lists.",
+        "additionalProperties": false,
+        "required": [
+          "orderIds"
+        ],
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "minLength": 1,
+            "nullable": false,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "comment": {
             "type": "string",
             "nullable": true
           }
@@ -26762,6 +28354,102 @@
           }
         }
       },
+      "BulkCreateVariantsResult": {
+        "type": "object",
+        "description": "Result of bulk variant creation with counts and errors.",
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "BulkCreateProductVariantsRequest": {
+        "type": "object",
+        "description": "Bulk create multiple product variants at once.\nUsed by the enhanced product creation modal to create all variants in a single request.",
+        "additionalProperties": false,
+        "required": [
+          "productId",
+          "variants"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "minLength": 1,
+            "nullable": false
+          },
+          "variants": {
+            "type": "array",
+            "minLength": 1,
+            "nullable": false,
+            "items": {
+              "$ref": "#/components/schemas/VariantItemRequest"
+            }
+          }
+        }
+      },
+      "VariantItemRequest": {
+        "type": "object",
+        "description": "Individual variant item for bulk creation.",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "barcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "options": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "buyingPrice": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
       "UpdateProductVariantRequest": {
         "type": "object",
         "additionalProperties": false,
@@ -26937,6 +28625,19 @@
             "type": "string",
             "nullable": true
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "variantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantSku": {
+            "type": "string",
+            "nullable": true
+          },
           "quantity": {
             "type": "integer",
             "format": "int32"
@@ -27030,6 +28731,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "quantity": {
             "type": "integer",
             "format": "int32"
@@ -27104,6 +28810,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "quantity": {
             "type": "integer",
             "format": "int32"
@@ -27171,6 +28882,190 @@
           "createdOn": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "StatusChangeRequest": {
+        "type": "object",
+        "description": "DTO for status change requests (confirm, ship, cancel)",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PaginationResponseOfQualityChecklistItemDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityChecklistItemDto"
+            }
+          },
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "QualityChecklistItemDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "key": {
+            "type": "string"
+          },
+          "labelAr": {
+            "type": "string"
+          },
+          "labelFr": {
+            "type": "string"
+          },
+          "isRequired": {
+            "type": "boolean"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SearchQualityChecklistItemsRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PaginationFilter"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "key": {
+                "type": "string",
+                "nullable": true
+              },
+              "isActive": {
+                "type": "boolean",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "CreateQualityChecklistItemRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "labelAr",
+          "labelFr"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "pattern": "^[a-z0-9_]+$",
+            "nullable": false
+          },
+          "labelAr": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "nullable": false
+          },
+          "labelFr": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "nullable": false
+          },
+          "isRequired": {
+            "type": "boolean"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0.0
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateQualityChecklistItemRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "minLength": 1,
+            "nullable": false
+          },
+          "key": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 0,
+            "pattern": "^[a-z0-9_]+$",
+            "nullable": true
+          },
+          "labelAr": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true
+          },
+          "labelFr": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true
+          },
+          "isRequired": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "displayOrder": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0.0,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -27548,6 +29443,19 @@
           "productName": {
             "type": "string"
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "variantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantSku": {
+            "type": "string",
+            "nullable": true
+          },
           "quantity": {
             "type": "integer",
             "format": "int32"
@@ -27623,6 +29531,11 @@
             "minLength": 1,
             "nullable": false
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "quantity": {
             "type": "integer",
             "format": "int32",
@@ -27664,6 +29577,11 @@
             "nullable": false
           },
           "productId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "productVariantId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
@@ -28568,6 +30486,19 @@
           "productName": {
             "type": "string"
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "variantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantSku": {
+            "type": "string",
+            "nullable": true
+          },
           "amount": {
             "type": "number",
             "format": "decimal"
@@ -28625,6 +30556,11 @@
             "minLength": 1,
             "nullable": false
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "amount": {
             "type": "number",
             "format": "decimal",
@@ -28656,6 +30592,11 @@
             "nullable": true
           },
           "productId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "productVariantId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
@@ -29027,6 +30968,11 @@
             "minLength": 1,
             "nullable": false
           },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "deliveryCompanyId": {
             "type": "string",
             "format": "uuid",
@@ -29105,6 +31051,19 @@
           },
           "productName": {
             "type": "string"
+          },
+          "productVariantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "variantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantSku": {
+            "type": "string",
+            "nullable": true
           },
           "quantity": {
             "type": "integer",

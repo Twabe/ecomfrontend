@@ -8,6 +8,7 @@
 
 /**
  * Worker grabs multiple orders at once.
+Creates OrderAssignments for each order.
  */
 export interface BulkGrabOrdersRequest {
   /**

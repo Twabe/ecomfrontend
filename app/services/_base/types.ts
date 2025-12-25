@@ -12,15 +12,16 @@ import type { UseMutationReturnType } from '@tanstack/vue-query'
 /**
  * Standard paginated response from backend
  * Matches backend PaginationResponse<T>
+ * Note: All fields optional for Orval compatibility (generated types have optional fields)
  */
 export interface PaginatedResponse<T> {
-  data: T[]
-  currentPage: number
-  totalPages: number
-  totalCount: number
-  pageSize: number
-  hasPreviousPage: boolean
-  hasNextPage: boolean
+  data?: T[]
+  currentPage?: number
+  totalPages?: number
+  totalCount?: number
+  pageSize?: number
+  hasPreviousPage?: boolean
+  hasNextPage?: boolean
 }
 
 /**
@@ -38,17 +39,15 @@ export interface PaginationInfo {
 /**
  * Base search params shared by all entities
  * Matches backend SearchFilter base class
+ * Note: Uses loose typing for Orval compatibility - generated types have specific Filter/Search types
  */
 export interface BaseSearchParams {
-  keyword?: string
+  keyword?: string | null
   pageNumber?: number
   pageSize?: number
-  orderBy?: string[]
-  advancedFilter?: Record<string, unknown>
-  advancedSearch?: {
-    fields: string[]
-    keyword: string
-  }
+  orderBy?: string[] | null
+  advancedFilter?: unknown
+  advancedSearch?: unknown
 }
 
 /**
@@ -63,8 +62,13 @@ export interface EntityServiceConfig<
   /** Entity name for query keys (must match queryKeys.ts) */
   entityName: string
 
-  /** Search function from Orval generated API */
-  searchFn: (params: TSearchParams) => Promise<PaginatedResponse<TDto>>
+  /**
+   * Search function from Orval generated API
+   * Note: Uses loose typing for Orval compatibility - Orval generates functions with MaybeRef params
+   * and specific PaginationResponseOf* types that are structurally equivalent to PaginatedResponse
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  searchFn: (...args: any[]) => Promise<PaginatedResponse<TDto> | any>
 
   /** Get single item function (optional) */
   getFn?: (id: string) => Promise<TDto>

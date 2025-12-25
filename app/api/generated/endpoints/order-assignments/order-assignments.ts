@@ -32,6 +32,8 @@ import type {
   AssignOrderRequest,
   BulkAssignOrdersRequest,
   BulkAssignOrdersResponse,
+  BulkCompleteSuiviAssignmentsRequest,
+  BulkCompleteSuiviAssignmentsResponse,
   BulkReassignOrdersRequest,
   BulkReassignOrdersResponse,
   CompleteAssignmentRequest,
@@ -1137,6 +1139,70 @@ export const useOrderAssignmentsCompleteSuivi = <TError = unknown,
       > => {
 
       const mutationOptions = getOrderAssignmentsCompleteSuiviMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Bulk complete suivi assignments.
+ */
+export const orderAssignmentsBulkCompleteSuivi = (
+    bulkCompleteSuiviAssignmentsRequest: MaybeRef<BulkCompleteSuiviAssignmentsRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      bulkCompleteSuiviAssignmentsRequest = unref(bulkCompleteSuiviAssignmentsRequest);
+      
+      return customInstance<BulkCompleteSuiviAssignmentsResponse>(
+      {url: `/api/v1/orderassignments/bulk-complete-suivi`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: bulkCompleteSuiviAssignmentsRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getOrderAssignmentsBulkCompleteSuiviMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsBulkCompleteSuivi>>, TError,{data: BulkCompleteSuiviAssignmentsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsBulkCompleteSuivi>>, TError,{data: BulkCompleteSuiviAssignmentsRequest}, TContext> => {
+
+const mutationKey = ['orderAssignmentsBulkCompleteSuivi'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof orderAssignmentsBulkCompleteSuivi>>, {data: BulkCompleteSuiviAssignmentsRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  orderAssignmentsBulkCompleteSuivi(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrderAssignmentsBulkCompleteSuiviMutationResult = NonNullable<Awaited<ReturnType<typeof orderAssignmentsBulkCompleteSuivi>>>
+    export type OrderAssignmentsBulkCompleteSuiviMutationBody = BulkCompleteSuiviAssignmentsRequest
+    export type OrderAssignmentsBulkCompleteSuiviMutationError = unknown
+
+    /**
+ * @summary Bulk complete suivi assignments.
+ */
+export const useOrderAssignmentsBulkCompleteSuivi = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsBulkCompleteSuivi>>, TError,{data: BulkCompleteSuiviAssignmentsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof orderAssignmentsBulkCompleteSuivi>>,
+        TError,
+        {data: BulkCompleteSuiviAssignmentsRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getOrderAssignmentsBulkCompleteSuiviMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

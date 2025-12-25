@@ -816,8 +816,17 @@
       </div>
     </div>
 
-    <!-- Assign/Reassign Modal -->
-    <TransitionRoot :show="showReassignModal" as="template">
+    <!-- Simple Assign Modal (for new orders tab only) -->
+    <SimpleAssignModal
+      :show="showReassignModal && activeTab === 'new'"
+      :orders="selectedOrdersForAssign"
+      :workers="workers"
+      @close="closeReassignModal"
+      @confirm="handleSimpleAssignConfirm"
+    />
+
+    <!-- Reassign Modal (for other tabs) -->
+    <TransitionRoot :show="showReassignModal && activeTab !== 'new'" as="template">
       <Dialog as="div" class="relative z-50" @close="closeReassignModal">
         <TransitionChild
           enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
@@ -834,17 +843,17 @@
             >
               <DialogPanel class="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
                 <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  {{ activeTab === 'new' ? $t('supervisor.assignOrders') : $t('supervisor.reassignOrders') }}
+                  {{ $t('supervisor.reassignOrders') }}
                 </DialogTitle>
 
                 <form @submit.prevent="submitReassign">
                   <!-- Order Count -->
                   <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    {{ $t('supervisor.assigningCount', { count: selectedOrders.length }) }}
+                    {{ $t('supervisor.reassigningCount', { count: selectedOrders.length }) }}
                   </p>
 
-                  <!-- REASSIGN MODE: Service Selection for existing assignments -->
-                  <div v-if="activeTab !== 'new'" class="mb-4">
+                  <!-- Service Selection for existing assignments -->
+                  <div class="mb-4">
                     <!-- Loading state -->
                     <div v-if="isLoadingActiveServices" class="text-center py-4">
                       <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto"></div>
@@ -892,8 +901,8 @@
                     </div>
                   </div>
 
-                  <!-- Worker Selection (only in chain mode or reassign tabs) -->
-                  <div v-if="activeTab !== 'new' || !isIndividualMode" class="mb-4">
+                  <!-- Worker Selection -->
+                  <div class="mb-4">
                     <label class="label">{{ $t('supervisor.selectWorker') }} *</label>
                     <select v-model="reassignForm.workerId" class="input" required>
                       <option value="">{{ $t('common.select') }}...</option>
@@ -905,76 +914,6 @@
                         {{ worker.firstName }} {{ worker.lastName }}
                       </option>
                     </select>
-                  </div>
-
-                  <!-- Mode Toggle (for Nouvelles commandes tab only) -->
-                  <div v-if="activeTab === 'new'" class="mb-4">
-                    <div class="flex items-center justify-between mb-3">
-                      <label class="label mb-0">{{ $t('supervisor.assignmentMode') }}</label>
-                      <label class="flex items-center gap-2 cursor-pointer">
-                        <span class="text-xs text-gray-500">{{ $t('supervisor.chainMode') }}</span>
-                        <input
-                          type="checkbox"
-                          v-model="isIndividualMode"
-                          class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                        />
-                        <span class="text-xs text-gray-500">{{ $t('supervisor.individualMode') }}</span>
-                      </label>
-                    </div>
-
-                    <!-- Chain Mode: Single Worker for All Services -->
-                    <div v-if="!isIndividualMode">
-                      <label class="label">{{ $t('supervisor.serviceTypes') }} *</label>
-                      <div class="space-y-2">
-                        <label
-                          v-for="service in availableServiceTypes"
-                          :key="service.value"
-                          class="flex items-center gap-2 cursor-pointer"
-                        >
-                          <input
-                            type="checkbox"
-                            :value="service.value"
-                            v-model="reassignForm.serviceTypes"
-                            class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          <span class="text-sm text-gray-700 dark:text-gray-300">
-                            {{ service.label }}
-                          </span>
-                        </label>
-                      </div>
-                      <p class="text-xs text-gray-500 mt-1">
-                        {{ $t('supervisor.serviceTypesHint') }}
-                      </p>
-                    </div>
-
-                    <!-- Individual Mode: Different Worker for Each Service -->
-                    <div v-else class="space-y-3">
-                      <p class="text-xs text-gray-500 mb-2">
-                        {{ $t('supervisor.individualModeHint') }}
-                      </p>
-                      <div
-                        v-for="service in availableServiceTypes"
-                        :key="service.value"
-                        class="flex items-center gap-3"
-                      >
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 w-24">
-                          {{ service.label }}
-                        </span>
-                        <select
-                          v-model="individualAssignments[service.value]"
-                          class="input flex-1 text-sm"
-                        >
-                          <option value="">-- {{ $t('supervisor.noAssignment') }} --</option>
-                          <option
-                            v-for="worker in workers"
-                            :key="worker.id"
-                            :value="worker.id"
-                          >
-                            {{ worker.firstName }} {{ worker.lastName }}
-                          </option>
-                        </select>
-                      </div>
-                    </div>
                   </div>
 
                   <!-- Notes -->
@@ -992,7 +931,7 @@
                       class="btn-primary"
                       :disabled="isSubmitting || isSubmitDisabled"
                     >
-                      {{ isSubmitting ? $t('common.loading') : (activeTab === 'new' ? $t('supervisor.assign') : $t('supervisor.reassign')) }}
+                      {{ isSubmitting ? $t('common.loading') : $t('supervisor.reassign') }}
                     </button>
                   </div>
                 </form>
@@ -1021,6 +960,7 @@ import {
   ShieldCheckIcon,
   ClipboardDocumentListIcon
 } from '@heroicons/vue/24/outline'
+import SimpleAssignModal from '~/components/supervisor/SimpleAssignModal.vue'
 import {
   useOrdersWorkflowService,
   useOrderAssignmentsService,
@@ -1149,6 +1089,13 @@ const workerOrderCounts = computed(() => {
   return counts
 })
 
+// Computed: orders for SimpleAssignModal (for new tab)
+const selectedOrdersForAssign = computed(() => {
+  return newOrders.value
+    .filter(o => selectedOrders.value.includes(o.id))
+    .map(o => ({ id: o.id, code: o.code }))
+})
+
 const selectAllNew = computed(() =>
   newOrders.value.length > 0 &&
   newOrders.value.every(o => selectedOrders.value.includes(o.id))
@@ -1177,15 +1124,6 @@ const reassignForm = ref({
   notes: ''
 })
 
-// Individual Assignment Mode
-const isIndividualMode = ref(false)
-const individualAssignments = ref<Record<ServiceType, string>>({
-  [ServiceTypes.Confirmation]: '',
-  [ServiceTypes.Suivi]: '',
-  [ServiceTypes.Quality]: '',
-  [ServiceTypes.Callback]: ''
-})
-
 // Reassign Mode: Service selection for existing assignments
 interface ActiveServiceInfo {
   serviceType: string
@@ -1197,70 +1135,10 @@ const activeServicesForReassign = ref<ActiveServiceInfo[]>([])
 const selectedServicesToReassign = ref<string[]>([])
 const isLoadingActiveServices = ref(false)
 
-// Computed for submit validation
-const hasAnyIndividualAssignment = computed(() =>
-  Object.values(individualAssignments.value).some(v => v !== '')
-)
-
+// Computed for submit validation (reassign modal only - new tab uses SimpleAssignModal)
 const isSubmitDisabled = computed(() => {
-  if (activeTab.value === 'new') {
-    if (isIndividualMode.value) {
-      // Individual mode: at least one service must be assigned
-      return !hasAnyIndividualAssignment.value
-    } else {
-      // Chain mode: worker and services required
-      return !reassignForm.value.workerId || reassignForm.value.serviceTypes.length === 0
-    }
-  } else {
-    // Reassign mode: worker required + at least one service selected
-    return !reassignForm.value.workerId || selectedServicesToReassign.value.length === 0
-  }
-})
-
-// Get unique active services from selected orders (for reassign modal)
-// Only includes services with status 'pending' or 'taken' (not completed)
-const getActiveServicesForSelectedOrders = () => {
-  const services: ActiveServiceInfo[] = []
-  const seenServices = new Set<string>()
-  const activeStatuses = [AssignmentStatus.Pending, AssignmentStatus.Taken]
-
-  for (const orderId of selectedOrders.value) {
-    // Find in confirmationOrders
-    const confOrder = confirmationOrders.value.find(o => o.orderId === orderId)
-    const isActiveStatus = activeStatuses.includes(confOrder?.assignmentStatus || '')
-    if (confOrder && confOrder.serviceType && isActiveStatus) {
-      const key = `${confOrder.serviceType}`
-      if (!seenServices.has(key)) {
-        seenServices.add(key)
-        services.push({
-          serviceType: confOrder.serviceType,
-          workerName: confOrder.workerName || null,
-          status: confOrder.assignmentStatus || 'unknown',
-          orderId: confOrder.orderId || ''
-        })
-      }
-    }
-  }
-
-  return services
-}
-
-// Available service types for selection (filtered by settings)
-// Note: Callback is NOT a service type - it's an action within confirmation
-// Quality only appears if EnableQualityCheck is true
-const availableServiceTypes = computed(() => {
-  const services: Array<{ value: ServiceType; label: string }> = [
-    { value: ServiceTypes.Confirmation, label: 'Confirmation' }
-  ]
-
-  // Only include Quality if enabled in settings
-  if (isQualityEnabled.value) {
-    services.push({ value: ServiceTypes.Quality, label: 'Quality' })
-  }
-
-  services.push({ value: ServiceTypes.Suivi, label: 'Suivi' })
-
-  return services
+  // Reassign mode: worker required + at least one service selected
+  return !reassignForm.value.workerId || selectedServicesToReassign.value.length === 0
 })
 
 // Format helpers
@@ -1473,17 +1351,10 @@ const toggleSelectAllSuivi = () => {
   }
 }
 
-// Reassign modal
+// Reassign modal (for non-new tabs - new tab uses SimpleAssignModal)
 const openReassignModal = async () => {
   if (selectedOrders.value.length === 0) return
   reassignForm.value = { workerId: '', serviceTypes: [ServiceTypes.Confirmation], notes: '' }
-  isIndividualMode.value = false
-  individualAssignments.value = {
-    [ServiceTypes.Confirmation]: '',
-    [ServiceTypes.Suivi]: '',
-    [ServiceTypes.Quality]: '',
-    [ServiceTypes.Callback]: ''
-  }
 
   // For reassign tabs: get active services from the correct data source
   if (activeTab.value !== 'new') {
@@ -1635,57 +1506,67 @@ const closeReassignModal = () => {
   showReassignModal.value = false
 }
 
+// Handler for SimpleAssignModal (new orders tab)
+const handleSimpleAssignConfirm = async (data: {
+  orderIds: string[]
+  confirmationWorkerId?: string
+  suiviWorkerId?: string
+}) => {
+  isSubmitting.value = true
+  try {
+    // Build service chain based on selected workers
+    const serviceTypes: ServiceType[] = []
+    const individualAssignments: Record<string, string> = {}
+
+    if (data.confirmationWorkerId) {
+      serviceTypes.push(ServiceTypes.Confirmation)
+      individualAssignments[ServiceTypes.Confirmation] = data.confirmationWorkerId
+    }
+    if (data.suiviWorkerId) {
+      serviceTypes.push(ServiceTypes.Suivi)
+      individualAssignments[ServiceTypes.Suivi] = data.suiviWorkerId
+    }
+
+    // Use individual assign for each order/service combination
+    for (const orderId of data.orderIds) {
+      for (const [serviceType, workerId] of Object.entries(individualAssignments)) {
+        await orderAssignments.assign({
+          orderId,
+          workerId,
+          serviceType,
+          allowReassignment: true
+        })
+      }
+    }
+
+    notification.success(t('supervisor.assignmentSuccess'))
+    closeReassignModal()
+    selectedOrders.value = []
+    await loadAllData()
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : t('common.error')
+    notification.error(errorMessage)
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+// Submit reassign (for non-new tabs only - new tab uses SimpleAssignModal)
 const submitReassign = async () => {
   isSubmitting.value = true
   try {
-    if (activeTab.value === 'new' && isIndividualMode.value) {
-      // Individual mode: assign each service to different worker
-      for (const orderId of selectedOrders.value) {
-        for (const [serviceType, workerId] of Object.entries(individualAssignments.value)) {
-          if (workerId) {
-            await orderAssignments.assign({
-              orderId,
-              workerId,
-              serviceType,
-              allowReassignment: true,
-              notes: reassignForm.value.notes || undefined
-            })
-          }
-        }
-      }
-    } else if (activeTab.value === 'new') {
-      // Tab: Nouvelles commandes → bulk-assign with ServiceTypes (chain mode)
-      if (!reassignForm.value.workerId) return
-      await orderAssignments.bulkAssign({
-        orderIds: selectedOrders.value,
-        workerId: reassignForm.value.workerId,
-        serviceTypes: reassignForm.value.serviceTypes,
-        notes: reassignForm.value.notes || undefined
-      })
-    } else if (activeTab.value === 'confirmations') {
-      // Tab: Confirmations → bulk-reassign existing active assignments
-      if (!reassignForm.value.workerId) return
-      if (selectedServicesToReassign.value.length === 0) return
+    if (!reassignForm.value.workerId) return
+    if (selectedServicesToReassign.value.length === 0) return
 
-      await orderAssignments.bulkReassign({
-        orderIds: selectedOrders.value,
-        toWorkerId: reassignForm.value.workerId,
-        serviceTypes: selectedServicesToReassign.value,
-        notes: reassignForm.value.notes || undefined
-      })
-    } else if (activeTab.value === ServiceTypes.Suivi) {
-      // Tab: Suivi → reassign active suivi assignments
-      if (!reassignForm.value.workerId) return
-      if (selectedServicesToReassign.value.length === 0) return
+    // Bulk-reassign existing active assignments
+    await orderAssignments.bulkReassign({
+      orderIds: selectedOrders.value,
+      toWorkerId: reassignForm.value.workerId,
+      serviceTypes: selectedServicesToReassign.value,
+      notes: reassignForm.value.notes || undefined
+    })
 
-      await orderAssignments.bulkReassign({
-        orderIds: selectedOrders.value,
-        toWorkerId: reassignForm.value.workerId,
-        serviceTypes: selectedServicesToReassign.value,
-        notes: reassignForm.value.notes || undefined
-      })
-    }
-    notification.success(t('supervisor.assignmentSuccess'))
+    notification.success(t('supervisor.reassignSuccess', { count: selectedOrders.value.length }))
     closeReassignModal()
     selectedOrders.value = []
     await loadAllData()

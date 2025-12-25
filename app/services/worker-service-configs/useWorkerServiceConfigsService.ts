@@ -39,9 +39,21 @@ export function useWorkerServiceConfigsService(options: { initialParams?: Worker
   })
 
   // Current user's config query - always enabled for workers
+  // Return null instead of undefined when user has no config (Vue Query doesn't allow undefined)
   const myConfigQuery = useQuery({
     queryKey: [...queryKey, 'myConfig'] as const,
-    queryFn: () => workerServiceConfigsGetMyConfig(),
+    queryFn: async () => {
+      try {
+        const result = await workerServiceConfigsGetMyConfig()
+        return result ?? null
+      } catch (error: any) {
+        // Return null if 404 (user has no config yet)
+        if (error?.response?.status === 404) {
+          return null
+        }
+        throw error
+      }
+    },
     staleTime: 30 * 1000,
   })
 

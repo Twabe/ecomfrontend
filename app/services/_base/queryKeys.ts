@@ -103,6 +103,7 @@ export const queryKeys = {
   // ============================================
   autoAssignmentSettings: createEntityKeys('auto-assignment-settings'),
   workerServiceConfigs: createEntityKeys('worker-service-configs'),
+  qualityChecklistItems: createEntityKeys('quality-checklist-items'),
   settings: createEntityKeys('settings'),
 
   // ============================================

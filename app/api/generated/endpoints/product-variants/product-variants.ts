@@ -30,6 +30,8 @@ import type {
 } from 'vue';
 
 import type {
+  BulkCreateProductVariantsRequest,
+  BulkCreateVariantsResult,
   CreateProductVariantRequest,
   ErrorResult,
   HttpValidationProblemDetails,
@@ -434,6 +436,71 @@ export const useProductVariantsCreate = <TError = HttpValidationProblemDetails |
       > => {
 
       const mutationOptions = getProductVariantsCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * Creates multiple variants for a product in a single request. Skips variants with duplicate SKUs.
+ * @summary Bulk create multiple product variants.
+ */
+export const productVariantsBulkCreate = (
+    bulkCreateProductVariantsRequest: MaybeRef<BulkCreateProductVariantsRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      bulkCreateProductVariantsRequest = unref(bulkCreateProductVariantsRequest);
+      
+      return customInstance<BulkCreateVariantsResult>(
+      {url: `/api/v1/productvariants/bulk`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: bulkCreateProductVariantsRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getProductVariantsBulkCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productVariantsBulkCreate>>, TError,{data: BulkCreateProductVariantsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof productVariantsBulkCreate>>, TError,{data: BulkCreateProductVariantsRequest}, TContext> => {
+
+const mutationKey = ['productVariantsBulkCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof productVariantsBulkCreate>>, {data: BulkCreateProductVariantsRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  productVariantsBulkCreate(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProductVariantsBulkCreateMutationResult = NonNullable<Awaited<ReturnType<typeof productVariantsBulkCreate>>>
+    export type ProductVariantsBulkCreateMutationBody = BulkCreateProductVariantsRequest
+    export type ProductVariantsBulkCreateMutationError = unknown
+
+    /**
+ * @summary Bulk create multiple product variants.
+ */
+export const useProductVariantsBulkCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productVariantsBulkCreate>>, TError,{data: BulkCreateProductVariantsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof productVariantsBulkCreate>>,
+        TError,
+        {data: BulkCreateProductVariantsRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getProductVariantsBulkCreateMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

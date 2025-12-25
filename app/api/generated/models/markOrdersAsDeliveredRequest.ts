@@ -9,6 +9,7 @@
 /**
  * Mark multiple orders as delivered (bulk operation).
 Auto-SMS will be sent via OrderStateChangedEvent.
+Also completes any active assignments (suivi, quality, etc.)
  */
 export interface MarkOrdersAsDeliveredRequest {
   /**

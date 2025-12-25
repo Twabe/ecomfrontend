@@ -239,16 +239,13 @@ const handleSelfAssign = async (order: OrderDto) => {
 
     showSuccess(t('worker.orderGrabbed', { code: order.code }))
     emit('assigned', order)
-
-    // Refresh the list
-    await refetch()
+    // No manual refetch needed - selfAssign already invalidates relevant queries
+    // Vue Query will automatically refetch invalidated queries
   } catch (err: any) {
     // Handle conflict (409) - order already taken
     if (err?.response?.status === 409) {
       showError(t('worker.orderAlreadyTaken'))
       emit('error', { code: 409, message: 'Order already taken' })
-      // Refresh to remove the order from list
-      await refetch()
     } else if (err?.response?.status === 400) {
       showError(t('worker.capacityReached'))
       emit('error', { code: 400, message: 'Capacity reached' })

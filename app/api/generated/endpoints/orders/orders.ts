@@ -31,8 +31,12 @@ import type {
 
 import type {
   AddOrderItemRequest,
+  ArchiveOrdersRequest,
+  ArchiveOrdersResponse,
   AssignDeliveryCompanyRequest,
   AssignDeliveryCompanyResponse,
+  BulkAssignDeliveryCompanyRequest,
+  BulkAssignDeliveryCompanyResponse,
   BulkDeleteOrdersRequest,
   BulkDeleteOrdersResponse,
   BulkExportOrdersRequest,
@@ -64,13 +68,18 @@ import type {
   MarkOrdersAsReturnedResponse,
   OrderDto,
   OrdersGetConfirmationOrdersParams,
+  OrdersGetQualityOrdersParams,
+  OrdersGetSuiviOrdersParams,
   PaginationResponseOfOrderDto,
+  ReadyForDeliveryOrderDto,
   ReassignOrdersRequest,
   ReassignOrdersResponse,
   ReleaseOrderRequest,
   RemoveOrderItemRequest,
   SearchOrdersRequest,
   Stream,
+  UnarchiveOrdersRequest,
+  UnarchiveOrdersResponse,
   UpdateOrderItemRequest,
   UpdateOrderRequest
 } from '../../models';
@@ -1634,6 +1643,144 @@ export function useOrdersGetConfirmationOrders<TData = Awaited<ReturnType<typeof
 
 
 /**
+ * @summary Get quality orders with assignment status.
+ */
+export const ordersGetQualityOrders = (
+    params?: MaybeRef<OrdersGetQualityOrdersParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      params = unref(params);
+      
+      return customInstance<ConfirmationOrderDto[]>(
+      {url: `/api/v1/orders/quality-orders`, method: 'GET',
+        params: unref(params), signal
+    },
+      options);
+    }
+  
+
+
+
+export const getOrdersGetQualityOrdersQueryKey = (params?: MaybeRef<OrdersGetQualityOrdersParams>,) => {
+    return [
+    'api','v1','orders','quality-orders', ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getOrdersGetQualityOrdersQueryOptions = <TData = Awaited<ReturnType<typeof ordersGetQualityOrders>>, TError = HttpValidationProblemDetails | ErrorResult>(params?: MaybeRef<OrdersGetQualityOrdersParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersGetQualityOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  getOrdersGetQualityOrdersQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersGetQualityOrders>>> = ({ signal }) => ordersGetQualityOrders(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersGetQualityOrders>>, TError, TData> 
+}
+
+export type OrdersGetQualityOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof ordersGetQualityOrders>>>
+export type OrdersGetQualityOrdersQueryError = HttpValidationProblemDetails | ErrorResult
+
+
+/**
+ * @summary Get quality orders with assignment status.
+ */
+
+export function useOrdersGetQualityOrders<TData = Awaited<ReturnType<typeof ordersGetQualityOrders>>, TError = HttpValidationProblemDetails | ErrorResult>(
+ params?: MaybeRef<OrdersGetQualityOrdersParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersGetQualityOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersGetQualityOrdersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Get suivi orders with assignment status.
+ */
+export const ordersGetSuiviOrders = (
+    params?: MaybeRef<OrdersGetSuiviOrdersParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      params = unref(params);
+      
+      return customInstance<ConfirmationOrderDto[]>(
+      {url: `/api/v1/orders/suivi-orders`, method: 'GET',
+        params: unref(params), signal
+    },
+      options);
+    }
+  
+
+
+
+export const getOrdersGetSuiviOrdersQueryKey = (params?: MaybeRef<OrdersGetSuiviOrdersParams>,) => {
+    return [
+    'api','v1','orders','suivi-orders', ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getOrdersGetSuiviOrdersQueryOptions = <TData = Awaited<ReturnType<typeof ordersGetSuiviOrders>>, TError = HttpValidationProblemDetails | ErrorResult>(params?: MaybeRef<OrdersGetSuiviOrdersParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersGetSuiviOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  getOrdersGetSuiviOrdersQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersGetSuiviOrders>>> = ({ signal }) => ordersGetSuiviOrders(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersGetSuiviOrders>>, TError, TData> 
+}
+
+export type OrdersGetSuiviOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof ordersGetSuiviOrders>>>
+export type OrdersGetSuiviOrdersQueryError = HttpValidationProblemDetails | ErrorResult
+
+
+/**
+ * @summary Get suivi orders with assignment status.
+ */
+
+export function useOrdersGetSuiviOrders<TData = Awaited<ReturnType<typeof ordersGetSuiviOrders>>, TError = HttpValidationProblemDetails | ErrorResult>(
+ params?: MaybeRef<OrdersGetSuiviOrdersParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersGetSuiviOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersGetSuiviOrdersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+
+/**
  * @summary Get orders ready for delivery.
  */
 export const ordersGetReadyForDelivery = (
@@ -1642,7 +1789,7 @@ export const ordersGetReadyForDelivery = (
 ) => {
       getOrdersReadyForDeliveryRequest = unref(getOrdersReadyForDeliveryRequest);
       
-      return customInstance<OrderDto[]>(
+      return customInstance<ReadyForDeliveryOrderDto[]>(
       {url: `/api/v1/orders/ready-for-delivery`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: getOrdersReadyForDeliveryRequest, signal
@@ -1826,6 +1973,70 @@ export const useOrdersAssignDeliveryCompany = <TError = unknown,
       return useMutation(mutationOptions, queryClient);
     }
     /**
+ * @summary Bulk assign delivery company to orders.
+ */
+export const ordersBulkAssignDeliveryCompany = (
+    bulkAssignDeliveryCompanyRequest: MaybeRef<BulkAssignDeliveryCompanyRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      bulkAssignDeliveryCompanyRequest = unref(bulkAssignDeliveryCompanyRequest);
+      
+      return customInstance<BulkAssignDeliveryCompanyResponse>(
+      {url: `/api/v1/orders/bulk-assign-delivery-company`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: bulkAssignDeliveryCompanyRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getOrdersBulkAssignDeliveryCompanyMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersBulkAssignDeliveryCompany>>, TError,{data: BulkAssignDeliveryCompanyRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersBulkAssignDeliveryCompany>>, TError,{data: BulkAssignDeliveryCompanyRequest}, TContext> => {
+
+const mutationKey = ['ordersBulkAssignDeliveryCompany'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersBulkAssignDeliveryCompany>>, {data: BulkAssignDeliveryCompanyRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersBulkAssignDeliveryCompany(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersBulkAssignDeliveryCompanyMutationResult = NonNullable<Awaited<ReturnType<typeof ordersBulkAssignDeliveryCompany>>>
+    export type OrdersBulkAssignDeliveryCompanyMutationBody = BulkAssignDeliveryCompanyRequest
+    export type OrdersBulkAssignDeliveryCompanyMutationError = unknown
+
+    /**
+ * @summary Bulk assign delivery company to orders.
+ */
+export const useOrdersBulkAssignDeliveryCompany = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersBulkAssignDeliveryCompany>>, TError,{data: BulkAssignDeliveryCompanyRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof ordersBulkAssignDeliveryCompany>>,
+        TError,
+        {data: BulkAssignDeliveryCompanyRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersBulkAssignDeliveryCompanyMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Bulk move orders to shipping.
  */
 export const ordersBulkMoveToShipping = (
@@ -1886,6 +2097,134 @@ export const useOrdersBulkMoveToShipping = <TError = unknown,
       > => {
 
       const mutationOptions = getOrdersBulkMoveToShippingMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Archive orders.
+ */
+export const ordersArchive = (
+    archiveOrdersRequest: MaybeRef<ArchiveOrdersRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      archiveOrdersRequest = unref(archiveOrdersRequest);
+      
+      return customInstance<ArchiveOrdersResponse>(
+      {url: `/api/v1/orders/archive`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: archiveOrdersRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getOrdersArchiveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersArchive>>, TError,{data: ArchiveOrdersRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersArchive>>, TError,{data: ArchiveOrdersRequest}, TContext> => {
+
+const mutationKey = ['ordersArchive'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersArchive>>, {data: ArchiveOrdersRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersArchive(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersArchiveMutationResult = NonNullable<Awaited<ReturnType<typeof ordersArchive>>>
+    export type OrdersArchiveMutationBody = ArchiveOrdersRequest
+    export type OrdersArchiveMutationError = unknown
+
+    /**
+ * @summary Archive orders.
+ */
+export const useOrdersArchive = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersArchive>>, TError,{data: ArchiveOrdersRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof ordersArchive>>,
+        TError,
+        {data: ArchiveOrdersRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersArchiveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Unarchive orders.
+ */
+export const ordersUnarchive = (
+    unarchiveOrdersRequest: MaybeRef<UnarchiveOrdersRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      unarchiveOrdersRequest = unref(unarchiveOrdersRequest);
+      
+      return customInstance<UnarchiveOrdersResponse>(
+      {url: `/api/v1/orders/unarchive`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: unarchiveOrdersRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getOrdersUnarchiveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersUnarchive>>, TError,{data: UnarchiveOrdersRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersUnarchive>>, TError,{data: UnarchiveOrdersRequest}, TContext> => {
+
+const mutationKey = ['ordersUnarchive'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersUnarchive>>, {data: UnarchiveOrdersRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersUnarchive(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersUnarchiveMutationResult = NonNullable<Awaited<ReturnType<typeof ordersUnarchive>>>
+    export type OrdersUnarchiveMutationBody = UnarchiveOrdersRequest
+    export type OrdersUnarchiveMutationError = unknown
+
+    /**
+ * @summary Unarchive orders.
+ */
+export const useOrdersUnarchive = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersUnarchive>>, TError,{data: UnarchiveOrdersRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof ordersUnarchive>>,
+        TError,
+        {data: UnarchiveOrdersRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersUnarchiveMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

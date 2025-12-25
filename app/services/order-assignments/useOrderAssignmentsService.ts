@@ -153,8 +153,27 @@ export function useOrderAssignmentsService() {
   const releaseMutation = useOrderAssignmentsRelease()
   const scheduleCallbackMutation = useOrderAssignmentsScheduleCallback()
 
-  // Invalidation
+  // Invalidation helpers
   const invalidateAll = () => queryClient.invalidateQueries({ queryKey: keys.all })
+
+  // Targeted invalidation for worker self-assign
+  // Only invalidates queries that are actually affected
+  const invalidateAfterSelfAssign = () => {
+    // Worker's pending assignments (new assignment appears)
+    queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-pending'] })
+    // Orders available for grabbing (grabbed order disappears)
+    queryClient.invalidateQueries({ queryKey: ['orders', 'available-for-grabbing'] })
+    // Worker stats
+    queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-stats'] })
+    // Worker config - use correct key (currentAssignmentCount changes)
+    queryClient.invalidateQueries({ queryKey: ['workerServiceConfigs', 'myConfig'] })
+  }
+
+  // Targeted invalidation for take action
+  const invalidateAfterTake = () => {
+    queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-pending'] })
+    queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-active'] })
+  }
 
   // Query Hooks
   const useUnassignedOrders = (params?: Ref<OrderAssignmentsGetUnassignedParams>) => {
@@ -275,13 +294,15 @@ export function useOrderAssignmentsService() {
 
   const selfAssign = async (data: SelfAssignOrderRequest) => {
     const result = await selfAssignMutation.mutateAsync({ data })
-    invalidateAll()
+    // Use targeted invalidation to reduce API calls
+    invalidateAfterSelfAssign()
     return result
   }
 
   const take = async (id: string) => {
     const result = await takeMutation.mutateAsync({ id })
-    invalidateAll()
+    // Use targeted invalidation - only pending and active queries affected
+    invalidateAfterTake()
     return result
   }
 

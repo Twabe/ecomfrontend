@@ -9,6 +9,7 @@
 /**
  * Bulk reassign orders to a different worker.
 Marks existing active assignments as "reassigned" and creates new ones for the new worker.
+If no active assignment exists for a service type, creates a new assignment (assign mode).
  */
 export interface BulkReassignOrdersRequest {
   /**
@@ -21,6 +22,7 @@ export interface BulkReassignOrdersRequest {
   toWorkerId: string;
   /**
    * Which services to reassign. If empty or null, reassign all pending/taken services.
+For orders without existing assignments, this list specifies which services to create.
    * @nullable
    */
   serviceTypes?: string[] | null;

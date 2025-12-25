@@ -8,6 +8,7 @@
 
 /**
  * Get orders ready for delivery (in shipping phase, not yet in a delivery note).
+Returns enriched DTO with worker assignment information.
  */
 export interface GetOrdersReadyForDeliveryRequest {
   /** @nullable */
@@ -16,6 +17,8 @@ export interface GetOrdersReadyForDeliveryRequest {
   subDeliveryCompanyId?: string | null;
   /** @nullable */
   cityId?: string | null;
+  /** @nullable */
+  workerId?: string | null;
   /** @nullable */
   shippingDateFrom?: string | null;
   /** @nullable */

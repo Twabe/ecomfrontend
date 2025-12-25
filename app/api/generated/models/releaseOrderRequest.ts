@@ -8,10 +8,13 @@
 
 /**
  * Worker releases an order (unassign).
+Releases the active OrderAssignment and resets order phase to "new".
  */
 export interface ReleaseOrderRequest {
   /**
    * @minLength 1
    */
   orderId: string;
+  /** @nullable */
+  reason?: string | null;
 }

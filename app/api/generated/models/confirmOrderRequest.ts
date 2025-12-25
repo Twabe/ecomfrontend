@@ -5,6 +5,7 @@
  * Clean Architecture Template for .NET 7 WebApi built with Multitenancy Support.
  * OpenAPI spec version: 1.0.0
  */
+import type { ConfirmOrderRequestQualityChecks } from './confirmOrderRequestQualityChecks';
 
 /**
  * Confirm order (customer accepts the order).
@@ -23,4 +24,10 @@ export interface ConfirmOrderRequest {
   subDeliveryCompanyId?: string | null;
   /** @nullable */
   comment?: string | null;
+  /**
+   * Quality checks completed during confirmation (key -> passed).
+Only used when EnableQualityCheck is enabled in AutoAssignmentSettings.
+   * @nullable
+   */
+  qualityChecks?: ConfirmOrderRequestQualityChecks;
 }

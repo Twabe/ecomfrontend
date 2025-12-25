@@ -42,10 +42,7 @@
         <div>
           <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('worker.myLoad') }}</p>
           <p class="text-2xl font-bold text-gray-900 dark:text-white">
-            {{ myConfig?.currentAssignmentCount || 0 }}
-            <span v-if="myConfig?.maxConcurrentAssignments" class="text-sm font-normal text-gray-500">
-              / {{ myConfig.maxConcurrentAssignments }}
-            </span>
+            {{ currentAssignmentCount }}
           </p>
         </div>
       </div>
@@ -292,41 +289,126 @@
                 </DialogTitle>
 
                 <form @submit.prevent="submitConfirm">
-                  <!-- Order Summary -->
-                  <div class="mb-4 space-y-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <!-- Customer Name -->
-                    <div class="flex items-center gap-2">
-                      <UserIcon class="w-4 h-4 text-gray-400 shrink-0" />
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">{{ selectedAssignment?.customerName }}</span>
+                  <!-- Order Summary with Edit Button -->
+                  <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <!-- Header with Edit Button -->
+                    <div class="flex items-center justify-between mb-2 pb-2 border-b border-gray-200 dark:border-gray-600">
+                      <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('orders.orderSummary') }}</span>
+                      <button
+                        type="button"
+                        @click="openEditFromConfirm"
+                        class="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+                      >
+                        <PencilSquareIcon class="w-3.5 h-3.5" />
+                        {{ $t('common.edit') }}
+                      </button>
                     </div>
-                    <!-- Phone -->
-                    <div class="flex items-center gap-2">
-                      <PhoneIcon class="w-4 h-4 text-gray-400 shrink-0" />
-                      <a :href="'tel:' + selectedAssignment?.customerPhone" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        {{ selectedAssignment?.customerPhone }}
-                      </a>
-                    </div>
-                    <!-- City -->
-                    <div v-if="selectedAssignment?.cityName || selectedAssignment?.customerCity" class="flex items-center gap-2">
-                      <MapPinIcon class="w-4 h-4 text-gray-400 shrink-0" />
-                      <span class="text-sm text-gray-600 dark:text-gray-300">{{ selectedAssignment?.cityName || selectedAssignment?.customerCity }}</span>
-                    </div>
-                    <!-- Products -->
-                    <div v-if="selectedAssignment?.productNames || selectedAssignment?.firstProductName" class="flex items-start gap-2">
-                      <CubeIcon class="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
-                      <span class="text-sm text-gray-600 dark:text-gray-300">
-                        {{ selectedAssignment?.productNames || selectedAssignment?.firstProductName }}
-                        <span v-if="selectedAssignment?.itemCount && selectedAssignment.itemCount > 1" class="text-gray-400">
-                          ({{ selectedAssignment.itemCount }} {{ $t('common.items') }})
+                    <div class="space-y-2">
+                      <!-- Customer Name - prefer orderDetails after edit -->
+                      <div class="flex items-center gap-2">
+                        <UserIcon class="w-4 h-4 text-gray-400 shrink-0" />
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ orderDetails?.fullName || selectedAssignment?.customerName }}</span>
+                      </div>
+                      <!-- Phone -->
+                      <div class="flex items-center gap-2">
+                        <PhoneIcon class="w-4 h-4 text-gray-400 shrink-0" />
+                        <a :href="'tel:' + (orderDetails?.phone || selectedAssignment?.customerPhone)" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                          {{ orderDetails?.phone || selectedAssignment?.customerPhone }}
+                        </a>
+                      </div>
+                      <!-- City -->
+                      <div v-if="orderDetails?.cityName || selectedAssignment?.cityName || selectedAssignment?.customerCity" class="flex items-center gap-2">
+                        <MapPinIcon class="w-4 h-4 text-gray-400 shrink-0" />
+                        <span class="text-sm text-gray-600 dark:text-gray-300">{{ orderDetails?.cityName || selectedAssignment?.cityName || selectedAssignment?.customerCity }}</span>
+                      </div>
+                      <!-- Products -->
+                      <div v-if="orderDetails?.items?.length || selectedAssignment?.productNames || selectedAssignment?.firstProductName" class="flex items-start gap-2">
+                        <CubeIcon class="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                        <span class="text-sm text-gray-600 dark:text-gray-300">
+                          <template v-if="orderDetails?.items?.length">
+                            {{ orderDetails.items.map(i => i.productName).join(', ') }}
+                            <span v-if="orderDetails.items.length > 1" class="text-gray-400">
+                              ({{ orderDetails.items.length }} {{ $t('common.items') }})
+                            </span>
+                          </template>
+                          <template v-else>
+                            {{ selectedAssignment?.productNames || selectedAssignment?.firstProductName }}
+                            <span v-if="selectedAssignment?.itemCount && selectedAssignment.itemCount > 1" class="text-gray-400">
+                              ({{ selectedAssignment.itemCount }} {{ $t('common.items') }})
+                            </span>
+                          </template>
                         </span>
-                      </span>
+                      </div>
+                      <!-- Total Price -->
+                      <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('common.total') }}</span>
+                        <span class="text-lg font-bold text-primary-600 dark:text-primary-400">
+                          {{ formatCurrency(orderDetails?.price || selectedAssignment?.orderPrice || selectedAssignment?.totalPrice || 0) }}
+                        </span>
+                      </div>
                     </div>
-                    <!-- Total Price -->
-                    <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
-                      <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('common.total') }}</span>
-                      <span class="text-lg font-bold text-primary-600 dark:text-primary-400">
-                        {{ formatCurrency(selectedAssignment?.orderPrice || selectedAssignment?.totalPrice || 0) }}
-                      </span>
+                  </div>
+
+                  <!-- Quality Checklist Section -->
+                  <div v-if="isQualityEnabled" class="mb-4">
+                    <div class="flex items-center gap-2 mb-2">
+                      <CheckCircleIcon class="w-5 h-5 text-primary-600" />
+                      <h4 class="font-medium text-gray-900 dark:text-white">
+                        {{ $t('worker.qualityChecklist') }}
+                      </h4>
+                    </div>
+
+                    <!-- Loading state -->
+                    <div v-if="isLoadingChecklist" class="text-center py-3">
+                      <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600 mx-auto"></div>
+                    </div>
+
+                    <!-- Error state - allow confirm anyway -->
+                    <div v-else-if="isChecklistError" class="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-200 dark:border-amber-700">
+                      <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300 text-sm">
+                        <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
+                        <span>{{ $t('worker.checklistLoadError') }}</span>
+                      </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div v-else-if="!checklistItems || checklistItems.length === 0" class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-500 dark:text-gray-400 text-sm text-center">
+                      {{ $t('worker.noChecklistItems') }}
+                    </div>
+
+                    <!-- Checklist items -->
+                    <div v-else class="space-y-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                      <label
+                        v-for="item in checklistItems"
+                        :key="item.key"
+                        class="flex items-start gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                      >
+                        <input
+                          v-model="qualityChecks[item.key]"
+                          type="checkbox"
+                          class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        />
+                        <span
+                          :class="[
+                            'text-sm',
+                            item.isRequired && !qualityChecks[item.key]
+                              ? 'text-red-600 dark:text-red-400'
+                              : 'text-gray-700 dark:text-gray-300'
+                          ]"
+                        >
+                          {{ getItemLabel(item) }}
+                          <span v-if="item.isRequired" class="text-red-500 ml-1">*</span>
+                        </span>
+                      </label>
+
+                      <!-- Validation warning -->
+                      <div
+                        v-if="!allRequiredChecked"
+                        class="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg text-amber-700 dark:text-amber-300 text-sm mt-2"
+                      >
+                        <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
+                        <span>{{ $t('worker.completeChecklist') }}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -345,7 +427,16 @@
                     <button type="button" class="btn-secondary" @click="closeConfirmModal">
                       {{ $t('common.cancel') }}
                     </button>
-                    <button type="submit" class="btn-primary" :disabled="isSubmitting">
+                    <button
+                      type="submit"
+                      :disabled="isSubmitting || !canConfirmOrder"
+                      :class="[
+                        'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                        canConfirmOrder
+                          ? 'bg-primary-600 hover:bg-primary-700 text-white'
+                          : 'bg-gray-400 cursor-not-allowed text-white'
+                      ]"
+                    >
                       {{ isSubmitting ? $t('common.loading') : $t('orders.confirmOrder') }}
                     </button>
                   </div>
@@ -464,6 +555,8 @@ import {
   CubeIcon,
   PhoneArrowUpRightIcon,
   PencilIcon,
+  PencilSquareIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline'
 import {
   useOrderAssignmentsService,
@@ -476,6 +569,7 @@ import {
   useAutoAssignmentSettingsService,
   useCitiesService,
   useProductsService,
+  useActiveQualityChecklistItems,
   type WorkerAssignmentDto,
   type OrderDto,
   type WorkerServiceConfigDto,
@@ -506,6 +600,33 @@ const { items: products } = useProductsService()
 // Check if Quality is enabled in auto-assignment settings
 const isQualityEnabled = computed(() => autoAssignmentSettingsService.settings.value?.enableQualityCheck ?? false)
 
+// Quality Checklist for order confirmation
+const { data: checklistItems, isLoading: isLoadingChecklist, isError: isChecklistError, error: checklistError } = useActiveQualityChecklistItems()
+const qualityChecks = ref<Record<string, boolean>>({})
+
+// Validation: all required checklist items must be checked
+const allRequiredChecked = computed(() => {
+  if (!isQualityEnabled.value || !checklistItems.value) return true
+  return checklistItems.value
+    .filter(item => item.isRequired)
+    .every(item => qualityChecks.value[item.key] === true)
+})
+
+// Can confirm: either quality check is disabled, failed to load, or all required items are checked
+const canConfirmOrder = computed(() => {
+  if (!isQualityEnabled.value) return true
+  // Allow confirm if checklist failed to load (don't block worker)
+  if (isChecklistError.value) return true
+  if (!checklistItems.value || checklistItems.value.length === 0) return true
+  return allRequiredChecked.value
+})
+
+// Get label based on locale
+const { locale } = useI18n()
+const getItemLabel = (item: { labelAr: string; labelFr: string }) => {
+  return locale.value === 'ar' ? item.labelAr : item.labelFr
+}
+
 // My pending/active assignments (use reactive query hooks)
 const myPendingQuery = orderAssignmentsService.useMyPendingAssignments()
 const myActiveQuery = orderAssignmentsService.useMyActiveAssignments()
@@ -518,6 +639,8 @@ const myCallbacks = computed(() => myCallbacksQuery.data.value ?? [])
 const myConfig = computed<WorkerServiceConfigDto | undefined>(() => workerConfigsService.myConfig.value)
 const isOnline = computed(() => myConfig.value?.isOnline ?? false)
 const isLoading = computed(() => myPendingQuery.isLoading.value || myActiveQuery.isLoading.value)
+// Calculate current assignment count from actual data (pending + active)
+const currentAssignmentCount = computed(() => myPendingAssignments.value.length + myActiveAssignments.value.length)
 const deliveryCompanies = computed(() => deliveryCompaniesService.items.value)
 const subDeliveryCompanies = computed(() => subDeliveryCompaniesService.items.value)
 const reasons = computed(() => reasonsService.items.value)
@@ -574,11 +697,15 @@ const availableTabs = computed(() => {
     })
   }
 
-  // 1. Confirmation tab
-  if (myConfig.value?.canDoConfirmation) {
-    // Filter out assignments with scheduled callbacks (they show in Callbacks tab)
-    const confirmationPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Confirmation && !a.callbackScheduledAt).length
-    const confirmationActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Confirmation && !a.callbackScheduledAt).length
+  // 1. Confirmation tab - show if:
+  //    a) Worker canDoConfirmation, OR
+  //    b) Worker has any pending/active Confirmation assignments (even if config not set)
+  //    This ensures workers can complete their existing work
+  const confirmationPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Confirmation && !a.callbackScheduledAt).length
+  const confirmationActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Confirmation && !a.callbackScheduledAt).length
+  const hasConfirmationAssignments = confirmationPending + confirmationActive > 0
+
+  if (myConfig.value?.canDoConfirmation || hasConfirmationAssignments) {
     tabs.push({
       key: ServiceTypes.Confirmation,
       label: t('worker.confirmation'),
@@ -604,10 +731,12 @@ const availableTabs = computed(() => {
     })
   }
 
-  // 3. Suivi tab
-  if (myConfig.value?.canDoSuivi) {
-    const suiviPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi).length
-    const suiviActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi).length
+  // 3. Suivi tab - show if worker canDoSuivi OR has existing suivi assignments
+  const suiviPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi).length
+  const suiviActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi).length
+  const hasSuiviAssignments = suiviPending + suiviActive > 0
+
+  if (myConfig.value?.canDoSuivi || hasSuiviAssignments) {
     tabs.push({
       key: ServiceTypes.Suivi,
       label: t('worker.suivi'),
@@ -616,9 +745,10 @@ const availableTabs = computed(() => {
     })
   }
 
-  // 4. Callbacks tab
-  if (myConfig.value?.canDoCallback) {
-    // Use myCallbacks query for accurate count
+  // 4. Callbacks tab - show if worker canDoCallback OR has existing callbacks
+  const hasCallbacks = myCallbacks.value.length > 0
+
+  if (myConfig.value?.canDoCallback || hasCallbacks) {
     tabs.push({
       key: 'callbacks',
       label: t('worker.callbacksTab'),
@@ -648,6 +778,8 @@ const selectedAssignment = ref<WorkerAssignmentDto | null>(null)
 const orderDetails = ref<OrderDto | null>(null)
 // Track if viewing an available (unassigned) order - to hide edit buttons
 const isViewingAvailableOrder = ref(false)
+// Track if edit was opened from confirm modal - to return after edit
+const editFromConfirm = ref(false)
 const assignDeliveryOrder = ref<Order | null>(null)
 const isAssigningDelivery = ref(false)
 
@@ -692,9 +824,9 @@ const refreshAll = async () => {
 }
 
 // Handle order assigned from available panel (switch to confirmation tab)
-const handleOrderAssigned = async () => {
-  // Refresh data
-  await refreshAll()
+// No manual refresh needed - selfAssign already invalidates relevant queries
+// Vue Query will automatically refetch when ConfirmationPanel mounts
+const handleOrderAssigned = () => {
   // Switch to confirmation tab to work on the order
   if (myConfig.value?.canDoConfirmation) {
     activeTab.value = ServiceTypes.Confirmation
@@ -753,17 +885,34 @@ const openEditOrderModal = () => {
 
 const closeEditOrderModal = () => {
   showEditOrderModal.value = false
+
+  // If cancelled from confirm flow, return to confirm modal
+  if (editFromConfirm.value && selectedAssignment.value) {
+    editFromConfirm.value = false
+    showConfirmModal.value = true
+  }
 }
 
 const handleOrderUpdate = async (id: string, data: UpdateOrderRequest) => {
+  // Save flag BEFORE closing modal (closeEditOrderModal resets it)
+  const wasFromConfirm = editFromConfirm.value
+
   try {
     await updateOrder(id, data)
     closeEditOrderModal()
-    // Refresh order details if we go back to view modal
+
+    // Refresh order details
     if (selectedAssignment.value) {
       orderDetails.value = await ordersWorkflow.getOrder(selectedAssignment.value.orderId)
     }
-    await refreshAll()
+
+    // If edit was initiated from confirm modal, show success message
+    // (confirm modal already opened by closeEditOrderModal)
+    if (wasFromConfirm) {
+      notification.success(t('common.updateSuccess'))
+    } else {
+      await refreshAll()
+    }
   } catch {
     // Error handled by service
   }
@@ -799,6 +948,14 @@ const handleConfirm = (assignment: WorkerAssignmentDto) => {
   confirmForm.value = {
     comment: ''
   }
+  // Reset quality checks when modal opens
+  if (checklistItems.value) {
+    const checks: Record<string, boolean> = {}
+    checklistItems.value.forEach(item => {
+      checks[item.key] = false
+    })
+    qualityChecks.value = checks
+  }
   showConfirmModal.value = true
 }
 
@@ -807,17 +964,45 @@ const closeConfirmModal = () => {
   selectedAssignment.value = null
 }
 
+// Open edit from confirm modal - allows editing order during confirmation
+const openEditFromConfirm = async () => {
+  if (!selectedAssignment.value) return
+
+  try {
+    // Fetch full order details if not already loaded
+    if (!orderDetails.value || orderDetails.value.id !== selectedAssignment.value.orderId) {
+      orderDetails.value = await ordersWorkflow.getOrder(selectedAssignment.value.orderId)
+    }
+
+    // Track that we came from confirm modal
+    editFromConfirm.value = true
+
+    // Close confirm modal and open edit modal
+    showConfirmModal.value = false
+    showEditOrderModal.value = true
+  } catch {
+    notification.error(t('common.errorOccurred'))
+  }
+}
+
 const submitConfirm = async () => {
   if (!selectedAssignment.value) return
   isSubmitting.value = true
   try {
     // STEP 1: Confirm order FIRST (validates stock, business rules)
     // If this fails, assignment stays "taken" and user can retry
-    await ordersWorkflow.confirmOrder({
+    const confirmRequest: any = {
       orderId: selectedAssignment.value.orderId,
       moveToShipping: true,
       comment: confirmForm.value.comment || undefined
-    })
+    }
+
+    // Include quality checks if enabled
+    if (isQualityEnabled.value && checklistItems.value && checklistItems.value.length > 0) {
+      confirmRequest.qualityChecks = { ...qualityChecks.value }
+    }
+
+    await ordersWorkflow.confirmOrder(confirmRequest)
 
     // STEP 2: Complete assignment AFTER order is confirmed
     // This ensures we only mark as complete when order is truly confirmed
@@ -829,18 +1014,60 @@ const submitConfirm = async () => {
     closeConfirmModal()
     await refreshAll()
   } catch (error: any) {
-    // Handle reassigned assignment error (HTTP 409)
-    if (error?.response?.status === 409) {
-      notification.warning(t('worker.orderReassigned'))
+    const status = error?.response?.status
+    const errorMessage = error?.response?.data?.exception || error?.response?.data?.message || ''
+
+    // Handle HTTP 404 - Order was deleted
+    if (status === 404) {
+      // Order no longer exists - clean up assignment
+      try {
+        await orderAssignmentsService.complete(selectedAssignment.value!.id, {
+          result: 'cancelled',
+          notes: 'Order was deleted'
+        })
+      } catch {
+        // Assignment may already be completed - ignore
+      }
+      notification.warning(t('worker.orderDeleted'))
       closeConfirmModal()
       await refreshAll()
-    } else {
-      // Show error message to user (e.g., no stock, validation errors)
-      const errorMessage = error?.response?.data?.exception
-        || error?.response?.data?.message
-        || error?.message
-        || t('common.errorOccurred')
-      notification.error(errorMessage)
+    }
+    // Handle HTTP 409 Conflict errors
+    else if (status === 409) {
+      // Check if order was already confirmed
+      if (errorMessage.toLowerCase().includes('already confirmed')) {
+        // Order was confirmed elsewhere - complete the assignment to remove from list
+        try {
+          await orderAssignmentsService.complete(selectedAssignment.value!.id, {
+            result: 'confirmed',
+            notes: 'Order was already confirmed'
+          })
+        } catch {
+          // Assignment may already be completed - ignore
+        }
+        notification.info(t('worker.orderAlreadyConfirmed'))
+        closeConfirmModal()
+        await refreshAll()
+      } else if (errorMessage.toLowerCase().includes('reassign') || errorMessage.toLowerCase().includes('another worker')) {
+        // Order was reassigned to another worker
+        notification.warning(t('worker.orderReassigned'))
+        closeConfirmModal()
+        await refreshAll()
+      } else if (errorMessage.toLowerCase().includes('stock') || errorMessage.toLowerCase().includes('insufficient')) {
+        // Stock issue - show specific message, keep modal open for retry
+        notification.error(t('worker.insufficientStock'))
+      } else {
+        // Other conflict - show generic message
+        notification.warning(t('worker.orderConflict'))
+        closeConfirmModal()
+        await refreshAll()
+      }
+    }
+    // Handle other errors
+    else {
+      // Show error message to user (e.g., validation errors)
+      const displayMessage = errorMessage || error?.message || t('common.errorOccurred')
+      notification.error(displayMessage)
       // Dialog stays open for retry - assignment is still "taken"
     }
   } finally {
@@ -884,18 +1111,47 @@ const submitCancel = async () => {
     closeCancelModal()
     await refreshAll()
   } catch (error: any) {
-    // Handle reassigned assignment error (HTTP 409)
-    if (error?.response?.status === 409) {
-      notification.warning(t('worker.orderReassigned'))
+    const status = error?.response?.status
+    const errorMessage = error?.response?.data?.exception || error?.response?.data?.message || ''
+
+    // Handle HTTP 404 - Order was deleted
+    if (status === 404) {
+      try {
+        await orderAssignmentsService.complete(selectedAssignment.value!.id, {
+          result: 'cancelled',
+          notes: 'Order was deleted'
+        })
+      } catch {
+        // Assignment may already be completed - ignore
+      }
+      notification.warning(t('worker.orderDeleted'))
       closeCancelModal()
       await refreshAll()
-    } else {
-      // Show error message to user
-      const errorMessage = error?.response?.data?.exception
-        || error?.response?.data?.message
-        || error?.message
-        || t('common.errorOccurred')
-      notification.error(errorMessage)
+    }
+    // Handle HTTP 409 Conflict errors
+    else if (status === 409) {
+      if (errorMessage.toLowerCase().includes('already cancelled')) {
+        try {
+          await orderAssignmentsService.complete(selectedAssignment.value!.id, {
+            result: 'cancelled',
+            notes: 'Order was already cancelled'
+          })
+        } catch {
+          // Assignment may already be completed - ignore
+        }
+        notification.info(t('worker.orderAlreadyCancelled'))
+        closeCancelModal()
+        await refreshAll()
+      } else {
+        notification.warning(t('worker.orderReassigned'))
+        closeCancelModal()
+        await refreshAll()
+      }
+    }
+    // Handle other errors
+    else {
+      const displayMessage = errorMessage || error?.message || t('common.errorOccurred')
+      notification.error(displayMessage)
       // Dialog stays open for retry - assignment is still "taken"
     }
   } finally {

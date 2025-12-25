@@ -8,7 +8,8 @@
 
 export interface OrderItemDto {
   id?: string;
-  productId?: string;
+  /** @nullable */
+  productId?: string | null;
   productName?: string;
   /** @nullable */
   productReference?: string | null;

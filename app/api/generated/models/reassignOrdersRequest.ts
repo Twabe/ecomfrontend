@@ -8,6 +8,7 @@
 
 /**
  * Reassign orders from one worker to another.
+Marks old assignments as "reassigned" and creates new assignments for the new worker.
  */
 export interface ReassignOrdersRequest {
   /**

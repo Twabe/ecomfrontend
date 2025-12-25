@@ -34,8 +34,12 @@ import type {
   HttpValidationProblemDetails,
   YouCanIntegrationCallbackParams,
   YouCanIntegrationConnectParams,
+  YouCanIntegrationDeleteWebhookParams,
   YouCanIntegrationDisconnectParams,
-  YouCanIntegrationGetStatusParams
+  YouCanIntegrationGetStatusParams,
+  YouCanIntegrationListWebhooksParams,
+  YouCanIntegrationReceiveWebhookParams,
+  YouCanIntegrationResetWebhooksParams
 } from '../../models';
 
 import { customInstance } from '../../../axios-instance';
@@ -252,6 +256,74 @@ export const useYouCanIntegrationDisconnect = <TError = unknown,
       return useMutation(mutationOptions, queryClient);
     }
     /**
+ * @summary Receives webhooks from YouCan for order.created events.
+This is the endpoint registered with YouCan during OAuth flow.
+ */
+export const youCanIntegrationReceiveWebhook = (
+    storeId: MaybeRef<string>,
+    params?: MaybeRef<YouCanIntegrationReceiveWebhookParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      storeId = unref(storeId);
+params = unref(params);
+      
+      return customInstance<Blob>(
+      {url: `/api/webhooks/${storeId}/receive`, method: 'POST',
+        params: unref(params),
+        responseType: 'blob', signal
+    },
+      options);
+    }
+  
+
+
+export const getYouCanIntegrationReceiveWebhookMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationReceiveWebhook>>, TError,{storeId: string;params?: YouCanIntegrationReceiveWebhookParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationReceiveWebhook>>, TError,{storeId: string;params?: YouCanIntegrationReceiveWebhookParams}, TContext> => {
+
+const mutationKey = ['youCanIntegrationReceiveWebhook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof youCanIntegrationReceiveWebhook>>, {storeId: string;params?: YouCanIntegrationReceiveWebhookParams}> = (props) => {
+          const {storeId,params} = props ?? {};
+
+          return  youCanIntegrationReceiveWebhook(storeId,params,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type YouCanIntegrationReceiveWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof youCanIntegrationReceiveWebhook>>>
+    
+    export type YouCanIntegrationReceiveWebhookMutationError = unknown
+
+    /**
+ * @summary Receives webhooks from YouCan for order.created events.
+This is the endpoint registered with YouCan during OAuth flow.
+ */
+export const useYouCanIntegrationReceiveWebhook = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationReceiveWebhook>>, TError,{storeId: string;params?: YouCanIntegrationReceiveWebhookParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof youCanIntegrationReceiveWebhook>>,
+        TError,
+        {storeId: string;params?: YouCanIntegrationReceiveWebhookParams},
+        TContext
+      > => {
+
+      const mutationOptions = getYouCanIntegrationReceiveWebhookMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Gets the connection status for a YouCan store.
  */
 export const youCanIntegrationGetStatus = (
@@ -325,3 +397,218 @@ export function useYouCanIntegrationGetStatus<TData = Awaited<ReturnType<typeof 
 
 
 
+/**
+ * @summary Lists all YouCan webhook subscriptions for a store directly from YouCan API.
+Use this to see what webhooks are registered and clean up old ones.
+ */
+export const youCanIntegrationListWebhooks = (
+    storeId: MaybeRef<string>,
+    params?: MaybeRef<YouCanIntegrationListWebhooksParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      storeId = unref(storeId);
+params = unref(params);
+      
+      return customInstance<Blob>(
+      {url: `/api/integrations/youcan/${storeId}/webhooks`, method: 'GET',
+        params: unref(params),
+        responseType: 'blob', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getYouCanIntegrationListWebhooksQueryKey = (storeId?: MaybeRef<string>,
+    params?: MaybeRef<YouCanIntegrationListWebhooksParams>,) => {
+    return [
+    'api','integrations','youcan',storeId,'webhooks', ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getYouCanIntegrationListWebhooksQueryOptions = <TData = Awaited<ReturnType<typeof youCanIntegrationListWebhooks>>, TError = unknown>(storeId: MaybeRef<string>,
+    params?: MaybeRef<YouCanIntegrationListWebhooksParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof youCanIntegrationListWebhooks>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  getYouCanIntegrationListWebhooksQueryKey(storeId,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof youCanIntegrationListWebhooks>>> = ({ signal }) => youCanIntegrationListWebhooks(storeId,params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(storeId))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof youCanIntegrationListWebhooks>>, TError, TData> 
+}
+
+export type YouCanIntegrationListWebhooksQueryResult = NonNullable<Awaited<ReturnType<typeof youCanIntegrationListWebhooks>>>
+export type YouCanIntegrationListWebhooksQueryError = unknown
+
+
+/**
+ * @summary Lists all YouCan webhook subscriptions for a store directly from YouCan API.
+Use this to see what webhooks are registered and clean up old ones.
+ */
+
+export function useYouCanIntegrationListWebhooks<TData = Awaited<ReturnType<typeof youCanIntegrationListWebhooks>>, TError = unknown>(
+ storeId: MaybeRef<string>,
+    params?: MaybeRef<YouCanIntegrationListWebhooksParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof youCanIntegrationListWebhooks>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getYouCanIntegrationListWebhooksQueryOptions(storeId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Deletes a specific webhook subscription from YouCan.
+Use this to clean up old/orphaned webhook subscriptions.
+ */
+export const youCanIntegrationDeleteWebhook = (
+    storeId: MaybeRef<string>,
+    subscriptionId: MaybeRef<string | null>,
+    params?: MaybeRef<YouCanIntegrationDeleteWebhookParams>,
+ options?: SecondParameter<typeof customInstance>,) => {
+      storeId = unref(storeId);
+subscriptionId = unref(subscriptionId);
+params = unref(params);
+      
+      return customInstance<Blob>(
+      {url: `/api/integrations/youcan/${storeId}/webhooks/${subscriptionId}`, method: 'DELETE',
+        params: unref(params),
+        responseType: 'blob'
+    },
+      options);
+    }
+  
+
+
+export const getYouCanIntegrationDeleteWebhookMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationDeleteWebhook>>, TError,{storeId: string;subscriptionId: string | null;params?: YouCanIntegrationDeleteWebhookParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationDeleteWebhook>>, TError,{storeId: string;subscriptionId: string | null;params?: YouCanIntegrationDeleteWebhookParams}, TContext> => {
+
+const mutationKey = ['youCanIntegrationDeleteWebhook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof youCanIntegrationDeleteWebhook>>, {storeId: string;subscriptionId: string | null;params?: YouCanIntegrationDeleteWebhookParams}> = (props) => {
+          const {storeId,subscriptionId,params} = props ?? {};
+
+          return  youCanIntegrationDeleteWebhook(storeId,subscriptionId,params,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type YouCanIntegrationDeleteWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof youCanIntegrationDeleteWebhook>>>
+    
+    export type YouCanIntegrationDeleteWebhookMutationError = unknown
+
+    /**
+ * @summary Deletes a specific webhook subscription from YouCan.
+Use this to clean up old/orphaned webhook subscriptions.
+ */
+export const useYouCanIntegrationDeleteWebhook = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationDeleteWebhook>>, TError,{storeId: string;subscriptionId: string | null;params?: YouCanIntegrationDeleteWebhookParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof youCanIntegrationDeleteWebhook>>,
+        TError,
+        {storeId: string;subscriptionId: string | null;params?: YouCanIntegrationDeleteWebhookParams},
+        TContext
+      > => {
+
+      const mutationOptions = getYouCanIntegrationDeleteWebhookMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Deletes ALL webhook subscriptions for a store from YouCan and re-subscribes with correct URL.
+Use this to fix webhook URL issues after migrations.
+ */
+export const youCanIntegrationResetWebhooks = (
+    storeId: MaybeRef<string>,
+    params?: MaybeRef<YouCanIntegrationResetWebhooksParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      storeId = unref(storeId);
+params = unref(params);
+      
+      return customInstance<Blob>(
+      {url: `/api/integrations/youcan/${storeId}/webhooks/reset`, method: 'POST',
+        params: unref(params),
+        responseType: 'blob', signal
+    },
+      options);
+    }
+  
+
+
+export const getYouCanIntegrationResetWebhooksMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationResetWebhooks>>, TError,{storeId: string;params?: YouCanIntegrationResetWebhooksParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationResetWebhooks>>, TError,{storeId: string;params?: YouCanIntegrationResetWebhooksParams}, TContext> => {
+
+const mutationKey = ['youCanIntegrationResetWebhooks'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof youCanIntegrationResetWebhooks>>, {storeId: string;params?: YouCanIntegrationResetWebhooksParams}> = (props) => {
+          const {storeId,params} = props ?? {};
+
+          return  youCanIntegrationResetWebhooks(storeId,params,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type YouCanIntegrationResetWebhooksMutationResult = NonNullable<Awaited<ReturnType<typeof youCanIntegrationResetWebhooks>>>
+    
+    export type YouCanIntegrationResetWebhooksMutationError = unknown
+
+    /**
+ * @summary Deletes ALL webhook subscriptions for a store from YouCan and re-subscribes with correct URL.
+Use this to fix webhook URL issues after migrations.
+ */
+export const useYouCanIntegrationResetWebhooks = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof youCanIntegrationResetWebhooks>>, TError,{storeId: string;params?: YouCanIntegrationResetWebhooksParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof youCanIntegrationResetWebhooks>>,
+        TError,
+        {storeId: string;params?: YouCanIntegrationResetWebhooksParams},
+        TContext
+      > => {
+
+      const mutationOptions = getYouCanIntegrationResetWebhooksMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    

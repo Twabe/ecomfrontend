@@ -38,6 +38,7 @@ import type {
   PurchaseHistoryDto,
   ReceivePurchaseRequest,
   SearchPurchasesRequest,
+  StatusChangeRequest,
   UpdatePurchaseRequest
 } from '../../models';
 
@@ -504,3 +505,202 @@ export function usePurchasesGetHistory<TData = Awaited<ReturnType<typeof purchas
 
 
 
+/**
+ * @summary Confirm a pending purchase.
+ */
+export const purchasesConfirm = (
+    id: MaybeRef<string>,
+    statusChangeRequest: MaybeRef<StatusChangeRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+statusChangeRequest = unref(statusChangeRequest);
+      
+      return customInstance<string>(
+      {url: `/api/v1/purchases/${id}/confirm`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: statusChangeRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPurchasesConfirmMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof purchasesConfirm>>, TError,{id: string;data: StatusChangeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof purchasesConfirm>>, TError,{id: string;data: StatusChangeRequest}, TContext> => {
+
+const mutationKey = ['purchasesConfirm'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof purchasesConfirm>>, {id: string;data: StatusChangeRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  purchasesConfirm(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PurchasesConfirmMutationResult = NonNullable<Awaited<ReturnType<typeof purchasesConfirm>>>
+    export type PurchasesConfirmMutationBody = StatusChangeRequest
+    export type PurchasesConfirmMutationError = unknown
+
+    /**
+ * @summary Confirm a pending purchase.
+ */
+export const usePurchasesConfirm = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof purchasesConfirm>>, TError,{id: string;data: StatusChangeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof purchasesConfirm>>,
+        TError,
+        {id: string;data: StatusChangeRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPurchasesConfirmMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Mark a confirmed purchase as shipped.
+ */
+export const purchasesMarkAsShipped = (
+    id: MaybeRef<string>,
+    statusChangeRequest: MaybeRef<StatusChangeRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+statusChangeRequest = unref(statusChangeRequest);
+      
+      return customInstance<string>(
+      {url: `/api/v1/purchases/${id}/ship`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: statusChangeRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPurchasesMarkAsShippedMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof purchasesMarkAsShipped>>, TError,{id: string;data: StatusChangeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof purchasesMarkAsShipped>>, TError,{id: string;data: StatusChangeRequest}, TContext> => {
+
+const mutationKey = ['purchasesMarkAsShipped'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof purchasesMarkAsShipped>>, {id: string;data: StatusChangeRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  purchasesMarkAsShipped(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PurchasesMarkAsShippedMutationResult = NonNullable<Awaited<ReturnType<typeof purchasesMarkAsShipped>>>
+    export type PurchasesMarkAsShippedMutationBody = StatusChangeRequest
+    export type PurchasesMarkAsShippedMutationError = unknown
+
+    /**
+ * @summary Mark a confirmed purchase as shipped.
+ */
+export const usePurchasesMarkAsShipped = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof purchasesMarkAsShipped>>, TError,{id: string;data: StatusChangeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof purchasesMarkAsShipped>>,
+        TError,
+        {id: string;data: StatusChangeRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPurchasesMarkAsShippedMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Cancel a purchase.
+ */
+export const purchasesCancel = (
+    id: MaybeRef<string>,
+    statusChangeRequest: MaybeRef<StatusChangeRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+statusChangeRequest = unref(statusChangeRequest);
+      
+      return customInstance<string>(
+      {url: `/api/v1/purchases/${id}/cancel`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: statusChangeRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPurchasesCancelMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof purchasesCancel>>, TError,{id: string;data: StatusChangeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof purchasesCancel>>, TError,{id: string;data: StatusChangeRequest}, TContext> => {
+
+const mutationKey = ['purchasesCancel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof purchasesCancel>>, {id: string;data: StatusChangeRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  purchasesCancel(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PurchasesCancelMutationResult = NonNullable<Awaited<ReturnType<typeof purchasesCancel>>>
+    export type PurchasesCancelMutationBody = StatusChangeRequest
+    export type PurchasesCancelMutationError = unknown
+
+    /**
+ * @summary Cancel a purchase.
+ */
+export const usePurchasesCancel = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof purchasesCancel>>, TError,{id: string;data: StatusChangeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof purchasesCancel>>,
+        TError,
+        {id: string;data: StatusChangeRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPurchasesCancelMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    

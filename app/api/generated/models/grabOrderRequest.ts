@@ -8,6 +8,7 @@
 
 /**
  * Worker grabs/takes ownership of an order.
+Creates an OrderAssignment and immediately takes it.
  */
 export interface GrabOrderRequest {
   /**

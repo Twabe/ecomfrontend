@@ -371,9 +371,34 @@ const handleTake = async (assignment: WorkerAssignmentDto) => {
   }
 }
 
+const isReleasing = ref(false)
+const notification = useNotification()
+
 const handleRelease = async (assignment: WorkerAssignmentDto) => {
   if (!confirm(t('worker.confirmRelease'))) return
-  await orderAssignmentsService.release(assignment.id, { reason: 'Worker released' })
+
+  isReleasing.value = true
+  try {
+    await orderAssignmentsService.release(assignment.id, { reason: 'Worker released' })
+    notification.success(t('worker.releaseSuccess'))
+  } catch (error: any) {
+    const status = error?.response?.status
+    const errorMessage = error?.response?.data?.exception || error?.response?.data?.message || ''
+
+    if (status === 404) {
+      // Assignment no longer exists
+      notification.warning(t('worker.assignmentNotFound'))
+    } else if (status === 409) {
+      // Assignment already completed or reassigned
+      notification.info(t('worker.assignmentAlreadyProcessed'))
+    } else {
+      notification.error(errorMessage || t('common.errorOccurred'))
+    }
+    // Refresh to sync UI with backend state
+    await Promise.all([myPendingQuery.refetch(), myActiveQuery.refetch()])
+  } finally {
+    isReleasing.value = false
+  }
 }
 
 const openCallbackModal = (assignment: WorkerAssignmentDto) => {
