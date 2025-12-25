@@ -55,7 +55,33 @@
     "items": "articles",
     "total": "Total",
     "createdAt": "Créé le",
-    "updatedAt": "Modifié le"
+    "updatedAt": "Modifié le",
+    "apply": "Appliquer"
+  },
+  "date": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "thisWeek": "Cette semaine",
+    "lastWeek": "Semaine précédente",
+    "thisMonth": "Ce mois",
+    "lastMonth": "Mois précédent",
+    "thisYear": "Cette année",
+    "lastYear": "Année précédente",
+    "custom": "Personnalisé",
+    "from": "Du",
+    "to": "Au"
+  },
+  "stats": {
+    "total": "Total",
+    "delivered": "Livrées",
+    "returned": "Retours",
+    "cancelled": "Annulées",
+    "confirmed": "Confirmées",
+    "new": "Nouvelles",
+    "confirmation": "En confirmation",
+    "inDelivery": "En livraison",
+    "readyToShip": "Prêt à livrer",
+    "orders": "commandes"
   },
   "auth": {
     "login": "Connexion",
@@ -82,6 +108,8 @@
     "delivered": "Livrées",
     "phaseConfirmation": "Confirmation",
     "phaseShipping": "Livraison",
+    "confirmedOrders": "Commandes confirmées",
+    "confirmed": "Confirmées",
     "finalStates": "États finaux",
     "enConfirmation": "En confirmation",
     "callbacks": "Rappels",

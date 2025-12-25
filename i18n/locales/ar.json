@@ -48,7 +48,33 @@
     "validated": "مُصادق",
     "pending": "قيد الانتظار",
     "view": "عرض",
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "apply": "تطبيق"
+  },
+  "date": {
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "thisWeek": "هذا الأسبوع",
+    "lastWeek": "الأسبوع الماضي",
+    "thisMonth": "هذا الشهر",
+    "lastMonth": "الشهر الماضي",
+    "thisYear": "هذه السنة",
+    "lastYear": "السنة الماضية",
+    "custom": "مخصص",
+    "from": "من",
+    "to": "إلى"
+  },
+  "stats": {
+    "total": "الإجمالي",
+    "delivered": "مُسلَّمة",
+    "returned": "مرتجعة",
+    "cancelled": "ملغاة",
+    "confirmed": "مؤكدة",
+    "new": "جديدة",
+    "confirmation": "قيد التأكيد",
+    "inDelivery": "في التوصيل",
+    "readyToShip": "جاهز للشحن",
+    "orders": "طلبات"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -73,6 +99,8 @@
     "delivered": "مُسلَّمة",
     "phaseConfirmation": "التأكيد",
     "phaseShipping": "التوصيل",
+    "confirmedOrders": "الطلبات المؤكدة",
+    "confirmed": "مؤكدة",
     "finalStates": "الحالات النهائية",
     "enConfirmation": "قيد التأكيد",
     "callbacks": "المواعيد",

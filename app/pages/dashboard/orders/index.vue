@@ -13,6 +13,7 @@ import {
   useOrderAssignmentsService,
   useAutoAssignmentSettingsService,
   useUsersService,
+  useDashboardService,
   type OrderDto,
   type CreateOrderRequest,
   type UpdateOrderRequest,
@@ -20,6 +21,8 @@ import {
   type CancelOrderRequest
 } from '~/services'
 import { OrderPhase, OrderState } from '~/constants/order'
+import type { DateRange, DatePreset } from '~/utils/date'
+import { getDateRangeFromPreset, formatDateForApi, parseDateFromString } from '~/utils/date'
 
 definePageMeta({
   layout: 'tenant',
@@ -87,6 +90,82 @@ const filters = ref({
   storeId: (route.query.storeId as string) || '',
   sourceId: (route.query.sourceId as string) || '',
   isArchived: route.query.isArchived === 'true' ? true : route.query.isArchived === 'false' ? false : false as boolean | null
+})
+
+// Date range filter - Initialize from URL or default to this month
+const datePreset = ref<DatePreset>((route.query.datePreset as DatePreset) || 'this_month')
+const initDateRange = (): DateRange => {
+  const fromStr = route.query.createdFrom as string | undefined
+  const toStr = route.query.createdTo as string | undefined
+  if (fromStr || toStr) {
+    return {
+      from: parseDateFromString(fromStr),
+      to: parseDateFromString(toStr)
+    }
+  }
+  return getDateRangeFromPreset('this_month')
+}
+const dateRange = ref<DateRange>(initDateRange())
+
+// Dashboard stats service with date range
+const dashboardParams = computed(() => ({
+  startDate: formatDateForApi(dateRange.value.from),
+  endDate: formatDateForApi(dateRange.value.to)
+}))
+const { overview: stats, isLoadingOverview: isStatsLoading } = useDashboardService(dashboardParams)
+
+// Check if showing all orders (no filters) - show full stats
+const showFullStats = computed(() => {
+  return !route.query.phase && !route.query.state && !route.query.trackingState
+})
+
+// Current filter label for filtered pages
+const currentFilterLabel = computed(() => {
+  if (route.query.phase === 'new') return t('stats.new')
+  if (route.query.phase === 'confirmation') return t('stats.confirmation')
+  if (route.query.phase === 'shipping') {
+    if (route.query.trackingState === 'in_progress') return t('stats.inDelivery')
+    if (route.query.trackingState === 'no_answer') return t('orders.noAnswer')
+    return t('stats.readyToShip')
+  }
+  if (route.query.state === 'delivered') return t('stats.delivered')
+  if (route.query.state === 'returned') return t('stats.returned')
+  if (route.query.state === 'cancelled') return t('stats.cancelled')
+  return t('orders.title')
+})
+
+// Helper to get amount from dashboard stats by state
+const getAmountByState = (state: string): number => {
+  const stateData = stats.value?.ordersByState?.find(
+    s => s.state?.toLowerCase() === state.toLowerCase()
+  )
+  return stateData?.totalAmount ?? 0
+}
+
+// Current filter stats for filtered pages
+const currentFilterStats = computed(() => {
+  if (showFullStats.value) return undefined
+
+  // For state-based filters, use dashboard stats (accurate total)
+  const stateFilter = route.query.state as string | undefined
+  if (stateFilter) {
+    return {
+      label: currentFilterLabel.value,
+      count: pagination.value?.totalCount ?? 0,
+      amount: getAmountByState(stateFilter)
+    }
+  }
+
+  // For phase-based filters, calculate from visible orders (current page only)
+  const visibleAmount = orders.value.reduce((sum, order) => {
+    return sum + (order.price ?? 0) + (order.fees ?? 0)
+  }, 0)
+
+  return {
+    label: currentFilterLabel.value,
+    count: pagination.value?.totalCount ?? 0,
+    amount: visibleAmount
+  }
 })
 
 // Selection for bulk actions
@@ -169,12 +248,31 @@ const applyFilters = () => {
     deliveryCompanyId: filters.value.deliveryCompanyId || undefined,
     storeId: filters.value.storeId || undefined,
     sourceId: filters.value.sourceId || undefined,
-    isArchived: filters.value.isArchived ?? undefined
+    isArchived: filters.value.isArchived ?? undefined,
+    // Date range filters
+    createdFrom: formatDateForApi(dateRange.value.from),
+    createdTo: formatDateForApi(dateRange.value.to)
   })
   if (searchQuery.value) {
     setKeyword(searchQuery.value)
   }
 }
+
+// Update URL when date range changes
+const router = useRouter()
+const updateUrlWithDateFilter = () => {
+  const query: Record<string, string | undefined> = { ...route.query }
+  query.createdFrom = dateRange.value.from ? dateRange.value.from.toISOString() : undefined
+  query.createdTo = dateRange.value.to ? dateRange.value.to.toISOString() : undefined
+  query.datePreset = datePreset.value !== 'custom' ? datePreset.value : undefined
+  router.replace({ query })
+}
+
+// Watch date range changes
+watch(dateRange, () => {
+  applyFilters()
+  updateUrlWithDateFilter()
+}, { deep: true })
 
 // CRUD handlers
 const openCreateModal = () => {
@@ -562,15 +660,26 @@ const handleBulkCancel = async (data: CancelOrderRequest) => {
       </button>
     </div>
 
-    <!-- Filters -->
+    <!-- Filters with Date Range -->
     <OrdersOrderFilters
       v-model:search-query="searchQuery"
       v-model:filters="filters"
+      v-model:date-range="dateRange"
+      v-model:date-preset="datePreset"
       :cities="cities"
       :delivery-companies="deliveryCompanies"
       :stores="stores"
       :sources="sources"
       :hide-phase-status="hidePhaseStatusFilters"
+      :show-date-filter="true"
+    />
+
+    <!-- Statistics Cards -->
+    <OrdersOrderStatisticsCards
+      :stats="stats"
+      :is-loading="isStatsLoading"
+      :show-full-stats="showFullStats"
+      :current-filter="currentFilterStats"
     />
 
     <!-- Bulk Actions -->

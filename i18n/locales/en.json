@@ -52,7 +52,33 @@
     "view": "View",
     "refresh": "Refresh",
     "items": "items",
-    "total": "Total"
+    "total": "Total",
+    "apply": "Apply"
+  },
+  "date": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "thisYear": "This Year",
+    "lastYear": "Last Year",
+    "custom": "Custom",
+    "from": "From",
+    "to": "To"
+  },
+  "stats": {
+    "total": "Total",
+    "delivered": "Delivered",
+    "returned": "Returned",
+    "cancelled": "Cancelled",
+    "confirmed": "Confirmed",
+    "new": "New",
+    "confirmation": "In Confirmation",
+    "inDelivery": "In Delivery",
+    "readyToShip": "Ready to Ship",
+    "orders": "orders"
   },
   "auth": {
     "login": "Login",
@@ -79,6 +105,8 @@
     "delivered": "Delivered",
     "phaseConfirmation": "Confirmation",
     "phaseShipping": "Shipping",
+    "confirmedOrders": "Confirmed Orders",
+    "confirmed": "Confirmed",
     "finalStates": "Final States",
     "enConfirmation": "In Confirmation",
     "callbacks": "Callbacks",

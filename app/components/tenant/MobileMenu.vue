@@ -106,6 +106,12 @@
                       </NuxtLink>
                     </li>
                     <li>
+                      <NuxtLink to="/dashboard/orders?state=confirmed" class="nav-link text-sm py-2" @click="$emit('close')">
+                        <CheckCircleIcon class="w-4 h-4 mr-2 text-cyan-500" />
+                        {{ $t('nav.confirmed') }}
+                      </NuxtLink>
+                    </li>
+                    <li>
                       <NuxtLink to="/dashboard/orders?state=delivered" class="nav-link text-sm py-2" @click="$emit('close')">
                         <CheckCircleIcon class="w-4 h-4 mr-2" />
                         {{ $t('nav.delivered') }}

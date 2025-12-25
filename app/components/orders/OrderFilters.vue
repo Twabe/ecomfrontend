@@ -9,10 +9,12 @@ import type { City } from '~/types/city'
 import type { DeliveryCompany } from '~/types/deliveryCompany'
 import type { Store } from '~/types/store'
 import type { Source } from '~/types/source'
+import type { DateRange, DatePreset } from '~/utils/date'
 
 interface Filters {
   phase: string
   state: string
+  trackingState?: string
   cityId: string
   deliveryCompanyId: string
   storeId: string
@@ -26,6 +28,7 @@ const props = defineProps<{
   stores: Store[]
   sources: Source[]
   hidePhaseStatus?: boolean
+  showDateFilter?: boolean
 }>()
 
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
@@ -33,12 +36,19 @@ const filters = defineModel<Filters>('filters', {
   default: () => ({
     phase: '',
     state: '',
+    trackingState: '',
     cityId: '',
     deliveryCompanyId: '',
     storeId: '',
     sourceId: '',
     isArchived: null
   })
+})
+const dateRange = defineModel<DateRange>('dateRange', {
+  default: () => ({ from: null, to: null })
+})
+const datePreset = defineModel<DatePreset>('datePreset', {
+  default: 'this_month'
 })
 
 const { t } = useI18n()
@@ -47,6 +57,13 @@ const showFilters = ref(false)
 
 <template>
   <div class="space-y-4">
+    <!-- Date Range Filter -->
+    <UiDateRangeFilter
+      v-if="showDateFilter"
+      v-model="dateRange"
+      v-model:preset="datePreset"
+    />
+
     <div class="flex gap-4">
       <div class="relative flex-1">
         <MagnifyingGlassIcon class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />

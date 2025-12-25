@@ -82,17 +82,24 @@
                 </NuxtLink>
               </li>
 
+              <!-- Confirmed Orders (between Confirmation and Shipping) -->
+              <li class="pt-2">
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2">
+                  {{ $t('nav.confirmedOrders') }}
+                </span>
+              </li>
+              <li>
+                <NuxtLink to="/dashboard/orders?state=confirmed" class="nav-link text-sm py-2 ml-2">
+                  <CheckCircleIcon class="w-4 h-4 mr-2 text-cyan-500" />
+                  {{ $t('nav.confirmed') }}
+                </NuxtLink>
+              </li>
+
               <!-- Phase: SHIPPING -->
               <li class="pt-2">
                 <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2">
                   {{ $t('nav.phaseShipping') }}
                 </span>
-              </li>
-              <li>
-                <NuxtLink to="/dashboard/orders?phase=shipping&state=confirmed" class="nav-link text-sm py-2 ml-2">
-                  <TruckIcon class="w-4 h-4 mr-2" />
-                  {{ $t('nav.readyToShip') }}
-                </NuxtLink>
               </li>
               <li>
                 <NuxtLink to="/dashboard/orders?phase=shipping&trackingState=in_progress" class="nav-link text-sm py-2 ml-2">
