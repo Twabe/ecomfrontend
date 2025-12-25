@@ -197,7 +197,13 @@
     "quantitySold": "الكمية المباعة",
     "lastOrder": "آخر طلب",
     "deliveryRate": "نسبة التسليم",
-    "returnRate": "نسبة الإرجاع"
+    "returnRate": "نسبة الإرجاع",
+    "totalAdSpend": "إجمالي الإنفاق الإعلاني",
+    "totalExpenses": "إجمالي المصاريف",
+    "netProfit": "صافي الربح",
+    "roas": "العائد على الإنفاق الإعلاني",
+    "profitMargin": "هامش الربح",
+    "thisMonth": "هذا الشهر"
   },
   "orders": {
     "title": "الطلبات",

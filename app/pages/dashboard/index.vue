@@ -111,6 +111,107 @@
       </div>
     </div>
 
+    <!-- Marketing & Profitability Stats -->
+    <div v-if="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <!-- Ad Spend -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('dashboard.totalAdSpend') }}</p>
+            <p class="text-2xl md:text-3xl font-bold text-red-600 dark:text-red-400 mt-1">
+              {{ formatCurrency(dashboardStats?.marketingStats?.totalAdSpend ?? 0) }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+            <MegaphoneIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
+          </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+          <span class="text-gray-500 dark:text-gray-400">
+            {{ t('dashboard.thisMonth') }}: {{ formatCurrency(dashboardStats?.marketingStats?.thisMonthAdSpend ?? 0) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Expenses -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('dashboard.totalExpenses') }}</p>
+            <p class="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">
+              {{ formatCurrency(dashboardStats?.expenseStats?.totalExpenses ?? 0) }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+            <ReceiptRefundIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
+          </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+          <span class="text-gray-500 dark:text-gray-400">
+            {{ t('dashboard.thisMonth') }}: {{ formatCurrency(dashboardStats?.expenseStats?.thisMonthExpenses ?? 0) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Net Profit -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('dashboard.netProfit') }}</p>
+            <p :class="[
+              'text-2xl md:text-3xl font-bold mt-1',
+              (dashboardStats?.revenueStats?.totalNetProfit ?? 0) >= 0
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-red-600 dark:text-red-400'
+            ]">
+              {{ formatCurrency(dashboardStats?.revenueStats?.totalNetProfit ?? 0) }}
+            </p>
+          </div>
+          <div :class="[
+            'w-12 h-12 rounded-lg flex items-center justify-center',
+            (dashboardStats?.revenueStats?.totalNetProfit ?? 0) >= 0
+              ? 'bg-green-100 dark:bg-green-900/30'
+              : 'bg-red-100 dark:bg-red-900/30'
+          ]">
+            <ArrowTrendingUpIcon v-if="(dashboardStats?.revenueStats?.totalNetProfit ?? 0) >= 0" class="w-6 h-6 text-green-600 dark:text-green-400" />
+            <ArrowTrendingDownIcon v-else class="w-6 h-6 text-red-600 dark:text-red-400" />
+          </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+          <span class="text-gray-500 dark:text-gray-400">
+            {{ t('dashboard.thisMonth') }}: {{ formatCurrency(dashboardStats?.revenueStats?.thisMonthNetProfit ?? 0) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ROAS -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('dashboard.roas') }}</p>
+            <p :class="[
+              'text-2xl md:text-3xl font-bold mt-1',
+              (dashboardStats?.marketingStats?.roas ?? 0) >= 2
+                ? 'text-green-600 dark:text-green-400'
+                : (dashboardStats?.marketingStats?.roas ?? 0) >= 1
+                  ? 'text-yellow-600 dark:text-yellow-400'
+                  : 'text-red-600 dark:text-red-400'
+            ]">
+              {{ (dashboardStats?.marketingStats?.roas ?? 0).toFixed(2) }}x
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+            <ChartBarIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+          <span class="text-gray-500 dark:text-gray-400">
+            {{ t('dashboard.profitMargin') }}: {{ (dashboardStats?.revenueStats?.profitMargin ?? 0).toFixed(1) }}%
+          </span>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Orders by State -->
@@ -375,7 +476,12 @@ import {
   PlusIcon,
   CubeIcon,
   CheckCircleIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  MegaphoneIcon,
+  ReceiptRefundIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ChartBarIcon
 } from '@heroicons/vue/24/outline'
 import { useDashboardService, useSettingsService } from '~/services'
 

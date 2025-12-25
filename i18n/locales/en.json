@@ -202,7 +202,13 @@
     "quantitySold": "Quantity Sold",
     "lastOrder": "Last Order",
     "deliveryRate": "Delivery Rate",
-    "returnRate": "Return Rate"
+    "returnRate": "Return Rate",
+    "totalAdSpend": "Total Ad Spend",
+    "totalExpenses": "Total Expenses",
+    "netProfit": "Net Profit",
+    "roas": "ROAS",
+    "profitMargin": "Profit Margin",
+    "thisMonth": "This Month"
   },
   "orders": {
     "title": "Orders",

@@ -120,10 +120,26 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('nav.expenses') }}</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-1">{{ pagination.totalCount }} {{ $t('nav.expenses') }}</p>
       </div>
-      <button @click="openCreateModal" class="btn-primary">
-        <PlusIcon class="w-5 h-5 mr-2" />
-        {{ $t('common.create') }}
-      </button>
+      <div class="flex gap-2">
+        <button @click="handleExportCsv" class="btn-secondary" :disabled="expenses.length === 0">
+          <ArrowDownTrayIcon class="w-5 h-5 mr-2" />
+          {{ $t('common.export') }}
+        </button>
+        <button @click="openCreateModal" class="btn-primary">
+          <PlusIcon class="w-5 h-5 mr-2" />
+          {{ $t('common.create') }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="card mb-6">
+      <DateRangeFilter
+        v-model="dateRange"
+        :preset="datePreset"
+        @update:preset="onPresetChange"
+        @update:model-value="onDateRangeChange"
+      />
     </div>
 
     <!-- Search & Filters -->
@@ -224,6 +240,18 @@
               </td>
             </tr>
           </tbody>
+          <!-- Totals Row -->
+          <tfoot v-if="expenses.length > 0" class="border-t-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
+            <tr>
+              <td class="py-3 px-4 font-bold text-gray-900 dark:text-white" colspan="2">
+                {{ $t('common.total') }} ({{ expenses.length }} {{ $t('common.records') }})
+              </td>
+              <td class="py-3 px-4 text-right">
+                <span class="font-bold text-gray-900 dark:text-white text-lg">{{ formatCurrency(totalCost) }}</span>
+              </td>
+              <td colspan="3"></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
@@ -260,7 +288,8 @@ import {
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
-  BanknotesIcon
+  BanknotesIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/vue/24/outline'
 import {
   useExpensesService,
@@ -269,6 +298,9 @@ import {
   useProductVariantsByProduct,
   type ExpenseDto
 } from '~/services'
+import type { DateRange, DatePreset } from '~/utils/date'
+import { getDateRangeFromPreset, formatDateForApi } from '~/utils/date'
+import { exportToCsv, formatCurrencyForCsv } from '~/utils/csvExport'
 
 definePageMeta({
   layout: 'tenant',
@@ -336,6 +368,42 @@ const searchKeyword = ref('')
 const filterExpenseTypeId = ref('')
 const filterProductId = ref('')
 
+// Date range filter
+const datePreset = ref<DatePreset>('this_month')
+const dateRange = ref<DateRange>(getDateRangeFromPreset('this_month'))
+
+// Total cost calculation
+const totalCost = computed(() => {
+  return expenses.value.reduce((sum, item) => sum + (item.cost || 0), 0)
+})
+
+// Handle date range change
+const onDateRangeChange = (range: DateRange) => {
+  dateRange.value = range
+  applyFilters()
+}
+
+// Handle preset change
+const onPresetChange = (preset: DatePreset) => {
+  datePreset.value = preset
+}
+
+// CSV Export
+const handleExportCsv = () => {
+  const columns = [
+    { key: 'expenseTypeName', label: t('nav.expenseTypes') },
+    { key: 'productName', label: t('nav.products') },
+    { key: 'variantName', label: t('productVariants.title') },
+    { key: 'cost', label: t('common.cost'), formatter: (val: number) => formatCurrencyForCsv(val, 'MAD') },
+    { key: 'nature', label: t('expenses.nature') },
+    { key: 'description', label: t('common.description') },
+  ]
+
+  const filename = `expenses-${new Date().toISOString().split('T')[0]}`
+  exportToCsv(expenses.value, columns, filename)
+  notify({ type: 'success', message: t('messages.exportSuccess') })
+}
+
 // Debounced search
 let searchTimeout: ReturnType<typeof setTimeout>
 const debouncedSearch = () => {
@@ -347,7 +415,9 @@ const debouncedSearch = () => {
 const applyFilters = () => {
   setFilters({
     expenseTypeId: filterExpenseTypeId.value || undefined,
-    productId: filterProductId.value || undefined
+    productId: filterProductId.value || undefined,
+    startDate: formatDateForApi(dateRange.value.from),
+    endDate: formatDateForApi(dateRange.value.to)
   })
 }
 

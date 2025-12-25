@@ -206,7 +206,13 @@
     "quantitySold": "Quantité vendue",
     "lastOrder": "Dernière commande",
     "deliveryRate": "Taux de livraison",
-    "returnRate": "Taux de retour"
+    "returnRate": "Taux de retour",
+    "totalAdSpend": "Dépenses Pub Totales",
+    "totalExpenses": "Dépenses Totales",
+    "netProfit": "Bénéfice Net",
+    "roas": "ROAS",
+    "profitMargin": "Marge Bénéficiaire",
+    "thisMonth": "Ce Mois"
   },
   "orders": {
     "title": "Commandes",

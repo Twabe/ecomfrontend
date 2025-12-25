@@ -120,10 +120,26 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('nav.spentAds') }}</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-1">{{ pagination.totalCount }} {{ $t('common.records') }}</p>
       </div>
-      <button @click="openCreateModal" class="btn-primary">
-        <PlusIcon class="w-5 h-5 mr-2" />
-        {{ $t('common.create') }}
-      </button>
+      <div class="flex gap-2">
+        <button @click="handleExportCsv" class="btn-secondary" :disabled="spentAds.length === 0">
+          <ArrowDownTrayIcon class="w-5 h-5 mr-2" />
+          {{ $t('common.export') }}
+        </button>
+        <button @click="openCreateModal" class="btn-primary">
+          <PlusIcon class="w-5 h-5 mr-2" />
+          {{ $t('common.create') }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="card mb-6">
+      <DateRangeFilter
+        v-model="dateRange"
+        :preset="datePreset"
+        @update:preset="onPresetChange"
+        @update:model-value="onDateRangeChange"
+      />
     </div>
 
     <!-- Search & Filters -->
@@ -226,6 +242,18 @@
               </td>
             </tr>
           </tbody>
+          <!-- Totals Row -->
+          <tfoot v-if="spentAds.length > 0" class="border-t-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
+            <tr>
+              <td class="py-3 px-4 font-bold text-gray-900 dark:text-white" colspan="3">
+                {{ $t('common.total') }} ({{ spentAds.length }} {{ $t('common.records') }})
+              </td>
+              <td class="py-3 px-4 text-right">
+                <span class="font-bold text-red-600 dark:text-red-400 text-lg">{{ formatCurrency(totalAmount) }}</span>
+              </td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
@@ -262,7 +290,8 @@ import {
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/vue/24/outline'
 import {
   useSpentAdsService,
@@ -272,6 +301,9 @@ import {
   type SpentAdDto
 } from '~/services'
 import { AD_PLATFORMS } from '~/types/spentad'
+import type { DateRange, DatePreset } from '~/utils/date'
+import { getDateRangeFromPreset, formatDateForApi } from '~/utils/date'
+import { exportToCsv, formatDateForCsv, formatCurrencyForCsv } from '~/utils/csvExport'
 
 definePageMeta({
   layout: 'tenant',
@@ -369,6 +401,42 @@ const searchKeyword = ref('')
 const filterProductId = ref<string | null>(null)
 const filterPlatform = ref<string | null>(null)
 
+// Date range filter
+const datePreset = ref<DatePreset>('this_month')
+const dateRange = ref<DateRange>(getDateRangeFromPreset('this_month'))
+
+// Total amount calculation
+const totalAmount = computed(() => {
+  return spentAds.value.reduce((sum, item) => sum + (item.amount || 0), 0)
+})
+
+// Handle date range change
+const onDateRangeChange = (range: DateRange) => {
+  dateRange.value = range
+  applyFilters()
+}
+
+// Handle preset change
+const onPresetChange = (preset: DatePreset) => {
+  datePreset.value = preset
+}
+
+// CSV Export
+const handleExportCsv = () => {
+  const columns = [
+    { key: 'mediaBuyerId', label: t('mediaBuyer.mediaBuyer'), formatter: (val: string) => getUserName(val) },
+    { key: 'productName', label: t('nav.products') },
+    { key: 'variantName', label: t('productVariants.title') },
+    { key: 'platform', label: t('spentAds.platform'), formatter: (val: string) => getPlatformLabel(val) || '' },
+    { key: 'amount', label: t('spentAds.amount'), formatter: (val: number) => formatCurrencyForCsv(val, 'MAD') },
+    { key: 'spentDate', label: t('spentAds.spentDate'), formatter: (val: string) => formatDateForCsv(val) },
+  ]
+
+  const filename = `spent-ads-${new Date().toISOString().split('T')[0]}`
+  exportToCsv(spentAds.value, columns, filename)
+  notify({ type: 'success', message: t('messages.exportSuccess') })
+}
+
 // Debounced search
 let searchTimeout: ReturnType<typeof setTimeout>
 const debouncedSearch = () => {
@@ -382,7 +450,9 @@ const debouncedSearch = () => {
 const applyFilters = () => {
   setFilters({
     productId: filterProductId.value || undefined,
-    platform: filterPlatform.value || undefined
+    platform: filterPlatform.value || undefined,
+    startDate: formatDateForApi(dateRange.value.from),
+    endDate: formatDateForApi(dateRange.value.to)
   })
   setKeyword(searchKeyword.value)
 }
