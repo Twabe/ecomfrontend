@@ -54,56 +54,86 @@
             />
           </button>
           <Transition name="slide">
-            <ul v-if="expandedSections.orders && !isCollapsed" class="mt-1 ml-8 space-y-1">
+            <ul v-if="expandedSections.orders && !isCollapsed" class="mt-1 ml-4 space-y-1">
+              <!-- Phase: NEW -->
               <li>
                 <NuxtLink to="/dashboard/orders?phase=new" class="nav-link text-sm py-2">
                   <InboxArrowDownIcon class="w-4 h-4 mr-2" />
                   {{ $t('nav.nouvelles') }}
                 </NuxtLink>
               </li>
+
+              <!-- Phase: CONFIRMATION -->
+              <li class="pt-2">
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2">
+                  {{ $t('nav.phaseConfirmation') }}
+                </span>
+              </li>
               <li>
-                <NuxtLink to="/dashboard/orders?phase=confirmation" class="nav-link text-sm py-2">
+                <NuxtLink to="/dashboard/orders?phase=confirmation" class="nav-link text-sm py-2 ml-2">
                   <PhoneIcon class="w-4 h-4 mr-2" />
-                  {{ $t('nav.confirmation') }}
+                  {{ $t('nav.enConfirmation') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink to="/dashboard/orders?phase=shipping" class="nav-link text-sm py-2">
-                  <TruckIcon class="w-4 h-4 mr-2" />
-                  {{ $t('nav.suivi') }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink to="/dashboard/orders?state=in_progress" class="nav-link text-sm py-2">
+                <NuxtLink to="/dashboard/orders?phase=confirmation&state=callback" class="nav-link text-sm py-2 ml-2">
                   <ClockIcon class="w-4 h-4 mr-2" />
-                  {{ $t('nav.inProgress') }}
+                  {{ $t('nav.callbacks') }}
+                </NuxtLink>
+              </li>
+
+              <!-- Phase: SHIPPING -->
+              <li class="pt-2">
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2">
+                  {{ $t('nav.phaseShipping') }}
+                </span>
+              </li>
+              <li>
+                <NuxtLink to="/dashboard/orders?phase=shipping&state=confirmed" class="nav-link text-sm py-2 ml-2">
+                  <TruckIcon class="w-4 h-4 mr-2" />
+                  {{ $t('nav.readyToShip') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink to="/dashboard/orders?state=no_answer" class="nav-link text-sm py-2">
+                <NuxtLink to="/dashboard/orders?phase=shipping&trackingState=in_progress" class="nav-link text-sm py-2 ml-2">
+                  <TruckIcon class="w-4 h-4 mr-2" />
+                  {{ $t('nav.inDelivery') }}
+                </NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/dashboard/orders?phase=shipping&trackingState=no_answer" class="nav-link text-sm py-2 ml-2">
                   <PhoneXMarkIcon class="w-4 h-4 mr-2" />
                   {{ $t('nav.noAnswer') }}
                 </NuxtLink>
               </li>
-              <li>
-                <NuxtLink to="/dashboard/orders?state=cancelled" class="nav-link text-sm py-2">
-                  <XCircleIcon class="w-4 h-4 mr-2" />
-                  {{ $t('nav.cancelled') }}
-                </NuxtLink>
+
+              <!-- Final States -->
+              <li class="pt-2">
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2">
+                  {{ $t('nav.finalStates') }}
+                </span>
               </li>
               <li>
-                <NuxtLink to="/dashboard/orders?state=delivered" class="nav-link text-sm py-2">
-                  <CheckCircleIcon class="w-4 h-4 mr-2" />
+                <NuxtLink to="/dashboard/orders?state=delivered" class="nav-link text-sm py-2 ml-2">
+                  <CheckCircleIcon class="w-4 h-4 mr-2 text-green-500" />
                   {{ $t('nav.delivered') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink to="/dashboard/orders?state=returned" class="nav-link text-sm py-2">
-                  <ArrowUturnLeftIcon class="w-4 h-4 mr-2" />
+                <NuxtLink to="/dashboard/orders?state=returned" class="nav-link text-sm py-2 ml-2">
+                  <ArrowUturnLeftIcon class="w-4 h-4 mr-2 text-orange-500" />
                   {{ $t('nav.returnedOrders') }}
                 </NuxtLink>
               </li>
               <li>
+                <NuxtLink to="/dashboard/orders?state=cancelled" class="nav-link text-sm py-2 ml-2">
+                  <XCircleIcon class="w-4 h-4 mr-2 text-red-500" />
+                  {{ $t('nav.cancelled') }}
+                </NuxtLink>
+              </li>
+
+              <!-- All Orders -->
+              <li class="pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
                 <NuxtLink to="/dashboard/orders" class="nav-link text-sm py-2">
                   <QueueListIcon class="w-4 h-4 mr-2" />
                   {{ $t('nav.allOrders') }}
