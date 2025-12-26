@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { PlusIcon, PencilIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 import { useQualityChecklistItemsService, type QualityChecklistItemDto, type CreateQualityChecklistItemRequest, type UpdateQualityChecklistItemRequest } from '~/services'
 

@@ -15,6 +15,9 @@
     "status": "Status",
     "active": "Active",
     "inactive": "Inactive",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "confirmDelete": "Are you sure you want to delete this item?",
     "yes": "Yes",
     "no": "No",
     "confirm": "Confirm",
@@ -160,6 +163,7 @@
     "workerDashboard": "Worker Dashboard",
     "supervisorDashboard": "Supervisor Dashboard",
     "autoAssignment": "Auto-Assignment",
+    "qualityChecklist": "Quality Checklist",
     "roles": "Roles & Permissions"
   },
   "dashboard": {

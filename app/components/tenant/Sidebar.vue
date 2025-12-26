@@ -489,6 +489,11 @@
                   {{ $t('nav.autoAssignment') }}
                 </NuxtLink>
               </li>
+              <li v-if="canAccessQualityChecklist">
+                <NuxtLink to="/dashboard/settings/quality-checklist" class="nav-link text-sm py-2">
+                  {{ $t('nav.qualityChecklist') }}
+                </NuxtLink>
+              </li>
               <li v-if="canAccessRoles">
                 <NuxtLink to="/dashboard/roles" class="nav-link text-sm py-2">
                   {{ $t('nav.roles') }}
@@ -712,8 +717,11 @@ const canAccessPlatformIntegrations = computed(() =>
 const canAccessAutoAssignment = computed(() =>
   hasPermission('Permissions.AutoAssignmentSettings.View')
 )
+const canAccessQualityChecklist = computed(() =>
+  hasPermission('Permissions.QualityChecklistItems.View')
+)
 const canAccessConfigSection = computed(() =>
-  canAccessSettings.value || canAccessRoles.value || canAccessSmsTemplates.value || canAccessPlatformIntegrations.value || canAccessAutoAssignment.value
+  canAccessSettings.value || canAccessRoles.value || canAccessSmsTemplates.value || canAccessPlatformIntegrations.value || canAccessAutoAssignment.value || canAccessQualityChecklist.value
 )
 
 const expandedSections = ref({
