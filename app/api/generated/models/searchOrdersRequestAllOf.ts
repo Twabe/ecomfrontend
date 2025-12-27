@@ -39,4 +39,8 @@ export type SearchOrdersRequestAllOf = {
   isInvoicedMediaBuyer?: boolean | null;
   /** @nullable */
   isArchived?: boolean | null;
+  /** @nullable */
+  createdFrom?: string | null;
+  /** @nullable */
+  createdTo?: string | null;
 };

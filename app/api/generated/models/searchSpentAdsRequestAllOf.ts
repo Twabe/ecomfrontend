@@ -11,4 +11,10 @@ export type SearchSpentAdsRequestAllOf = {
   mediaBuyerId?: string | null;
   /** @nullable */
   productId?: string | null;
+  /** @nullable */
+  platform?: string | null;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
 };

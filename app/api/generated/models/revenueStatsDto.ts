@@ -15,4 +15,9 @@ export interface RevenueStatsDto {
   todayProfit?: number;
   thisWeekProfit?: number;
   thisMonthProfit?: number;
+  totalNetProfit?: number;
+  todayNetProfit?: number;
+  thisWeekNetProfit?: number;
+  thisMonthNetProfit?: number;
+  profitMargin?: number;
 }

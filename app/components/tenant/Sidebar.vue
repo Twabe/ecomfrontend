@@ -494,6 +494,11 @@
                   {{ $t('nav.qualityChecklist') }}
                 </NuxtLink>
               </li>
+              <li v-if="canAccessStockSettings">
+                <NuxtLink to="/dashboard/settings/stock" class="nav-link text-sm py-2">
+                  {{ $t('nav.stockSettings') }}
+                </NuxtLink>
+              </li>
               <li v-if="canAccessRoles">
                 <NuxtLink to="/dashboard/roles" class="nav-link text-sm py-2">
                   {{ $t('nav.roles') }}
@@ -720,8 +725,11 @@ const canAccessAutoAssignment = computed(() =>
 const canAccessQualityChecklist = computed(() =>
   hasPermission('Permissions.QualityChecklistItems.View')
 )
+const canAccessStockSettings = computed(() =>
+  hasPermission('Permissions.StockSettings.View')
+)
 const canAccessConfigSection = computed(() =>
-  canAccessSettings.value || canAccessRoles.value || canAccessSmsTemplates.value || canAccessPlatformIntegrations.value || canAccessAutoAssignment.value || canAccessQualityChecklist.value
+  canAccessSettings.value || canAccessRoles.value || canAccessSmsTemplates.value || canAccessPlatformIntegrations.value || canAccessAutoAssignment.value || canAccessQualityChecklist.value || canAccessStockSettings.value
 )
 
 const expandedSections = ref({

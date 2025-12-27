@@ -6,11 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type SearchMediaBuyerExpensesRequestAllOf = {
+export interface TestResultDto {
+  success?: boolean;
   /** @nullable */
-  mediaBuyerId?: string | null;
+  error?: string | null;
+  testedAt?: string;
   /** @nullable */
-  startDate?: string | null;
-  /** @nullable */
-  endDate?: string | null;
-};
+  cityCount?: number | null;
+}

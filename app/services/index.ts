@@ -133,6 +133,7 @@ export { useStatisticsService, type StatisticDto, type CreateStatisticRequest, t
 // ============================================
 export { useSettingsService, type TenantSettingsDto, type UpdateTenantSettingsRequest } from './settings/useSettingsService'
 export { useAutoAssignmentSettingsService, type AutoAssignmentSettingsDto, type UpdateAutoAssignmentSettingsRequest } from './auto-assignment-settings/useAutoAssignmentSettingsService'
+export { useStockSettingsService, type StockSettingsDto, type UpdateStockSettingsRequest } from './stock-settings/useStockSettingsService'
 export { useQualityChecklistItemsService, useActiveQualityChecklistItems, type QualityChecklistItemDto, type CreateQualityChecklistItemRequest, type UpdateQualityChecklistItemRequest } from './quality-checklist-items/useQualityChecklistItemsService'
 export { useSmsTemplatesService, type SmsTemplateDto, type CreateSmsTemplateRequest, type UpdateSmsTemplateRequest } from './sms-templates/useSmsTemplatesService'
 export { useWorkerServiceConfigsService, type WorkerServiceConfigDto, type CreateWorkerConfigRequest, type UpdateWorkerConfigRequest, type SetOnlineStatusRequest } from './worker-service-configs/useWorkerServiceConfigsService'

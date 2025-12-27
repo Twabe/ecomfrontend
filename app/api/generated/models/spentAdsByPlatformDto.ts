@@ -6,11 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type SearchMediaBuyerExpensesRequestAllOf = {
-  /** @nullable */
-  mediaBuyerId?: string | null;
-  /** @nullable */
-  startDate?: string | null;
-  /** @nullable */
-  endDate?: string | null;
-};
+export interface SpentAdsByPlatformDto {
+  platform?: string;
+  totalAmount?: number;
+  count?: number;
+  percentage?: number;
+}

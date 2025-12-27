@@ -33,6 +33,8 @@ import type {
   CreateExpenseRequest,
   ErrorResult,
   ExpenseDto,
+  ExpensesStatsDto,
+  GetExpensesStatsRequest,
   HttpValidationProblemDetails,
   PaginationResponseOfExpenseDto,
   SearchExpensesRequest,
@@ -365,6 +367,70 @@ export const useExpensesCreate = <TError = HttpValidationProblemDetails | ErrorR
       > => {
 
       const mutationOptions = getExpensesCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Get expense statistics and aggregations.
+ */
+export const expensesGetStats = (
+    getExpensesStatsRequest: MaybeRef<GetExpensesStatsRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      getExpensesStatsRequest = unref(getExpensesStatsRequest);
+      
+      return customInstance<ExpensesStatsDto>(
+      {url: `/api/v1/expenses/stats`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: getExpensesStatsRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getExpensesGetStatsMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof expensesGetStats>>, TError,{data: GetExpensesStatsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof expensesGetStats>>, TError,{data: GetExpensesStatsRequest}, TContext> => {
+
+const mutationKey = ['expensesGetStats'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof expensesGetStats>>, {data: GetExpensesStatsRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  expensesGetStats(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExpensesGetStatsMutationResult = NonNullable<Awaited<ReturnType<typeof expensesGetStats>>>
+    export type ExpensesGetStatsMutationBody = GetExpensesStatsRequest
+    export type ExpensesGetStatsMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Get expense statistics and aggregations.
+ */
+export const useExpensesGetStats = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof expensesGetStats>>, TError,{data: GetExpensesStatsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof expensesGetStats>>,
+        TError,
+        {data: GetExpensesStatsRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getExpensesGetStatsMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

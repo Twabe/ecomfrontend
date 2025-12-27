@@ -6,11 +6,13 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type SearchMediaBuyerExpensesRequestAllOf = {
-  /** @nullable */
-  mediaBuyerId?: string | null;
+export interface GetROASStatsRequest {
   /** @nullable */
   startDate?: string | null;
   /** @nullable */
   endDate?: string | null;
-};
+  /** @nullable */
+  productId?: string | null;
+  /** @nullable */
+  platform?: string | null;
+}

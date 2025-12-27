@@ -11,4 +11,8 @@ export type SearchExpensesRequestAllOf = {
   expenseTypeId?: string | null;
   /** @nullable */
   productId?: string | null;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
 };

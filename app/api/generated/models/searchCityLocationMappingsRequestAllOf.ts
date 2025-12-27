@@ -6,11 +6,15 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type SearchMediaBuyerExpensesRequestAllOf = {
+export type SearchCityLocationMappingsRequestAllOf = {
   /** @nullable */
-  mediaBuyerId?: string | null;
+  deliveryCompanyId?: string | null;
   /** @nullable */
-  startDate?: string | null;
+  cityId?: string | null;
   /** @nullable */
-  endDate?: string | null;
+  externalName?: string | null;
+  /** @nullable */
+  isActive?: boolean | null;
+  /** @nullable */
+  isMapped?: boolean | null;
 };

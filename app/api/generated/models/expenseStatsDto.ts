@@ -6,11 +6,12 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type SearchMediaBuyerExpensesRequestAllOf = {
+export interface ExpenseStatsDto {
+  totalExpenses?: number;
+  todayExpenses?: number;
+  thisWeekExpenses?: number;
+  thisMonthExpenses?: number;
   /** @nullable */
-  mediaBuyerId?: string | null;
-  /** @nullable */
-  startDate?: string | null;
-  /** @nullable */
-  endDate?: string | null;
-};
+  topExpenseType?: string | null;
+  topExpenseTypeCost?: number;
+}

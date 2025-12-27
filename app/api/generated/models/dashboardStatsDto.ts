@@ -7,6 +7,8 @@
  */
 import type { OrderStatisticsDto } from './orderStatisticsDto';
 import type { RevenueStatsDto } from './revenueStatsDto';
+import type { MarketingStatsDto } from './marketingStatsDto';
+import type { ExpenseStatsDto } from './expenseStatsDto';
 import type { OrderStatsByStateDto } from './orderStatsByStateDto';
 import type { TopProductDto } from './topProductDto';
 import type { TopCustomerDto } from './topCustomerDto';
@@ -15,6 +17,8 @@ import type { DeliveryCompanyPerformanceDto } from './deliveryCompanyPerformance
 export interface DashboardStatsDto {
   orderStatistics?: OrderStatisticsDto;
   revenueStats?: RevenueStatsDto;
+  marketingStats?: MarketingStatsDto;
+  expenseStats?: ExpenseStatsDto;
   ordersByState?: OrderStatsByStateDto[];
   topProducts?: TopProductDto[];
   topCustomers?: TopCustomerDto[];

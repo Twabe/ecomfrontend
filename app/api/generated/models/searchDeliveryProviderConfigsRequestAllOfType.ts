@@ -5,12 +5,9 @@
  * Clean Architecture Template for .NET 7 WebApi built with Multitenancy Support.
  * OpenAPI spec version: 1.0.0
  */
+import type { ProviderType } from './providerType';
 
-export type SearchMediaBuyerExpensesRequestAllOf = {
-  /** @nullable */
-  mediaBuyerId?: string | null;
-  /** @nullable */
-  startDate?: string | null;
-  /** @nullable */
-  endDate?: string | null;
-};
+/**
+ * @nullable
+ */
+export type SearchDeliveryProviderConfigsRequestAllOfType = ProviderType | null;

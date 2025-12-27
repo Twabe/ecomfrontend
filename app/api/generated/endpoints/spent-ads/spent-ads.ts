@@ -32,10 +32,12 @@ import type {
 import type {
   CreateSpentAdRequest,
   ErrorResult,
+  GetSpentAdsStatsRequest,
   HttpValidationProblemDetails,
   PaginationResponseOfSpentAdDto,
   SearchSpentAdsRequest,
   SpentAdDto,
+  SpentAdsStatsDto,
   UpdateSpentAdRequest
 } from '../../models';
 
@@ -365,6 +367,70 @@ export const useSpentAdsCreate = <TError = HttpValidationProblemDetails | ErrorR
       > => {
 
       const mutationOptions = getSpentAdsCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Get spent ads statistics and aggregations.
+ */
+export const spentAdsGetStats = (
+    getSpentAdsStatsRequest: MaybeRef<GetSpentAdsStatsRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      getSpentAdsStatsRequest = unref(getSpentAdsStatsRequest);
+      
+      return customInstance<SpentAdsStatsDto>(
+      {url: `/api/v1/spentads/stats`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: getSpentAdsStatsRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getSpentAdsGetStatsMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof spentAdsGetStats>>, TError,{data: GetSpentAdsStatsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof spentAdsGetStats>>, TError,{data: GetSpentAdsStatsRequest}, TContext> => {
+
+const mutationKey = ['spentAdsGetStats'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof spentAdsGetStats>>, {data: GetSpentAdsStatsRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  spentAdsGetStats(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SpentAdsGetStatsMutationResult = NonNullable<Awaited<ReturnType<typeof spentAdsGetStats>>>
+    export type SpentAdsGetStatsMutationBody = GetSpentAdsStatsRequest
+    export type SpentAdsGetStatsMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Get spent ads statistics and aggregations.
+ */
+export const useSpentAdsGetStats = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof spentAdsGetStats>>, TError,{data: GetSpentAdsStatsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof spentAdsGetStats>>,
+        TError,
+        {data: GetSpentAdsStatsRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getSpentAdsGetStatsMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
