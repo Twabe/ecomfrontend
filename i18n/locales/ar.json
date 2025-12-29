@@ -52,7 +52,14 @@
     "pending": "قيد الانتظار",
     "view": "عرض",
     "refresh": "تحديث",
-    "apply": "تطبيق"
+    "apply": "تطبيق",
+    "website": "الموقع",
+    "help": "مساعدة",
+    "justNow": "الآن",
+    "minutesAgo": "منذ {count} د",
+    "hoursAgo": "منذ {count} س",
+    "daysAgo": "منذ {count} ي",
+    "noData": "لا توجد بيانات"
   },
   "date": {
     "today": "اليوم",
@@ -160,7 +167,8 @@
     "autoAssignment": "التوزيع التلقائي",
     "stockSettings": "إعدادات المخزون",
     "qualityChecklist": "قائمة فحص الجودة",
-    "roles": "الأدوار والصلاحيات"
+    "roles": "الأدوار والصلاحيات",
+    "providerConnections": "اتصالات المزودين"
   },
   "dashboard": {
     "title": "لوحة التحكم",
@@ -1277,5 +1285,65 @@
     "allowCancelFromDeliveredDescription": "السماح بإلغاء الطلبات التي تم تمييزها بالفعل كمسلّمة. مفيد للتصحيحات الإدارية.",
     "allowCancelFromReturned": "السماح بالإلغاء من مرتجع",
     "allowCancelFromReturnedDescription": "السماح بإلغاء الطلبات التي تم تمييزها بالفعل كمرتجعة. مفيد للتصحيحات الإدارية."
+  },
+  "deliveryProviders": {
+    "title": "مزودي التوصيل",
+    "subtitle": "إدارة اتصالاتك مع مزودي التوصيل",
+    "yourConnections": "اتصالاتك",
+    "availableProviders": "المزودون المتاحون",
+    "allConnected": "جميع المزودين متصلون",
+    "allConnectedDesc": "أنت متصل بجميع مزودي التوصيل المتاحين.",
+    "connected": "متصل",
+    "inactive": "غير نشط",
+    "connect": "اتصال",
+    "manage": "إدارة",
+    "disconnect": "قطع الاتصال",
+    "disconnectWarning": "سيؤدي هذا الإجراء إلى حذف هذا الاتصال وجميع إعداداته بشكل دائم.",
+    "testConnection": "اختبار الاتصال",
+    "syncStatuses": "مزامنة الحالات",
+    "syncResult": "تم تحديث {count} طلب(ات)",
+    "statusActive": "الاتصال نشط",
+    "statusInactive": "الاتصال غير نشط",
+    "lastTest": "آخر اختبار",
+    "testSuccess": "الاتصال ناجح",
+    "testFailed": "فشل الاتصال",
+    "activate": "تفعيل",
+    "deactivate": "إلغاء التفعيل",
+    "store": "المتجر",
+    "allStores": "جميع المتاجر",
+    "connectWith": "الاتصال بـ {name}",
+    "webhookUrl": "رابط Webhook",
+    "webhookHelp": "انسخ هذا الرابط إلى إعدادات webhook لدى المزود لاستقبال تحديثات الحالة.",
+    "webhookAvailableAfterConnect": "سيكون رابط Webhook متاحاً بعد الاتصال.",
+    "connectionModeLabel": "وضع الاتصال",
+    "connectionMode": {
+      "default": "افتراضي",
+      "byCity": "حسب المدينة",
+      "byProduct": "حسب المنتج"
+    },
+    "dangerZone": "منطقة الخطر",
+    "citiesCount": "{count} مدينة",
+    "admin": {
+      "title": "إدارة مزودي التوصيل",
+      "subtitle": "مراقبة الاتصالات وصحة الويب هوك عبر جميع المستأجرين",
+      "totalProviders": "إجمالي المزودين",
+      "totalConnections": "إجمالي الاتصالات",
+      "activeConnections": "الاتصالات النشطة",
+      "staleConnections": "الاتصالات القديمة",
+      "providerStats": "إحصائيات المزودين",
+      "provider": "المزود",
+      "connections": "الاتصالات",
+      "active": "نشط",
+      "lastWebhook": "آخر ويب هوك",
+      "never": "أبداً",
+      "webhookHealth": "صحة الويب هوك",
+      "healthy": "سليمة",
+      "stale": "قديمة",
+      "neverReceived": "لم تستلم أبداً",
+      "staleAlert": "{count} اتصال(ات) لم تستلم ويب هوك منذ 24 ساعة",
+      "lastReceived": "آخر استلام",
+      "allHealthy": "جميع الويب هوك سليمة",
+      "allHealthyDesc": "جميع الاتصالات النشطة استلمت ويب هوك مؤخراً."
+    }
   }
 }

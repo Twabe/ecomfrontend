@@ -56,7 +56,14 @@
     "refresh": "Refresh",
     "items": "items",
     "total": "Total",
-    "apply": "Apply"
+    "apply": "Apply",
+    "website": "Website",
+    "help": "Help",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago",
+    "noData": "No data available"
   },
   "date": {
     "today": "Today",
@@ -165,7 +172,8 @@
     "autoAssignment": "Auto-Assignment",
     "stockSettings": "Stock Settings",
     "qualityChecklist": "Quality Checklist",
-    "roles": "Roles & Permissions"
+    "roles": "Roles & Permissions",
+    "providerConnections": "Provider Connections"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1369,5 +1377,65 @@
     "allowCancelFromDeliveredDescription": "Allow cancelling orders that have already been marked as delivered. Useful for admin corrections.",
     "allowCancelFromReturned": "Allow Cancel from Returned",
     "allowCancelFromReturnedDescription": "Allow cancelling orders that have already been marked as returned. Useful for admin corrections."
+  },
+  "deliveryProviders": {
+    "title": "Delivery Providers",
+    "subtitle": "Manage your delivery provider connections",
+    "yourConnections": "Your Connections",
+    "availableProviders": "Available Providers",
+    "allConnected": "All providers are connected",
+    "allConnectedDesc": "You are connected to all available delivery providers.",
+    "connected": "Connected",
+    "inactive": "Inactive",
+    "connect": "Connect",
+    "manage": "Manage",
+    "disconnect": "Disconnect",
+    "disconnectWarning": "This action will permanently remove this connection and all its configurations.",
+    "testConnection": "Test Connection",
+    "syncStatuses": "Sync Statuses",
+    "syncResult": "{count} order(s) updated",
+    "statusActive": "Connection active",
+    "statusInactive": "Connection inactive",
+    "lastTest": "Last test",
+    "testSuccess": "Connection successful",
+    "testFailed": "Connection failed",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "store": "Store",
+    "allStores": "All stores",
+    "connectWith": "Connect with {name}",
+    "webhookUrl": "Webhook URL",
+    "webhookHelp": "Copy this URL to the provider's webhook settings to receive status updates.",
+    "webhookAvailableAfterConnect": "Webhook URL will be available after connecting.",
+    "connectionModeLabel": "Connection Mode",
+    "connectionMode": {
+      "default": "Default",
+      "byCity": "By City",
+      "byProduct": "By Product"
+    },
+    "dangerZone": "Danger Zone",
+    "citiesCount": "{count} cities",
+    "admin": {
+      "title": "Delivery Provider Management",
+      "subtitle": "Monitor connections and webhook health across all tenants",
+      "totalProviders": "Total Providers",
+      "totalConnections": "Total Connections",
+      "activeConnections": "Active Connections",
+      "staleConnections": "Stale Connections",
+      "providerStats": "Provider Statistics",
+      "provider": "Provider",
+      "connections": "Connections",
+      "active": "Active",
+      "lastWebhook": "Last Webhook",
+      "never": "Never",
+      "webhookHealth": "Webhook Health",
+      "healthy": "Healthy",
+      "stale": "Stale",
+      "neverReceived": "Never Received",
+      "staleAlert": "{count} connection(s) haven't received a webhook in 24h",
+      "lastReceived": "Last received",
+      "allHealthy": "All webhooks are healthy",
+      "allHealthyDesc": "All active connections have received webhooks recently."
+    }
   }
 }

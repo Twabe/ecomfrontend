@@ -147,6 +147,19 @@ export { usePlatformIntegrationsService, type PlatformIntegrationDto, type Creat
 export { useYouCanIntegrationService, type YouCanIntegrationStatusDto, type YouCanIntegrationConnectParams, type YouCanIntegrationCallbackParams } from './you-can-integration/useYouCanIntegrationService'
 
 // ============================================
+// DELIVERY PROVIDER SERVICES
+// ============================================
+export { useDeliveryProviderTemplatesService, type DeliveryProviderTemplateDto, type TemplateStatsDto, type WebhookHealthReport } from './delivery-provider-templates/useDeliveryProviderTemplatesService'
+export {
+  useTenantDeliveryConnectionsService,
+  type TenantDeliveryConnectionDto,
+  type ConnectDeliveryProviderRequest,
+  type UpdateDeliveryConnectionRequest,
+  type TestConnectionResponse,
+  type SyncConnectionResponse,
+} from './tenant-delivery-connections/useTenantDeliveryConnectionsService'
+
+// ============================================
 // IDENTITY & ACCESS SERVICES
 // ============================================
 export { useUsersService, type UserDetailsDto, type UserRoleDto, type CreateUserRequest, type UpdateUserRequest, type AdminSetPasswordRequest, type UserRolesRequest } from './users/useUsersService'

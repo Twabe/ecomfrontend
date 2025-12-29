@@ -99,6 +99,12 @@ export const queryKeys = {
   webhooks: createEntityKeys('webhooks'),
 
   // ============================================
+  // DELIVERY PROVIDER CONNECTIONS
+  // ============================================
+  deliveryProviderTemplates: createEntityKeys('delivery-provider-templates'),
+  tenantDeliveryConnections: createEntityKeys('tenant-delivery-connections'),
+
+  // ============================================
   // SYSTEM & SETTINGS
   // ============================================
   autoAssignmentSettings: createEntityKeys('auto-assignment-settings'),

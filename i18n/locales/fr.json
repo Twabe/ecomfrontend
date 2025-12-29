@@ -59,7 +59,14 @@
     "total": "Total",
     "createdAt": "Créé le",
     "updatedAt": "Modifié le",
-    "apply": "Appliquer"
+    "apply": "Appliquer",
+    "website": "Site web",
+    "help": "Aide",
+    "justNow": "À l'instant",
+    "minutesAgo": "il y a {count}m",
+    "hoursAgo": "il y a {count}h",
+    "daysAgo": "il y a {count}j",
+    "noData": "Aucune donnée disponible"
   },
   "date": {
     "today": "Aujourd'hui",
@@ -169,7 +176,8 @@
     "smsTemplates": "Modèles SMS",
     "platformIntegrations": "Intégrations",
     "workerDashboard": "Tableau confirmateur",
-    "supervisorDashboard": "Tableau superviseur"
+    "supervisorDashboard": "Tableau superviseur",
+    "providerConnections": "Connexions fournisseurs"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -1456,5 +1464,65 @@
     "allowCancelFromDeliveredDescription": "Permettre l'annulation des commandes déjà marquées comme livrées. Utile pour les corrections administratives.",
     "allowCancelFromReturned": "Permettre l'Annulation depuis Retourné",
     "allowCancelFromReturnedDescription": "Permettre l'annulation des commandes déjà marquées comme retournées. Utile pour les corrections administratives."
+  },
+  "deliveryProviders": {
+    "title": "Fournisseurs de Livraison",
+    "subtitle": "Gérez vos connexions avec les fournisseurs de livraison",
+    "yourConnections": "Vos Connexions",
+    "availableProviders": "Fournisseurs Disponibles",
+    "allConnected": "Tous les fournisseurs sont connectés",
+    "allConnectedDesc": "Vous êtes connecté à tous les fournisseurs de livraison disponibles.",
+    "connected": "Connecté",
+    "inactive": "Inactif",
+    "connect": "Connecter",
+    "manage": "Gérer",
+    "disconnect": "Déconnecter",
+    "disconnectWarning": "Cette action supprimera définitivement cette connexion et toutes ses configurations.",
+    "testConnection": "Tester la connexion",
+    "syncStatuses": "Synchroniser les statuts",
+    "syncResult": "{count} commande(s) mise(s) à jour",
+    "statusActive": "Connexion active",
+    "statusInactive": "Connexion inactive",
+    "lastTest": "Dernier test",
+    "testSuccess": "Connexion réussie",
+    "testFailed": "Échec de la connexion",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "store": "Magasin",
+    "allStores": "Tous les magasins",
+    "connectWith": "Se connecter avec {name}",
+    "webhookUrl": "URL Webhook",
+    "webhookHelp": "Copiez cette URL dans les paramètres webhook du fournisseur pour recevoir les mises à jour de statut.",
+    "webhookAvailableAfterConnect": "L'URL du webhook sera disponible après la connexion.",
+    "connectionModeLabel": "Mode de connexion",
+    "connectionMode": {
+      "default": "Par défaut",
+      "byCity": "Par ville",
+      "byProduct": "Par produit"
+    },
+    "dangerZone": "Zone de danger",
+    "citiesCount": "{count} villes",
+    "admin": {
+      "title": "Gestion des Fournisseurs de Livraison",
+      "subtitle": "Surveillez les connexions et la santé des webhooks de tous les tenants",
+      "totalProviders": "Total Fournisseurs",
+      "totalConnections": "Total Connexions",
+      "activeConnections": "Connexions Actives",
+      "staleConnections": "Connexions Obsolètes",
+      "providerStats": "Statistiques par Fournisseur",
+      "provider": "Fournisseur",
+      "connections": "Connexions",
+      "active": "Actif",
+      "lastWebhook": "Dernier Webhook",
+      "never": "Jamais",
+      "webhookHealth": "Santé des Webhooks",
+      "healthy": "Saines",
+      "stale": "Obsolètes",
+      "neverReceived": "Jamais reçues",
+      "staleAlert": "{count} connexion(s) n'ont pas reçu de webhook depuis 24h",
+      "lastReceived": "Dernier reçu",
+      "allHealthy": "Tous les webhooks sont sains",
+      "allHealthyDesc": "Toutes les connexions actives ont reçu des webhooks récemment."
+    }
   }
 }

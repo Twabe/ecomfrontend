@@ -277,6 +277,11 @@
                   {{ $t('nav.deliveryNotes') }}
                 </NuxtLink>
               </li>
+              <li v-if="canAccessProviderConnections">
+                <NuxtLink to="/dashboard/delivery-providers" class="nav-link text-sm py-2">
+                  {{ $t('nav.providerConnections') }}
+                </NuxtLink>
+              </li>
             </ul>
           </Transition>
         </li>
@@ -633,8 +638,11 @@ const canAccessDeliveryNotes = computed(() =>
 const canAccessSubDeliveryCompanies = computed(() =>
   hasPermission('Permissions.SubDeliveryCompanies.View')
 )
+const canAccessProviderConnections = computed(() =>
+  hasPermission('Permissions.TenantDeliveryConnections.View')
+)
 const canAccessDeliverySection = computed(() =>
-  canAccessDeliveryCompanies.value || canAccessShippingFees.value || canAccessDeliveryNotes.value || canAccessSubDeliveryCompanies.value
+  canAccessDeliveryCompanies.value || canAccessShippingFees.value || canAccessDeliveryNotes.value || canAccessSubDeliveryCompanies.value || canAccessProviderConnections.value
 )
 // Finance section
 const canAccessPayments = computed(() =>
