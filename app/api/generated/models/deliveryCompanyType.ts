@@ -30,7 +30,9 @@ export const DeliveryCompanyType = {
   AtlasLivraison: 12,
   EagleExpress: 13,
   Digylog: 14,
-  ColisPrive: 15,
-  Imile: 16,
-  Manual: 17,
+  ForceLog: 15,
+  Cathedis: 16,
+  ColisPrive: 17,
+  Imile: 18,
+  Manual: 19,
 } as const;
