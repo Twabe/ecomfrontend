@@ -2,8 +2,9 @@
 import { useProviderCities, type DeliveryCompanyType } from '~/composables/useProviderCities'
 
 definePageMeta({
-  layout: 'dashboard',
-  middleware: ['auth']
+  layout: 'tenant',
+  middleware: ['auth', 'tenant', 'permission'],
+  requiredPermission: 'Permissions.Settings.View'
 })
 
 const { t } = useI18n()
