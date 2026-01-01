@@ -33,9 +33,9 @@ const {
   remove: deleteStatistic
 } = useStatisticsService()
 
-const { items: deliveryCompanies } = useDeliveryCompaniesService()
-const { items: cities } = useCitiesService()
-const { items: products } = useProductsService()
+const { items: deliveryCompanies } = useDeliveryCompaniesService({ initialParams: { pageSize: 100, pageNumber: 1 } })
+const { items: cities } = useCitiesService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
+const { items: products } = useProductsService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
 
 // Search & Filters
 const searchQuery = ref('')

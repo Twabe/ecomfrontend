@@ -15,4 +15,18 @@ export interface AssignDeliveryCompanyResponse {
   subDeliveryCompanyId?: string | null;
   /** @nullable */
   subDeliveryCompanyName?: string | null;
+  /**
+   * Tracking code returned from delivery provider API.
+Null if provider doesn't have API integration or if send failed.
+   * @nullable
+   */
+  trackingCode?: string | null;
+  /** Whether the order was successfully sent to the delivery provider API.
+False if provider doesn't have API integration or if send failed. */
+  sendToProviderSuccess?: boolean;
+  /**
+   * Error message if send to provider failed.
+   * @nullable
+   */
+  sendToProviderError?: string | null;
 }

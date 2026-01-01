@@ -95,6 +95,38 @@ export interface BulkAssignDeliveryCompanyRequest {
   subDeliveryCompanyId?: string
 }
 
+// Types for provider labels
+export interface GetBulkProviderLabelsRequest {
+  orderIds: string[]
+}
+
+export interface BulkLabelResult {
+  orderId: string
+  orderCode: string
+  trackingCode?: string
+  success: boolean
+  error?: string
+  providerName?: string
+}
+
+export interface LabelData {
+  orderId: string
+  orderCode: string
+  trackingCode?: string
+  pdfContent: string // Base64 encoded
+  fileName: string
+}
+
+export interface GetBulkProviderLabelsResponse {
+  totalRequested: number
+  successCount: number
+  failedCount: number
+  noProviderCount: number
+  noTrackingCodeCount: number
+  results: BulkLabelResult[]
+  labels: LabelData[]
+}
+
 // Types for archive orders
 export interface ArchiveOrdersRequest {
   orderIds: string[]
@@ -587,10 +619,15 @@ export function useOrdersWorkflowService() {
    * Assign delivery company to an order (for Suivi agents)
    * This follows industry standard COD workflow: Confirmation Agent only verifies customer,
    * Suivi Agent assigns delivery company.
+   * Returns the result with trackingCode and sendToProviderSuccess for UI feedback.
    */
   const assignDeliveryCompany = async (data: { orderId: string; deliveryCompanyId: string; subDeliveryCompanyId?: string }) => {
     const result = await ordersAssignDeliveryCompany(data)
-    success('Delivery company assigned successfully')
+    // Show success only if no tracking info (Manual providers)
+    // If tracking info available, caller will show specific message
+    if (!result.sendToProviderSuccess && !result.sendToProviderError) {
+      success('Delivery company assigned successfully')
+    }
     invalidateAll()
     return result
   }
@@ -698,6 +735,77 @@ export function useOrdersWorkflowService() {
     return result
   }
 
+  // ============================================
+  // Provider Label Operations
+  // ============================================
+
+  /**
+   * Get provider label for a single order
+   * Returns the PDF as a Blob or null if not available
+   */
+  const getProviderLabel = async (orderId: string): Promise<Blob | null> => {
+    const api = useApi()
+    try {
+      const response = await fetch(`/api/v1/orders/${orderId}/provider-label`, {
+        headers: {
+          Authorization: `Bearer ${api.getToken()}`,
+        },
+      })
+
+      if (response.status === 404) {
+        // Provider doesn't support labels
+        return null
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to fetch label')
+      }
+
+      return await response.blob()
+    }
+    catch (err: any) {
+      console.error('Provider label error:', err)
+      throw err
+    }
+  }
+
+  /**
+   * Get provider labels for multiple orders
+   * Returns summary with individual label results
+   */
+  const getBulkProviderLabels = async (data: GetBulkProviderLabelsRequest): Promise<GetBulkProviderLabelsResponse> => {
+    const api = useApi()
+    return api.post<GetBulkProviderLabelsResponse>(
+      '/api/v1/orders/bulk-provider-labels',
+      data
+    )
+  }
+
+  /**
+   * Open provider label in new tab for printing
+   */
+  const printProviderLabel = async (orderId: string): Promise<boolean> => {
+    try {
+      const blob = await getProviderLabel(orderId)
+      if (blob) {
+        const url = URL.createObjectURL(blob)
+        const printWindow = window.open(url, '_blank')
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.print()
+          }
+        }
+        return true
+      }
+      return false
+    }
+    catch (err) {
+      error('Failed to fetch provider label')
+      return false
+    }
+  }
+
   // Mutation loading states
   const isMutating = computed(() =>
     confirmMutation.isPending.value ||
@@ -762,6 +870,11 @@ export function useOrdersWorkflowService() {
     archiveOrders,
     unarchiveOrders,
 
+    // Provider label operations
+    getProviderLabel,
+    getBulkProviderLabels,
+    printProviderLabel,
+
     // State
     isMutating,
     invalidateAll,
@@ -793,4 +906,8 @@ export type {
   ReadyForDeliveryOrderDto,
   OrderAssignmentSummaryDto,
   GetOrdersReadyForDeliveryRequestExtended,
+  GetBulkProviderLabelsRequest,
+  GetBulkProviderLabelsResponse,
+  BulkLabelResult,
+  LabelData,
 }

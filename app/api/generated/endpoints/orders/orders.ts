@@ -77,6 +77,7 @@ import type {
   ReleaseOrderRequest,
   RemoveOrderItemRequest,
   SearchOrdersRequest,
+  SendOrderToProviderResponse,
   Stream,
   UnarchiveOrdersRequest,
   UnarchiveOrdersResponse,
@@ -2033,6 +2034,68 @@ export const useOrdersBulkAssignDeliveryCompany = <TError = unknown,
       > => {
 
       const mutationOptions = getOrdersBulkAssignDeliveryCompanyMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Send order to delivery provider API.
+ */
+export const ordersSendToProvider = (
+    id: MaybeRef<string>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+      
+      return customInstance<SendOrderToProviderResponse>(
+      {url: `/api/v1/orders/${id}/send-to-provider`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getOrdersSendToProviderMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersSendToProvider>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersSendToProvider>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['ordersSendToProvider'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersSendToProvider>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  ordersSendToProvider(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersSendToProviderMutationResult = NonNullable<Awaited<ReturnType<typeof ordersSendToProvider>>>
+    
+    export type OrdersSendToProviderMutationError = unknown
+
+    /**
+ * @summary Send order to delivery provider API.
+ */
+export const useOrdersSendToProvider = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersSendToProvider>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof ordersSendToProvider>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersSendToProviderMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

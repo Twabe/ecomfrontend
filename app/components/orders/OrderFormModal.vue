@@ -361,14 +361,13 @@ const handleClose = () => {
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       {{ t('orders.city') }} <span class="text-red-500">*</span>
                     </label>
-                    <select
+                    <UiSearchableSelect
                       v-model="formData.cityId"
-                      required
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                      <option value="">{{ t('common.select') }}</option>
-                      <option v-for="city in cities" :key="city.id" :value="city.id">{{ city.name }}</option>
-                    </select>
+                      :options="cities"
+                      :placeholder="t('orders.searchCity', 'Rechercher une ville...')"
+                      :required="true"
+                      class="mt-1"
+                    />
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">

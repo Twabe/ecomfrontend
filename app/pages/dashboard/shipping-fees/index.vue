@@ -36,12 +36,12 @@
 
                       <div>
                         <label class="label">{{ $t('nav.cities') }} *</label>
-                        <select v-model="form.cityId" class="input" required>
-                          <option value="">{{ $t('common.select') }}...</option>
-                          <option v-for="city in citiesList" :key="city.id" :value="city.id">
-                            {{ city.name }}
-                          </option>
-                        </select>
+                        <UiSearchableSelect
+                          v-model="form.cityId"
+                          :options="citiesList"
+                          :placeholder="$t('orders.searchCity', 'Rechercher une ville...')"
+                          :required="true"
+                        />
                       </div>
                     </div>
 
@@ -145,13 +145,13 @@
             </option>
           </select>
         </div>
-        <div>
-          <select v-model="filterCityId" class="input" @change="handleFilterChange">
-            <option value="">{{ $t('common.all') }} {{ $t('nav.cities') }}</option>
-            <option v-for="city in citiesList" :key="city.id" :value="city.id">
-              {{ city.name }}
-            </option>
-          </select>
+        <div class="min-w-[200px]">
+          <UiSearchableSelect
+            v-model="filterCityId"
+            :options="citiesList"
+            :placeholder="$t('common.all') + ' ' + $t('nav.cities')"
+            @update:model-value="handleFilterChange"
+          />
         </div>
       </div>
     </div>
@@ -280,9 +280,9 @@ const {
   remove,
 } = useShippingFeesService()
 
-// Delivery companies and cities for dropdowns (using services which auto-fetch)
-const { items: deliveryCompaniesList } = useDeliveryCompaniesService()
-const { items: citiesList } = useCitiesService()
+// Delivery companies and cities for dropdowns (using services which auto-fetch, large page size for dropdown)
+const { items: deliveryCompaniesList } = useDeliveryCompaniesService({ initialParams: { pageSize: 100, pageNumber: 1 } })
+const { items: citiesList } = useCitiesService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
 
 // Modal state
 const showModal = ref(false)

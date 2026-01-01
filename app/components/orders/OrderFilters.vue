@@ -111,13 +111,13 @@ const showFilters = ref(false)
         <option :value="OrderState.Returned">{{ t('orders.statuses.returned') }}</option>
       </select>
 
-      <select
-        v-model="filters.cityId"
-        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-      >
-        <option value="">{{ t('orders.city') }}</option>
-        <option v-for="city in cities" :key="city.id" :value="city.id">{{ city.name }}</option>
-      </select>
+      <div class="min-w-[180px]">
+        <UiSearchableSelect
+          v-model="filters.cityId"
+          :options="cities"
+          :placeholder="t('orders.city')"
+        />
+      </div>
 
       <select
         v-model="filters.deliveryCompanyId"

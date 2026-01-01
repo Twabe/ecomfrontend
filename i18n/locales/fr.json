@@ -177,7 +177,8 @@
     "platformIntegrations": "Intégrations",
     "workerDashboard": "Tableau confirmateur",
     "supervisorDashboard": "Tableau superviseur",
-    "providerConnections": "Connexions fournisseurs"
+    "providerConnections": "Connexions fournisseurs",
+    "providerCities": "Villes fournisseurs"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -235,6 +236,7 @@
     "customer": "Client",
     "phone": "Téléphone",
     "city": "Ville",
+    "searchCity": "Rechercher une ville...",
     "total": "Total",
     "status": "Statut",
     "phase": "Phase",
@@ -332,7 +334,16 @@
     "ordersCancelled": "commande(s) annulée(s)",
     "ordersFailed": "commande(s) échouée(s)",
     "customReasonPlaceholder": "Saisir une raison personnalisée",
-    "reasonOrCustomRequired": "Sélectionnez une raison ou saisissez une raison personnalisée"
+    "reasonOrCustomRequired": "Sélectionnez une raison ou saisissez une raison personnalisée",
+    "providerLabel": "Étiquette {provider}",
+    "ourLabel": "Notre étiquette",
+    "printProviderLabel": "Imprimer étiquette provider",
+    "printingLabel": "Chargement...",
+    "noProviderLabel": "Provider ne supporte pas les étiquettes PDF",
+    "labelError": "Erreur lors du téléchargement de l'étiquette",
+    "bulkPrintLabels": "Étiquettes ({count})",
+    "labelsSuccess": "{count} étiquette(s) récupérée(s)",
+    "labelsFailed": "{count} échec(s)"
   },
   "delivery": {
     "company": "Société de livraison",
@@ -532,7 +543,11 @@
     "keyHint": "Utilisez uniquement des lettres minuscules, des chiffres et des underscores",
     "noChecklistItems": "Aucun élément dans la liste",
     "noChecklistItemsDescription": "Ajoutez des éléments pour créer votre liste de contrôle qualité",
-    "required": "Obligatoire"
+    "required": "Obligatoire",
+    "providerCities": "Villes fournisseurs",
+    "providerCitiesDesc": "Voir les villes supportées par les fournisseurs de livraison. Utilisez ceci pour vérifier les correspondances de noms de villes.",
+    "searchCities": "Rechercher des villes...",
+    "citiesFound": "{count} villes trouvées"
   },
   "sources": {
     "title": "Sources",
@@ -1360,6 +1375,8 @@
     "printLabel": "Imprimer étiquette",
     "reassignCallback": "Réassigner le rappel",
     "deliveryAssigned": "Société de livraison assignée avec succès",
+    "deliveryAssignedWithTracking": "Envoyé à {company} - Code suivi: {tracking}",
+    "deliveryAssignedApiError": "Assigné à {company} mais envoi API échoué: {error}",
     "currentLoad": "Charge actuelle",
     "inProgress": "en cours",
     "waiting": "en attente",

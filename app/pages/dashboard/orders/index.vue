@@ -69,14 +69,14 @@ const isQualityEnabled = computed(() => autoAssignmentSettings.value?.enableQual
 // Users service for workers dropdown
 const { users: workers } = useUsersService()
 
-// Dropdown data from services (auto-fetch)
-const { items: cities } = useCitiesService()
-const { items: products } = useProductsService()
-const { items: deliveryCompanies } = useDeliveryCompaniesService()
-const { items: subDeliveryCompanies } = useSubDeliveryCompaniesService()
-const { items: sources } = useSourcesService()
-const { items: stores } = useStoresService()
-const { items: reasons } = useReasonsService()
+// Dropdown data from services (auto-fetch with large page size for dropdowns)
+const { items: cities } = useCitiesService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
+const { items: products } = useProductsService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
+const { items: deliveryCompanies } = useDeliveryCompaniesService({ initialParams: { pageSize: 100, pageNumber: 1 } })
+const { items: subDeliveryCompanies } = useSubDeliveryCompaniesService({ initialParams: { pageSize: 500, pageNumber: 1 } })
+const { items: sources } = useSourcesService({ initialParams: { pageSize: 100, pageNumber: 1 } })
+const { items: stores } = useStoresService({ initialParams: { pageSize: 100, pageNumber: 1 } })
+const { items: reasons } = useReasonsService({ initialParams: { pageSize: 100, pageNumber: 1 } })
 
 // Search & Filters - Initialize from URL query params
 // Default: isArchived = false (show only non-archived orders)

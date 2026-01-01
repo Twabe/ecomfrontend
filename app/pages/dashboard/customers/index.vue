@@ -69,12 +69,11 @@
 
                     <div>
                       <label class="label">{{ $t('customers.city') }}</label>
-                      <select v-model="form.defaultCityId" class="input">
-                        <option value="">{{ $t('common.select') }}</option>
-                        <option v-for="city in citiesList" :key="city.id" :value="city.id">
-                          {{ city.name }}
-                        </option>
-                      </select>
+                      <UiSearchableSelect
+                        v-model="form.defaultCityId"
+                        :options="citiesList"
+                        :placeholder="$t('orders.searchCity', 'Rechercher une ville...')"
+                      />
                     </div>
 
                     <div>
@@ -348,8 +347,8 @@ const {
   removeFromBlacklist,
 } = useCustomersService()
 
-// Cities for dropdown (using service's items which auto-fetch)
-const { items: citiesList } = useCitiesService()
+// Cities for dropdown (using service's items which auto-fetch, large page size for dropdown)
+const { items: citiesList } = useCitiesService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
 
 // Modal state
 const showModal = ref(false)

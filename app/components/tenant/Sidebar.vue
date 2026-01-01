@@ -257,6 +257,7 @@
           </button>
           <Transition name="slide">
             <ul v-if="expandedSections.delivery && !isCollapsed" class="mt-1 ml-8 space-y-1">
+              <!-- OLD: Replaced by Provider Connections (Shadow Entity Pattern)
               <li v-if="canAccessDeliveryCompanies">
                 <NuxtLink to="/dashboard/delivery-companies" class="nav-link text-sm py-2">
                   {{ $t('nav.deliveryCompanies') }}
@@ -267,6 +268,13 @@
                   {{ $t('nav.subDeliveryCompanies') }}
                 </NuxtLink>
               </li>
+              -->
+              <!-- Provider Connections - always visible for now (TODO: add proper permission) -->
+              <li>
+                <NuxtLink to="/dashboard/delivery-providers" class="nav-link text-sm py-2">
+                  {{ $t('nav.providerConnections') }}
+                </NuxtLink>
+              </li>
               <li v-if="canAccessShippingFees">
                 <NuxtLink to="/dashboard/shipping-fees" class="nav-link text-sm py-2">
                   {{ $t('nav.shippingFees') }}
@@ -275,11 +283,6 @@
               <li v-if="canAccessDeliveryNotes">
                 <NuxtLink to="/dashboard/delivery-notes" class="nav-link text-sm py-2">
                   {{ $t('nav.deliveryNotes') }}
-                </NuxtLink>
-              </li>
-              <li v-if="canAccessProviderConnections">
-                <NuxtLink to="/dashboard/delivery-providers" class="nav-link text-sm py-2">
-                  {{ $t('nav.providerConnections') }}
                 </NuxtLink>
               </li>
             </ul>
@@ -502,6 +505,11 @@
               <li v-if="canAccessStockSettings">
                 <NuxtLink to="/dashboard/settings/stock" class="nav-link text-sm py-2">
                   {{ $t('nav.stockSettings') }}
+                </NuxtLink>
+              </li>
+              <li v-if="canAccessDeliveryCompanies">
+                <NuxtLink to="/dashboard/settings/provider-cities" class="nav-link text-sm py-2">
+                  {{ $t('nav.providerCities', 'Provider Cities') }}
                 </NuxtLink>
               </li>
               <li v-if="canAccessRoles">

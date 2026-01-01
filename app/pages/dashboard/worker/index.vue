@@ -594,8 +594,8 @@ const deliveryCompaniesService = useDeliveryCompaniesService()
 const subDeliveryCompaniesService = useSubDeliveryCompaniesService()
 const reasonsService = useReasonsService()
 const autoAssignmentSettingsService = useAutoAssignmentSettingsService()
-const { items: cities } = useCitiesService()
-const { items: products } = useProductsService()
+const { items: cities } = useCitiesService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
+const { items: products } = useProductsService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
 
 // Check if Quality is enabled in auto-assignment settings
 const isQualityEnabled = computed(() => autoAssignmentSettingsService.settings.value?.enableQualityCheck ?? false)
@@ -1186,7 +1186,23 @@ const submitAssignDelivery = async (data: AssignDeliveryCompanyRequest) => {
   if (!data.orderId) return
   isAssigningDelivery.value = true
   try {
-    await ordersWorkflow.assignDeliveryCompany(data)
+    const result = await ordersWorkflow.assignDeliveryCompany(data)
+
+    // Show tracking code if provider API returned one
+    if (result.sendToProviderSuccess && result.trackingCode) {
+      notification.success(t('worker.deliveryAssignedWithTracking', {
+        company: result.deliveryCompanyName,
+        tracking: result.trackingCode
+      }))
+    } else if (result.sendToProviderError) {
+      // Order was assigned but API send failed - show warning
+      notification.warning(t('worker.deliveryAssignedApiError', {
+        company: result.deliveryCompanyName,
+        error: result.sendToProviderError
+      }))
+    }
+    // Note: success notification is already shown by the service
+
     closeAssignDeliveryModal()
     await refreshAll()
   } finally {

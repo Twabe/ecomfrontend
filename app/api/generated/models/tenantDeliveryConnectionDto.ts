@@ -29,6 +29,10 @@ export interface TenantDeliveryConnectionDto {
   /** @nullable */
   notes?: string | null;
   /** @nullable */
+  deliveryCompanyId?: string | null;
+  /** @nullable */
+  deliveryCompanyName?: string | null;
+  /** @nullable */
   templateName?: string | null;
   /** @nullable */
   templateCode?: string | null;

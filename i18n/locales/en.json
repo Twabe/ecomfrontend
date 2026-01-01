@@ -173,7 +173,8 @@
     "stockSettings": "Stock Settings",
     "qualityChecklist": "Quality Checklist",
     "roles": "Roles & Permissions",
-    "providerConnections": "Provider Connections"
+    "providerConnections": "Provider Connections",
+    "providerCities": "Provider Cities"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -229,6 +230,7 @@
     "customer": "Customer",
     "phone": "Phone",
     "city": "City",
+    "searchCity": "Search for a city...",
     "total": "Total",
     "status": "Status",
     "phase": "Phase",
@@ -323,7 +325,16 @@
     "ordersCancelled": "order(s) cancelled",
     "ordersFailed": "order(s) failed",
     "customReasonPlaceholder": "Enter a custom reason",
-    "reasonOrCustomRequired": "Select a reason or enter a custom reason"
+    "reasonOrCustomRequired": "Select a reason or enter a custom reason",
+    "providerLabel": "{provider} Label",
+    "ourLabel": "Our Label",
+    "printProviderLabel": "Print Provider Label",
+    "printingLabel": "Loading...",
+    "noProviderLabel": "Provider does not support PDF labels",
+    "labelError": "Error downloading label",
+    "bulkPrintLabels": "Labels ({count})",
+    "labelsSuccess": "{count} label(s) retrieved",
+    "labelsFailed": "{count} failed"
   },
   "delivery": {
     "company": "Delivery Company",
@@ -509,7 +520,11 @@
     "timeFormat": "Time Format",
     "orderSettings": "Order Settings",
     "orderPrefix": "Order Prefix",
-    "saveSettings": "Save Settings"
+    "saveSettings": "Save Settings",
+    "providerCities": "Provider Cities",
+    "providerCitiesDesc": "View cities supported by delivery providers. Use this to verify city name matches.",
+    "searchCities": "Search cities...",
+    "citiesFound": "{count} cities found"
   },
   "reasons": {
     "type": "Type",
@@ -1273,6 +1288,8 @@
     "printLabel": "Print Label",
     "reassignCallback": "Reassign Callback",
     "deliveryAssigned": "Delivery company assigned successfully",
+    "deliveryAssignedWithTracking": "Sent to {company} - Tracking: {tracking}",
+    "deliveryAssignedApiError": "Assigned to {company} but API send failed: {error}",
     "currentLoad": "Current Load",
     "inProgress": "in progress",
     "waiting": "waiting",
