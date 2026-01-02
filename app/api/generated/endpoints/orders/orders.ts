@@ -54,6 +54,8 @@ import type {
   CreateOrderRequest,
   ErrorResult,
   GetAvailableOrdersForGrabbingRequest,
+  GetBulkProviderLabelsRequest,
+  GetBulkProviderLabelsResponse,
   GetNewOrdersRequest,
   GetOrdersByCodesRequest,
   GetOrdersPendingDeliveryAssignmentRequest,
@@ -2160,6 +2162,138 @@ export const useOrdersBulkMoveToShipping = <TError = unknown,
       > => {
 
       const mutationOptions = getOrdersBulkMoveToShippingMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Get shipping label from delivery provider.
+ */
+export const ordersGetProviderLabel = (
+    id: MaybeRef<string>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+      
+      return customInstance<void>(
+      {url: `/api/v1/orders/${id}/provider-label`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getOrdersGetProviderLabelQueryKey = (id?: MaybeRef<string>,) => {
+    return [
+    'api','v1','orders',id,'provider-label'
+    ] as const;
+    }
+
+    
+export const getOrdersGetProviderLabelQueryOptions = <TData = Awaited<ReturnType<typeof ordersGetProviderLabel>>, TError = HttpValidationProblemDetails | ErrorResult>(id: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersGetProviderLabel>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  getOrdersGetProviderLabelQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersGetProviderLabel>>> = ({ signal }) => ordersGetProviderLabel(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(id))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersGetProviderLabel>>, TError, TData> 
+}
+
+export type OrdersGetProviderLabelQueryResult = NonNullable<Awaited<ReturnType<typeof ordersGetProviderLabel>>>
+export type OrdersGetProviderLabelQueryError = HttpValidationProblemDetails | ErrorResult
+
+
+/**
+ * @summary Get shipping label from delivery provider.
+ */
+
+export function useOrdersGetProviderLabel<TData = Awaited<ReturnType<typeof ordersGetProviderLabel>>, TError = HttpValidationProblemDetails | ErrorResult>(
+ id: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersGetProviderLabel>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersGetProviderLabelQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Get bulk shipping labels from delivery providers.
+ */
+export const ordersGetBulkProviderLabels = (
+    getBulkProviderLabelsRequest: MaybeRef<GetBulkProviderLabelsRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      getBulkProviderLabelsRequest = unref(getBulkProviderLabelsRequest);
+      
+      return customInstance<GetBulkProviderLabelsResponse>(
+      {url: `/api/v1/orders/bulk-provider-labels`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: getBulkProviderLabelsRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getOrdersGetBulkProviderLabelsMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersGetBulkProviderLabels>>, TError,{data: GetBulkProviderLabelsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersGetBulkProviderLabels>>, TError,{data: GetBulkProviderLabelsRequest}, TContext> => {
+
+const mutationKey = ['ordersGetBulkProviderLabels'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersGetBulkProviderLabels>>, {data: GetBulkProviderLabelsRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersGetBulkProviderLabels(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersGetBulkProviderLabelsMutationResult = NonNullable<Awaited<ReturnType<typeof ordersGetBulkProviderLabels>>>
+    export type OrdersGetBulkProviderLabelsMutationBody = GetBulkProviderLabelsRequest
+    export type OrdersGetBulkProviderLabelsMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Get bulk shipping labels from delivery providers.
+ */
+export const useOrdersGetBulkProviderLabels = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersGetBulkProviderLabels>>, TError,{data: GetBulkProviderLabelsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof ordersGetBulkProviderLabels>>,
+        TError,
+        {data: GetBulkProviderLabelsRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersGetBulkProviderLabelsMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

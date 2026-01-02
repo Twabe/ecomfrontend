@@ -2,11 +2,13 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { TrashIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { shippingFeesSearch } from '~/api/generated/endpoints/shipping-fees/shipping-fees'
+import { cityLocationMappingsGetByCompany } from '~/api/generated/endpoints/city-location-mappings/city-location-mappings'
 import { useProductVariantsByProduct } from '~/services'
 import type { Order, CreateOrderRequest, UpdateOrderRequest, CreateOrderItemRequest } from '~/types/order'
 import type { City } from '~/types/city'
 import type { Product } from '~/types/product'
 import type { DeliveryCompany } from '~/types/deliverycompany'
+import type { DeliveryCompanyCityDto } from '~/api/generated/models'
 
 const props = withDefaults(defineProps<{
   show: boolean
@@ -31,7 +33,7 @@ const { t } = useI18n()
 
 const isEdit = computed(() => !!props.order)
 
-const formData = ref<Partial<CreateOrderRequest>>({
+const formData = ref<Partial<CreateOrderRequest & { deliveryLocationId?: string }>>({
   code: '',
   fullName: '',
   phone: '',
@@ -40,8 +42,13 @@ const formData = ref<Partial<CreateOrderRequest>>({
   items: [],
   price: 0,
   fees: 0,
-  deliveryCompanyId: ''
+  deliveryCompanyId: '',
+  deliveryLocationId: ''
 })
+
+// Delivery company cities (loaded when delivery company is selected)
+const deliveryCities = ref<DeliveryCompanyCityDto[]>([])
+const isLoadingDeliveryCities = ref(false)
 
 const newItem = ref<CreateOrderItemRequest>({
   productId: '',
@@ -174,6 +181,28 @@ watch(
   }
 )
 
+// Watch for delivery company changes to load delivery cities
+watch(
+  () => formData.value.deliveryCompanyId,
+  async (deliveryCompanyId) => {
+    // Reset delivery location when company changes
+    formData.value.deliveryLocationId = ''
+    deliveryCities.value = []
+
+    if (deliveryCompanyId) {
+      isLoadingDeliveryCities.value = true
+      try {
+        const cities = await cityLocationMappingsGetByCompany(deliveryCompanyId)
+        deliveryCities.value = cities
+      } catch {
+        deliveryCities.value = []
+      } finally {
+        isLoadingDeliveryCities.value = false
+      }
+    }
+  }
+)
+
 const generateOrderCode = () => {
   const prefix = 'CMD'
   const timestamp = Date.now().toString(36).toUpperCase()
@@ -265,6 +294,7 @@ const handleSubmit = () => {
     ...formData.value,
     deliveryCompanyId: formData.value.deliveryCompanyId || undefined,
     subDeliveryCompanyId: formData.value.subDeliveryCompanyId || undefined,
+    deliveryLocationId: formData.value.deliveryLocationId || undefined,
     storeId: formData.value.storeId || undefined,
     sourceId: formData.value.sourceId || undefined,
     trackingStateId: formData.value.trackingStateId || undefined,
@@ -382,18 +412,37 @@ const handleClose = () => {
                   </div>
                 </div>
 
-                <!-- Delivery Company -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ t('nav.deliveryCompanies') }}
-                  </label>
-                  <select
-                    v-model="formData.deliveryCompanyId"
-                    class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">{{ t('common.select') }}</option>
-                    <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">{{ dc.name }}</option>
-                  </select>
+                <!-- Delivery Company & Location -->
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {{ t('nav.deliveryCompanies') }}
+                    </label>
+                    <select
+                      v-model="formData.deliveryCompanyId"
+                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="">{{ t('common.select') }}</option>
+                      <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">{{ dc.name }}</option>
+                    </select>
+                  </div>
+                  <!-- Delivery Location (shown when delivery company is selected) -->
+                  <div v-if="formData.deliveryCompanyId">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {{ t('orders.deliveryCity', 'Ville de livraison') }}
+                    </label>
+                    <select
+                      v-model="formData.deliveryLocationId"
+                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      :disabled="isLoadingDeliveryCities"
+                    >
+                      <option value="">{{ isLoadingDeliveryCities ? t('common.loading') : t('common.select') }}</option>
+                      <option v-for="city in deliveryCities" :key="city.id" :value="city.id">
+                        {{ city.externalName }}
+                        <template v-if="city.deliveryFee"> - {{ formatCurrency(city.deliveryFee) }}</template>
+                      </option>
+                    </select>
+                  </div>
                 </div>
 
                 <!-- Items Section - Show in both Create and Edit modes -->

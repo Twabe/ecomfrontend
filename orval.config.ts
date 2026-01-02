@@ -3,7 +3,8 @@ import { defineConfig } from 'orval'
 export default defineConfig({
   ecommerce: {
     input: {
-      target: '../SWAGGER/swagger.json',
+      target: 'https://localhost:5001/swagger/v1/swagger.json',
+      validation: false,
     },
     output: {
       mode: 'tags-split',
