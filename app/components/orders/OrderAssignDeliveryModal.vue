@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import { cityLocationMappingsGetByCompany } from '~/api/generated/endpoints/city-location-mappings/city-location-mappings'
 import type { Order } from '~/types/order'
+import type { DeliveryCompanyCityDto } from '~/api/generated/models/deliveryCompanyCityDto'
 import { ServiceTypes, OrderPhase, OrderState } from '~/constants/order'
 
 interface DeliveryCompany {
@@ -24,14 +26,27 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: []
-  confirm: [data: { orderIds: string[]; deliveryCompanyId: string; subDeliveryCompanyId?: string }]
+  confirm: [data: { orderIds: string[]; deliveryCompanyId: string; subDeliveryCompanyId?: string; deliveryLocationId?: string }]
 }>()
 
 const { t } = useI18n()
 
 const deliveryCompanyId = ref('')
 const subDeliveryCompanyId = ref('')
+const deliveryLocationId = ref('')
 const isSubmitting = ref(false)
+
+// Delivery cities for selected company
+const deliveryCities = ref<DeliveryCompanyCityDto[]>([])
+const isLoadingCities = ref(false)
+
+// Convert to options format for UiSearchableSelect
+const deliveryCitiesOptions = computed(() => {
+  return deliveryCities.value.map(city => ({
+    id: city.id || '',
+    name: city.externalName || ''
+  }))
+})
 
 // Filter orders that can have delivery assigned
 const validOrders = computed(() => {
@@ -49,6 +64,21 @@ const invalidOrders = computed(() => {
   return props.orders.filter(order => !validOrders.value.includes(order))
 })
 
+// Check if single order with existing delivery location
+const isSingleOrderWithCity = computed(() => {
+  return validOrders.value.length === 1 && validOrders.value[0].deliveryLocationId
+})
+
+// Get the single order's existing city info
+const singleOrderCity = computed(() => {
+  if (!isSingleOrderWithCity.value) return null
+  const order = validOrders.value[0]
+  return {
+    id: order.deliveryLocationId,
+    name: order.deliveryLocationName || order.sourceCity || order.cityName || ''
+  }
+})
+
 // Filter sub-delivery companies based on selected delivery company
 const filteredSubDeliveryCompanies = computed(() => {
   if (!deliveryCompanyId.value) return []
@@ -62,13 +92,30 @@ watch(() => props.show, (val) => {
   if (val) {
     deliveryCompanyId.value = ''
     subDeliveryCompanyId.value = ''
+    deliveryLocationId.value = ''
+    deliveryCities.value = []
     isSubmitting.value = false
   }
 })
 
-// Reset sub-delivery when delivery company changes
-watch(deliveryCompanyId, () => {
+// Load cities when delivery company changes
+watch(deliveryCompanyId, async (newId) => {
   subDeliveryCompanyId.value = ''
+  deliveryLocationId.value = ''
+  deliveryCities.value = []
+
+  if (newId) {
+    isLoadingCities.value = true
+    try {
+      const cities = await cityLocationMappingsGetByCompany(newId)
+      deliveryCities.value = cities || []
+    } catch (error) {
+      console.error('Failed to load delivery cities:', error)
+      deliveryCities.value = []
+    } finally {
+      isLoadingCities.value = false
+    }
+  }
 })
 
 const canSubmit = computed(() => {
@@ -78,10 +125,18 @@ const canSubmit = computed(() => {
 const handleConfirm = () => {
   if (!canSubmit.value) return
   isSubmitting.value = true
+
+  // For single order with existing city, use that city
+  // For bulk or new city selection, use the selected value
+  const finalDeliveryLocationId = isSingleOrderWithCity.value
+    ? singleOrderCity.value?.id
+    : (deliveryLocationId.value || undefined)
+
   emit('confirm', {
     orderIds: validOrders.value.map(o => o.id),
     deliveryCompanyId: deliveryCompanyId.value,
-    subDeliveryCompanyId: subDeliveryCompanyId.value || undefined
+    subDeliveryCompanyId: subDeliveryCompanyId.value || undefined,
+    deliveryLocationId: finalDeliveryLocationId
   })
 }
 
@@ -164,6 +219,34 @@ const handleClose = () => {
                       {{ sub.name }}
                     </option>
                   </select>
+                </div>
+
+                <!-- Delivery City - Show existing city for single order (readonly) -->
+                <div v-if="isSingleOrderWithCity && singleOrderCity">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('orders.deliveryCity', 'Ville de livraison') }}
+                  </label>
+                  <div class="mt-1 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-green-800 dark:border-green-600 dark:bg-green-900/20 dark:text-green-200">
+                    {{ singleOrderCity.name }}
+                  </div>
+                  <p class="mt-1 text-xs text-gray-500">{{ t('orders.cityAlreadySelected', 'Ville déjà sélectionnée par le confirmateur') }}</p>
+                </div>
+
+                <!-- Delivery City selector (for bulk orders or orders without city) -->
+                <div v-else-if="deliveryCompanyId">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('orders.deliveryCity', 'Ville de livraison') }}
+                  </label>
+                  <UiSearchableSelect
+                    v-model="deliveryLocationId"
+                    :options="deliveryCitiesOptions"
+                    :placeholder="isLoadingCities ? t('common.loading') : t('orders.searchDeliveryCity', 'Rechercher une ville...')"
+                    :disabled="isSubmitting || isLoadingCities"
+                    class="mt-1"
+                  />
+                  <p v-if="deliveryCities.length > 0" class="mt-1 text-xs text-gray-500">
+                    {{ deliveryCities.length }} {{ t('orders.citiesAvailable', 'villes disponibles') }}
+                  </p>
                 </div>
               </div>
 

@@ -79,4 +79,10 @@ export interface UpdateOrderRequest {
   utm1?: string | null;
   /** @nullable */
   utm2?: string | null;
+  /**
+   * Delivery location from CityLocationMappings.
+Selected by Confirmateur when assigning delivery company.
+   * @nullable
+   */
+  deliveryLocationId?: string | null;
 }

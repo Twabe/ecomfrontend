@@ -154,15 +154,6 @@
                       <CloudArrowDownIcon v-else class="w-4 h-4" />
                       {{ $t('cityMappings.sync', 'Sync') }}
                     </button>
-                    <button
-                      @click="autoMatchCompany(company.id!)"
-                      :disabled="autoMatchingCompanyId === company.id"
-                      class="px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 border border-indigo-600 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg disabled:opacity-50 flex items-center gap-1"
-                    >
-                      <ArrowPathIcon v-if="autoMatchingCompanyId === company.id" class="w-4 h-4 animate-spin" />
-                      <SparklesIcon v-else class="w-4 h-4" />
-                      {{ $t('cityMappings.autoMatch', 'Auto-Match') }}
-                    </button>
                     <NuxtLink
                       :to="`/super-admin/city-mappings/${company.id}`"
                       class="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg flex items-center gap-1"
@@ -223,7 +214,6 @@ import {
   ExclamationTriangleIcon,
   ArrowPathIcon,
   CloudArrowDownIcon,
-  SparklesIcon,
   EyeIcon,
   XCircleIcon,
 } from '@heroicons/vue/24/outline'
@@ -233,7 +223,6 @@ import {
 import {
   useCityLocationMappingsSearch,
   useCityLocationMappingsSync,
-  useCityLocationMappingsAutoMatch,
 } from '~/api/generated/endpoints/city-location-mappings/city-location-mappings'
 import type { DeliveryCompanyDto } from '~/api/generated/models/deliveryCompanyDto'
 import type { CityLocationMappingDto } from '~/api/generated/models/cityLocationMappingDto'
@@ -250,7 +239,6 @@ const { t } = useI18n()
 const searchCompanies = useDeliveryCompaniesSearch()
 const searchMappings = useCityLocationMappingsSearch()
 const syncMutation = useCityLocationMappingsSync()
-const autoMatchMutation = useCityLocationMappingsAutoMatch()
 
 // Data
 const deliveryCompanies = ref<DeliveryCompanyDto[]>([])
@@ -258,7 +246,6 @@ const allMappings = ref<CityLocationMappingDto[]>([])
 const isLoadingCompanies = ref(true)
 const isRefreshing = ref(false)
 const syncingCompanyId = ref<string | null>(null)
-const autoMatchingCompanyId = ref<string | null>(null)
 const recentSyncResults = ref<LocationSyncResultDto[]>([])
 
 // Computed
@@ -349,30 +336,6 @@ const syncCompany = async (companyId: string) => {
     })
   } finally {
     syncingCompanyId.value = null
-  }
-}
-
-// Auto-match company
-const autoMatchCompany = async (companyId: string) => {
-  autoMatchingCompanyId.value = companyId
-  try {
-    const matchedCount = await autoMatchMutation.mutateAsync({ deliveryCompanyId: companyId })
-    // Show success message
-    recentSyncResults.value.unshift({
-      deliveryCompanyId: companyId,
-      providerCode: deliveryCompanies.value.find(c => c.id === companyId)?.type ?? 'Unknown',
-      success: true,
-      totalCities: matchedCount,
-      newMappings: matchedCount,
-      updatedMappings: 0,
-      syncedAt: new Date().toISOString(),
-    })
-    // Refresh mappings
-    await loadData()
-  } catch (error) {
-    console.error('Auto-match failed:', error)
-  } finally {
-    autoMatchingCompanyId.value = null
   }
 }
 

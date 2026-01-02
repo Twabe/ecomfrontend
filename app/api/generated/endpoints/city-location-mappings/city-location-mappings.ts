@@ -32,6 +32,7 @@ import type {
 import type {
   CityLocationMappingDto,
   CreateCityLocationMappingRequest,
+  DeliveryCompanyCityDto,
   ErrorResult,
   HttpValidationProblemDetails,
   LocationSyncResultDto,
@@ -432,65 +433,70 @@ export const useCityLocationMappingsSync = <TError = unknown,
       return useMutation(mutationOptions, queryClient);
     }
     /**
- * @summary Auto-match unmapped cities to internal cities.
+ * @summary Get all cities for a specific delivery company.
  */
-export const cityLocationMappingsAutoMatch = (
+export const cityLocationMappingsGetByCompany = (
     deliveryCompanyId: MaybeRef<string>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       deliveryCompanyId = unref(deliveryCompanyId);
       
-      return customInstance<number>(
-      {url: `/api/v1/citylocationmappings/auto-match/${deliveryCompanyId}`, method: 'POST', signal
+      return customInstance<DeliveryCompanyCityDto[]>(
+      {url: `/api/v1/citylocationmappings/by-company/${deliveryCompanyId}`, method: 'GET', signal
     },
       options);
     }
   
 
 
-export const getCityLocationMappingsAutoMatchMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cityLocationMappingsAutoMatch>>, TError,{deliveryCompanyId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof cityLocationMappingsAutoMatch>>, TError,{deliveryCompanyId: string}, TContext> => {
 
-const mutationKey = ['cityLocationMappingsAutoMatch'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+export const getCityLocationMappingsGetByCompanyQueryKey = (deliveryCompanyId?: MaybeRef<string>,) => {
+    return [
+    'api','v1','citylocationmappings','by-company',deliveryCompanyId
+    ] as const;
+    }
+
+    
+export const getCityLocationMappingsGetByCompanyQueryOptions = <TData = Awaited<ReturnType<typeof cityLocationMappingsGetByCompany>>, TError = HttpValidationProblemDetails | ErrorResult>(deliveryCompanyId: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cityLocationMappingsGetByCompany>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  getCityLocationMappingsGetByCompanyQueryKey(deliveryCompanyId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof cityLocationMappingsGetByCompany>>> = ({ signal }) => cityLocationMappingsGetByCompany(deliveryCompanyId, requestOptions, signal);
 
       
 
+      
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cityLocationMappingsAutoMatch>>, {deliveryCompanyId: string}> = (props) => {
-          const {deliveryCompanyId} = props ?? {};
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(deliveryCompanyId))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof cityLocationMappingsGetByCompany>>, TError, TData> 
+}
 
-          return  cityLocationMappingsAutoMatch(deliveryCompanyId,requestOptions)
-        }
-
-        
+export type CityLocationMappingsGetByCompanyQueryResult = NonNullable<Awaited<ReturnType<typeof cityLocationMappingsGetByCompany>>>
+export type CityLocationMappingsGetByCompanyQueryError = HttpValidationProblemDetails | ErrorResult
 
 
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CityLocationMappingsAutoMatchMutationResult = NonNullable<Awaited<ReturnType<typeof cityLocationMappingsAutoMatch>>>
-    
-    export type CityLocationMappingsAutoMatchMutationError = unknown
-
-    /**
- * @summary Auto-match unmapped cities to internal cities.
+/**
+ * @summary Get all cities for a specific delivery company.
  */
-export const useCityLocationMappingsAutoMatch = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cityLocationMappingsAutoMatch>>, TError,{deliveryCompanyId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationReturnType<
-        Awaited<ReturnType<typeof cityLocationMappingsAutoMatch>>,
-        TError,
-        {deliveryCompanyId: string},
-        TContext
-      > => {
 
-      const mutationOptions = getCityLocationMappingsAutoMatchMutationOptions(options);
+export function useCityLocationMappingsGetByCompany<TData = Awaited<ReturnType<typeof cityLocationMappingsGetByCompany>>, TError = HttpValidationProblemDetails | ErrorResult>(
+ deliveryCompanyId: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cityLocationMappingsGetByCompany>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-      return useMutation(mutationOptions, queryClient);
-    }
-    
+  const queryOptions = getCityLocationMappingsGetByCompanyQueryOptions(deliveryCompanyId,options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+

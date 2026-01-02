@@ -121,6 +121,7 @@ export * from './dashboardStatsDto';
 export * from './dayOfWeek';
 export * from './deallocatePaymentRequest';
 export * from './deliveryCompaniesGetProviderCitiesParams';
+export * from './deliveryCompanyCityDto';
 export * from './deliveryCompanyDto';
 export * from './deliveryCompanyDtoPaymentDayOfWeek';
 export * from './deliveryCompanyPaymentDto';

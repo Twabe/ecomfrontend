@@ -67,8 +67,18 @@ const handleClose = () => {
                   <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
                     <div><span class="text-gray-500">{{ t('common.name') }}:</span> {{ order.fullName }}</div>
                     <div><span class="text-gray-500">{{ t('orders.phone') }}:</span> {{ order.phone }}</div>
-                    <div><span class="text-gray-500">{{ t('orders.city') }}:</span> {{ order.cityName }}</div>
-                    <div><span class="text-gray-500">{{ t('common.address') }}:</span> {{ order.address }}</div>
+                    <div v-if="order.sourceCity">
+                      <span class="text-gray-500">{{ t('orders.sourceCity', 'Ville (source)') }}:</span>
+                      <span class="text-amber-600 dark:text-amber-400">{{ order.sourceCity }}</span>
+                    </div>
+                    <div v-if="order.deliveryLocationName">
+                      <span class="text-gray-500">{{ t('orders.deliveryCity', 'Ville livraison') }}:</span>
+                      <span class="text-green-600 dark:text-green-400">{{ order.deliveryLocationName }}</span>
+                    </div>
+                    <div v-else-if="order.cityName">
+                      <span class="text-gray-500">{{ t('orders.city') }}:</span> {{ order.cityName }}
+                    </div>
+                    <div class="col-span-2"><span class="text-gray-500">{{ t('common.address') }}:</span> {{ order.address }}</div>
                   </div>
                 </div>
 

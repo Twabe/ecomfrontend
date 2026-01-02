@@ -77,6 +77,12 @@ export interface OrderDto {
   /** @nullable */
   platformSource?: string | null;
   /** @nullable */
+  sourceCity?: string | null;
+  /** @nullable */
+  deliveryLocationId?: string | null;
+  /** @nullable */
+  deliveryLocationName?: string | null;
+  /** @nullable */
   moderatorId?: string | null;
   /** @nullable */
   mediaBuyerId?: string | null;

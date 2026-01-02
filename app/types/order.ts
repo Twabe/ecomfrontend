@@ -96,6 +96,13 @@ export interface Order {
   platformOrderId?: string
   platformSource?: string
 
+  // Source City (from external platform, may contain typos)
+  sourceCity?: string
+
+  // Delivery Location (from CityLocationMappings - selected by Confirmateur)
+  deliveryLocationId?: string
+  deliveryLocationName?: string
+
   // Workers (workerId removed - use activeAssignments instead)
   moderatorId?: string
   mediaBuyerId?: string
@@ -191,7 +198,8 @@ export interface CreateOrderRequest {
   items: CreateOrderItemRequest[]
   fullName: string
   phone: string
-  cityId: string
+  // Internal city - optional when deliveryLocationId is provided
+  cityId?: string
   address: string
   price?: number
   fees?: number
@@ -204,6 +212,10 @@ export interface CreateOrderRequest {
   subDeliveryCompanyId?: string
   storeId?: string
   sourceId?: string
+  // City name as text (can be in Arabic or misspelled)
+  sourceCity?: string
+  // Delivery location from CityLocationMappings (selected when delivery company is chosen)
+  deliveryLocationId?: string
 }
 
 // Update Order Request
@@ -234,6 +246,10 @@ export interface UpdateOrderRequest {
   note?: string
   utm1?: string
   utm2?: string
+  // City name as text (can be in Arabic or misspelled)
+  sourceCity?: string
+  // Delivery location from CityLocationMappings (selected by Confirmateur)
+  deliveryLocationId?: string
 }
 
 // Confirm Order Request

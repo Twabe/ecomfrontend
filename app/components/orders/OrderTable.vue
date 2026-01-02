@@ -354,8 +354,19 @@ const handleAction = (action: string, order: Order) => {
               <div class="font-medium text-gray-900 dark:text-white">{{ order.fullName }}</div>
               <div class="text-sm text-gray-500">{{ order.phone }}</div>
             </td>
-            <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-              {{ order.cityName }}
+            <td class="px-4 py-3 text-sm">
+              <!-- Show delivery location if assigned -->
+              <div v-if="order.deliveryLocationName" class="text-green-600 dark:text-green-400 font-medium">
+                {{ order.deliveryLocationName }}
+              </div>
+              <!-- Otherwise show cityName -->
+              <div v-else-if="order.cityName" class="text-gray-700 dark:text-gray-300">
+                {{ order.cityName }}
+              </div>
+              <!-- Show source city if different and exists -->
+              <div v-if="order.sourceCity && order.sourceCity !== order.deliveryLocationName && order.sourceCity !== order.cityName" class="text-xs text-amber-600 dark:text-amber-400">
+                ({{ order.sourceCity }})
+              </div>
             </td>
             <td class="px-4 py-3">
               <div v-if="order.deliveryCompanyName">

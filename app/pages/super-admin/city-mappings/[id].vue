@@ -28,15 +28,6 @@
           <CloudArrowDownIcon v-else class="w-4 h-4" />
           {{ $t('cityMappings.sync', 'Sync Cities') }}
         </button>
-        <button
-          @click="autoMatch"
-          :disabled="isAutoMatching"
-          class="px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 border border-indigo-600 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg disabled:opacity-50 flex items-center gap-2"
-        >
-          <ArrowPathIcon v-if="isAutoMatching" class="w-4 h-4 animate-spin" />
-          <SparklesIcon v-else class="w-4 h-4" />
-          {{ $t('cityMappings.autoMatch', 'Auto-Match All') }}
-        </button>
       </div>
     </div>
 
@@ -288,7 +279,6 @@ import {
   ExclamationTriangleIcon,
   ArrowPathIcon,
   CloudArrowDownIcon,
-  SparklesIcon,
   HandRaisedIcon,
 } from '@heroicons/vue/24/outline'
 import {
@@ -297,7 +287,6 @@ import {
 import {
   useCityLocationMappingsSearch,
   useCityLocationMappingsSync,
-  useCityLocationMappingsAutoMatch,
   useCityLocationMappingsUpdate,
 } from '~/api/generated/endpoints/city-location-mappings/city-location-mappings'
 import {
@@ -320,7 +309,6 @@ const { data: company, isLoading: isLoadingCompany } = useDeliveryCompaniesGet(c
 const searchMappings = useCityLocationMappingsSearch()
 const searchCities = useCitiesSearch()
 const syncMutation = useCityLocationMappingsSync()
-const autoMatchMutation = useCityLocationMappingsAutoMatch()
 const updateMutation = useCityLocationMappingsUpdate()
 
 // Data
@@ -328,7 +316,6 @@ const mappings = ref<CityLocationMappingDto[]>([])
 const localCities = ref<CityDto[]>([])
 const isLoading = ref(true)
 const isSyncing = ref(false)
-const isAutoMatching = ref(false)
 const isSavingMapping = ref(false)
 const editingMappingId = ref<string | null>(null)
 const selectedCityId = ref('')
@@ -424,19 +411,6 @@ const syncCompany = async () => {
     console.error('Sync failed:', error)
   } finally {
     isSyncing.value = false
-  }
-}
-
-// Auto-match
-const autoMatch = async () => {
-  isAutoMatching.value = true
-  try {
-    await autoMatchMutation.mutateAsync({ deliveryCompanyId: companyId.value })
-    await loadData()
-  } catch (error) {
-    console.error('Auto-match failed:', error)
-  } finally {
-    isAutoMatching.value = false
   }
 }
 

@@ -58,4 +58,10 @@ export interface CreateOrderRequest {
   storeId?: string | null;
   /** @nullable */
   sourceId?: string | null;
+  /**
+   * Delivery location from CityLocationMappings.
+Selected when delivery company is chosen.
+   * @nullable
+   */
+  deliveryLocationId?: string | null;
 }

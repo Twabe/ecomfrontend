@@ -8,7 +8,18 @@ import type { Order, CreateOrderRequest, UpdateOrderRequest, CreateOrderItemRequ
 import type { City } from '~/types/city'
 import type { Product } from '~/types/product'
 import type { DeliveryCompany } from '~/types/deliverycompany'
-import type { DeliveryCompanyCityDto } from '~/api/generated/models'
+import type { DeliveryCompanyCityDto } from '~/api/generated/models/deliveryCompanyCityDto'
+
+// Fetch delivery cities using generated API client
+const fetchDeliveryCities = async (deliveryCompanyId: string): Promise<DeliveryCompanyCityDto[]> => {
+  try {
+    const result = await cityLocationMappingsGetByCompany(deliveryCompanyId)
+    return result || []
+  } catch (error) {
+    console.error('Failed to fetch delivery cities:', error)
+    return []
+  }
+}
 
 const props = withDefaults(defineProps<{
   show: boolean
@@ -33,7 +44,7 @@ const { t } = useI18n()
 
 const isEdit = computed(() => !!props.order)
 
-const formData = ref<Partial<CreateOrderRequest & { deliveryLocationId?: string }>>({
+const formData = ref<Partial<CreateOrderRequest & { deliveryLocationId?: string; sourceCity?: string }>>({
   code: '',
   fullName: '',
   phone: '',
@@ -43,12 +54,21 @@ const formData = ref<Partial<CreateOrderRequest & { deliveryLocationId?: string 
   price: 0,
   fees: 0,
   deliveryCompanyId: '',
-  deliveryLocationId: ''
+  deliveryLocationId: '',
+  sourceCity: ''
 })
 
 // Delivery company cities (loaded when delivery company is selected)
 const deliveryCities = ref<DeliveryCompanyCityDto[]>([])
 const isLoadingDeliveryCities = ref(false)
+
+// Convert delivery cities to format expected by UiSearchableSelect ({ id, name })
+const deliveryCitiesOptions = computed(() => {
+  return deliveryCities.value.map(city => ({
+    id: city.id || '',
+    name: city.externalName || ''
+  }))
+})
 
 const newItem = ref<CreateOrderItemRequest>({
   productId: '',
@@ -111,7 +131,24 @@ watch(() => props.show, (val) => {
         fees: props.order.fees,
         storeId: props.order.storeId || '',
         sourceId: props.order.sourceId || '',
-        deliveryCompanyId: props.order.deliveryCompanyId || ''
+        deliveryCompanyId: props.order.deliveryCompanyId || '',
+        deliveryLocationId: props.order.deliveryLocationId || '',
+        sourceCity: props.order.sourceCity || ''
+      }
+
+      // If order has a delivery company, load its cities for the dropdown
+      if (props.order.deliveryCompanyId) {
+        isLoadingDeliveryCities.value = true
+        fetchDeliveryCities(props.order.deliveryCompanyId)
+          .then(cities => {
+            deliveryCities.value = cities
+          })
+          .catch(() => {
+            deliveryCities.value = []
+          })
+          .finally(() => {
+            isLoadingDeliveryCities.value = false
+          })
       }
     } else {
       // Create mode
@@ -158,15 +195,14 @@ watch(() => newItem.value.productVariantId, (variantId) => {
   }
 })
 
-// Watch for city/deliveryCompany changes to auto-fill shipping fees
+// Watch for city changes to auto-fill shipping fees (when no delivery company)
 watch(
-  [() => formData.value.cityId, () => formData.value.deliveryCompanyId],
-  async ([cityId, dcId]) => {
-    if (cityId && !isEdit.value) {
+  () => formData.value.cityId,
+  async (cityId) => {
+    if (cityId && !formData.value.deliveryCompanyId && !isEdit.value) {
       try {
         const response = await shippingFeesSearch({
           cityId,
-          deliveryCompanyId: dcId || undefined,
           pageSize: 1,
           pageNumber: 1
         })
@@ -181,24 +217,46 @@ watch(
   }
 )
 
+// Watch for delivery location changes to auto-fill fees from CityLocationMappings
+watch(
+  () => formData.value.deliveryLocationId,
+  (deliveryLocationId) => {
+    if (deliveryLocationId && formData.value.deliveryCompanyId) {
+      // Find the selected city in deliveryCities to get its fee
+      const selectedCity = deliveryCities.value.find(c => c.id === deliveryLocationId)
+      if (selectedCity?.deliveryFee) {
+        formData.value.fees = selectedCity.deliveryFee
+        calculateTotal()
+      }
+    }
+  }
+)
+
 // Watch for delivery company changes to load delivery cities
 watch(
   () => formData.value.deliveryCompanyId,
-  async (deliveryCompanyId) => {
-    // Reset delivery location when company changes
-    formData.value.deliveryLocationId = ''
-    deliveryCities.value = []
-
+  async (deliveryCompanyId, oldDeliveryCompanyId) => {
+    // Reset selections when switching between modes
     if (deliveryCompanyId) {
+      // Switching TO delivery company mode - reset cityId, use deliveryLocationId
+      formData.value.cityId = ''
+      formData.value.deliveryLocationId = ''
+      deliveryCities.value = []
+
+      // Load delivery company cities
       isLoadingDeliveryCities.value = true
       try {
-        const cities = await cityLocationMappingsGetByCompany(deliveryCompanyId)
+        const cities = await fetchDeliveryCities(deliveryCompanyId)
         deliveryCities.value = cities
       } catch {
         deliveryCities.value = []
       } finally {
         isLoadingDeliveryCities.value = false
       }
+    } else if (oldDeliveryCompanyId) {
+      // Switching FROM delivery company mode - reset deliveryLocationId, use cityId
+      formData.value.deliveryLocationId = ''
+      deliveryCities.value = []
     }
   }
 )
@@ -289,15 +347,18 @@ const calculateTotal = () => {
 }
 
 const handleSubmit = () => {
-  // Clean data: convert empty strings to undefined for optional GUID fields
+  // Clean data: convert empty strings to undefined for optional fields
   const cleanData = {
     ...formData.value,
+    // CityId is required - keep it or use undefined (backend validates)
+    cityId: formData.value.cityId || undefined,
     deliveryCompanyId: formData.value.deliveryCompanyId || undefined,
     subDeliveryCompanyId: formData.value.subDeliveryCompanyId || undefined,
     deliveryLocationId: formData.value.deliveryLocationId || undefined,
     storeId: formData.value.storeId || undefined,
     sourceId: formData.value.sourceId || undefined,
     trackingStateId: formData.value.trackingStateId || undefined,
+    sourceCity: formData.value.sourceCity || undefined,
     // Clean items: remove empty optional fields
     items: formData.value.items?.map(item => ({
       ...item,
@@ -385,34 +446,31 @@ const handleClose = () => {
                   </div>
                 </div>
 
-                <!-- City & Address -->
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ t('orders.city') }} <span class="text-red-500">*</span>
-                    </label>
-                    <UiSearchableSelect
-                      v-model="formData.cityId"
-                      :options="cities"
-                      :placeholder="t('orders.searchCity', 'Rechercher une ville...')"
-                      :required="true"
-                      class="mt-1"
-                    />
+                <!-- Source City (readonly display - only in edit mode when exists) -->
+                <div v-if="isEdit && props.order?.sourceCity">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('orders.sourceCity', 'Ville (source)') }}
+                  </label>
+                  <div class="mt-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-200">
+                    {{ props.order.sourceCity }}
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ t('common.address') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      v-model="formData.address"
-                      type="text"
-                      required
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                  </div>
+                  <p class="mt-1 text-xs text-gray-500">{{ t('orders.sourceCityHint', 'Ville reçue de la plateforme (lecture seule)') }}</p>
                 </div>
 
-                <!-- Delivery Company & Location -->
+                <!-- Address -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('common.address') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.address"
+                    type="text"
+                    required
+                    class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <!-- Delivery Company & Delivery City -->
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -422,26 +480,34 @@ const handleClose = () => {
                       v-model="formData.deliveryCompanyId"
                       class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     >
-                      <option value="">{{ t('common.select') }}</option>
+                      <option value="">{{ t('orders.noDeliveryCompany', 'Sans société de livraison') }}</option>
                       <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">{{ dc.name }}</option>
                     </select>
                   </div>
-                  <!-- Delivery Location (shown when delivery company is selected) -->
-                  <div v-if="formData.deliveryCompanyId">
+
+                  <!-- Delivery City - Always shown, switches between Cities table and CityLocationMappings -->
+                  <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ t('orders.deliveryCity', 'Ville de livraison') }}
+                      {{ t('orders.deliveryCity', 'Ville de livraison') }} <span class="text-red-500">*</span>
                     </label>
-                    <select
+                    <!-- When delivery company is selected: show CityLocationMappings -->
+                    <UiSearchableSelect
+                      v-if="formData.deliveryCompanyId"
                       v-model="formData.deliveryLocationId"
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      :options="deliveryCitiesOptions"
+                      :placeholder="isLoadingDeliveryCities ? t('common.loading') : t('orders.searchDeliveryCity', 'Rechercher une ville...')"
                       :disabled="isLoadingDeliveryCities"
-                    >
-                      <option value="">{{ isLoadingDeliveryCities ? t('common.loading') : t('common.select') }}</option>
-                      <option v-for="city in deliveryCities" :key="city.id" :value="city.id">
-                        {{ city.externalName }}
-                        <template v-if="city.deliveryFee"> - {{ formatCurrency(city.deliveryFee) }}</template>
-                      </option>
-                    </select>
+                      class="mt-1"
+                    />
+                    <!-- When NO delivery company: show Cities table -->
+                    <UiSearchableSelect
+                      v-else
+                      v-model="formData.cityId"
+                      :options="cities"
+                      :placeholder="t('orders.searchCity', 'Rechercher une ville...')"
+                      :required="true"
+                      class="mt-1"
+                    />
                   </div>
                 </div>
 
