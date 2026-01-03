@@ -157,18 +157,19 @@
                                 class="input text-sm"
                                 :class="{ 'border-red-300': !item.productVariantId }"
                                 required
-                                @focus="currentItemIndexForVariants = index"
                                 @change="onVariantChange(item, item.productVariantId)"
                               >
                                 <option :value="undefined">
-                                  {{ currentItemIndexForVariants === index && isLoadingVariants ? $t('common.loading') : $t('common.select') }}
+                                  {{ isLoadingVariantsForProduct(item.productId) ? $t('common.loading') : $t('common.select') }}
                                 </option>
-                                <template v-if="currentItemIndexForVariants === index">
-                                  <option v-for="variant in currentProductVariants" :key="variant.id" :value="variant.id">
-                                    {{ variant.name }} ({{ variant.sku }})
-                                    {{ variant.buyingPrice ? `- ${variant.buyingPrice.toFixed(2)}` : '' }}
-                                  </option>
-                                </template>
+                                <option
+                                  v-for="variant in getVariantsForProduct(item.productId)"
+                                  :key="variant.id"
+                                  :value="variant.id"
+                                >
+                                  {{ variant.name }} ({{ variant.sku }})
+                                  {{ variant.buyingPrice ? `- ${variant.buyingPrice.toFixed(2)}` : '' }}
+                                </option>
                               </select>
                               <p v-if="!item.productVariantId" class="mt-1 text-xs text-red-500">
                                 {{ $t('products.variantRequired') || 'Please select a variant' }}
@@ -515,7 +516,8 @@ import {
   PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon, ShoppingCartIcon,
   EyeIcon, ArrowPathIcon
 } from '@heroicons/vue/24/outline'
-import { usePurchasesService, useSuppliersService, useProductsService, useProductVariantsByProduct, type PurchaseDto, type ProductDto, type PurchaseHistoryDto } from '~/services'
+import { usePurchasesService, useSuppliersService, useProductsService, type PurchaseDto, type ProductDto, type PurchaseHistoryDto, type ProductVariantDto } from '~/services'
+import { productVariantsGetByProduct } from '~/api/generated/endpoints/product-variants/product-variants'
 import { PurchaseStatuses } from '~/types/purchase'
 
 definePageMeta({
@@ -575,14 +577,36 @@ interface FormItem {
   note?: string
 }
 
-// Track which item index is being edited for variant loading
-const currentItemIndexForVariants = ref<number | null>(null)
-const currentProductIdForVariants = computed(() => {
-  if (currentItemIndexForVariants.value === null) return undefined
-  const item = form.value.items[currentItemIndexForVariants.value]
-  return item?.productId || undefined
-})
-const { variants: currentProductVariants, isLoading: isLoadingVariants } = useProductVariantsByProduct(currentProductIdForVariants)
+// Cache variants per product ID - persists across item changes
+const variantsCache = ref<Map<string, ProductVariantDto[]>>(new Map())
+const loadingVariants = ref<Set<string>>(new Set())
+
+// Load variants for a product and cache them
+const loadVariantsForProduct = async (productId: string) => {
+  if (!productId || variantsCache.value.has(productId) || loadingVariants.value.has(productId)) {
+    return
+  }
+
+  loadingVariants.value.add(productId)
+  try {
+    const variants = await productVariantsGetByProduct(productId)
+    variantsCache.value.set(productId, variants)
+  } catch (error) {
+    console.error('Failed to load variants for product:', productId, error)
+  } finally {
+    loadingVariants.value.delete(productId)
+  }
+}
+
+// Get cached variants for a product
+const getVariantsForProduct = (productId: string): ProductVariantDto[] => {
+  return variantsCache.value.get(productId) || []
+}
+
+// Check if variants are loading for a product
+const isLoadingVariantsForProduct = (productId: string): boolean => {
+  return loadingVariants.value.has(productId)
+}
 
 // Helper to check if a product has variants
 const getProductHasVariants = (productId: string): boolean => {
@@ -602,24 +626,29 @@ const getProductBuyingPrice = (productId: string): number => {
   return product?.buyingPrice || 0
 }
 
-// Handle product selection - auto-fill unit cost
+// Handle product selection - auto-fill unit cost and load variants
 const onProductChange = (item: FormItem, index: number) => {
   item.productVariantId = undefined
-  currentItemIndexForVariants.value = index
 
-  // Auto-fill unitCost from product's buyingPrice (only if product doesn't have variants)
-  if (item.productId && !getProductHasVariants(item.productId)) {
-    item.unitCost = getProductBuyingPrice(item.productId)
+  if (item.productId) {
+    // Load variants if product has variants
+    if (getProductHasVariants(item.productId)) {
+      loadVariantsForProduct(item.productId)
+    } else {
+      // Auto-fill unitCost from product's buyingPrice (only if product doesn't have variants)
+      item.unitCost = getProductBuyingPrice(item.productId)
+    }
   }
 }
 
 // Handle variant selection - auto-fill unit cost from variant
 const onVariantChange = (item: FormItem, variantId: string | undefined) => {
-  if (variantId && currentProductVariants.value) {
-    const variant = currentProductVariants.value.find(v => v.id === variantId)
+  if (variantId && item.productId) {
+    const variants = getVariantsForProduct(item.productId)
+    const variant = variants.find(v => v.id === variantId)
     if (variant?.buyingPrice) {
       item.unitCost = variant.buyingPrice
-    } else if (item.productId) {
+    } else {
       // Fallback to product's buyingPrice if variant doesn't have one
       item.unitCost = getProductBuyingPrice(item.productId)
     }
@@ -667,12 +696,15 @@ const openCreateModal = () => {
   editingPurchase.value = null
   form.value = defaultForm()
   form.value.code = generatePurchaseCode() // Auto-generate code
+  variantsCache.value.clear() // Clear variants cache for fresh modal
   showModal.value = true
 }
 
 // Open edit modal
-const openEditModal = (purchase: PurchaseDto) => {
+const openEditModal = async (purchase: PurchaseDto) => {
   editingPurchase.value = purchase
+  variantsCache.value.clear() // Clear variants cache for fresh modal
+
   form.value = {
     code: purchase.code || '',
     supplierId: purchase.supplierId || '',
@@ -689,6 +721,17 @@ const openEditModal = (purchase: PurchaseDto) => {
       note: item.note || ''
     }))
   }
+
+  // Pre-load variants for all products that have variants
+  const productIdsWithVariants = form.value.items
+    .filter(item => item.productId && getProductHasVariants(item.productId))
+    .map(item => item.productId)
+
+  // Load variants in parallel for all products
+  await Promise.all(
+    [...new Set(productIdsWithVariants)].map(productId => loadVariantsForProduct(productId))
+  )
+
   showModal.value = true
 }
 
