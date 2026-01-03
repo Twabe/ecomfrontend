@@ -29,8 +29,34 @@
                         <option value="">{{ $t('common.select') }}</option>
                         <option v-for="product in productsList" :key="product.id" :value="product.id">
                           {{ product.name }} {{ product.reference ? `(${product.reference})` : '' }}
+                          {{ product.hasVariants ? `(${$t('products.hasVariants')})` : '' }}
                         </option>
                       </select>
+                    </div>
+
+                    <!-- Variant selection - shows when product has variants -->
+                    <div v-if="currentProductHasVariants && !editingStock">
+                      <label class="label">{{ $t('products.variant') }} *</label>
+                      <select
+                        v-model="form.productVariantId"
+                        class="input"
+                        :required="currentProductHasVariants"
+                        :disabled="isLoadingVariantsForProduct(form.productId)"
+                      >
+                        <option value="">
+                          {{ isLoadingVariantsForProduct(form.productId) ? $t('common.loading') : $t('common.select') }}
+                        </option>
+                        <option
+                          v-for="variant in currentProductVariants"
+                          :key="variant.id"
+                          :value="variant.id"
+                        >
+                          {{ variant.name }} ({{ variant.sku }})
+                        </option>
+                      </select>
+                      <p v-if="currentProductVariants.length === 0 && !isLoadingVariantsForProduct(form.productId)" class="text-xs text-amber-600 mt-1">
+                        {{ $t('products.noVariantsFound') }}
+                      </p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -354,6 +380,8 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon, ArchiveBoxIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import { useStocksService, useProductsService, useDeliveryCompaniesService, type StockDto } from '~/services'
+import { productVariantsGetByProduct } from '~/api/generated/endpoints/product-variants/product-variants'
+import type { ProductVariantDto } from '~/api/generated/models'
 
 definePageMeta({
   layout: 'tenant',
@@ -383,6 +411,48 @@ const {
 const { items: productsList } = useProductsService()
 const { items: deliveryCompaniesList } = useDeliveryCompaniesService()
 
+// Variant caching - cache variants per product ID
+const variantsCache = ref<Map<string, ProductVariantDto[]>>(new Map())
+const loadingVariants = ref<Set<string>>(new Set())
+
+// Load variants for a specific product
+const loadVariantsForProduct = async (productId: string) => {
+  if (!productId || variantsCache.value.has(productId) || loadingVariants.value.has(productId)) {
+    return
+  }
+  loadingVariants.value.add(productId)
+  try {
+    const variants = await productVariantsGetByProduct(productId)
+    variantsCache.value.set(productId, variants)
+  } catch (error) {
+    console.error('Failed to load variants for product:', productId, error)
+  } finally {
+    loadingVariants.value.delete(productId)
+  }
+}
+
+// Get variants for a product from cache
+const getVariantsForProduct = (productId: string): ProductVariantDto[] => {
+  return variantsCache.value.get(productId) || []
+}
+
+// Check if loading variants for a product
+const isLoadingVariantsForProduct = (productId: string): boolean => {
+  return loadingVariants.value.has(productId)
+}
+
+// Get current product variants (for the selected product in form)
+const currentProductVariants = computed(() => {
+  if (!form.value.productId) return []
+  return getVariantsForProduct(form.value.productId)
+})
+
+// Check if current product has variants
+const currentProductHasVariants = computed(() => {
+  const product = productsList.value.find(p => p.id === form.value.productId)
+  return product?.hasVariants ?? false
+})
+
 // Modal state
 const showModal = ref(false)
 const showAddStockModal = ref(false)
@@ -396,6 +466,7 @@ const filterDeliveryCompany = ref('')
 
 const defaultForm = () => ({
   productId: '',
+  productVariantId: '' as string | null,
   quantity: 0,
   brokenQuantity: 0,
   totalValue: 0,
@@ -404,6 +475,15 @@ const defaultForm = () => ({
 })
 
 const form = ref(defaultForm())
+
+// Watch for product changes to load variants
+watch(() => form.value.productId, async (newProductId) => {
+  // Reset variant when product changes
+  form.value.productVariantId = ''
+  if (newProductId) {
+    await loadVariantsForProduct(newProductId)
+  }
+})
 
 const addStockForm = ref({
   quantityToAdd: 1,
@@ -429,6 +509,8 @@ const applyFilters = () => {
 const openCreateModal = () => {
   editingStock.value = null
   form.value = defaultForm()
+  // Clear variant cache to ensure fresh data
+  variantsCache.value.clear()
   showModal.value = true
 }
 
@@ -437,6 +519,7 @@ const openEditModal = (stock: StockDto) => {
   editingStock.value = stock
   form.value = {
     productId: stock.productId || '',
+    productVariantId: stock.productVariantId || '',
     quantity: stock.quantity ?? 0,
     brokenQuantity: stock.brokenQuantity ?? 0,
     totalValue: stock.totalValue ?? 0,
@@ -466,6 +549,12 @@ const closeModal = () => {
 const handleSubmit = async () => {
   if (!form.value.productId) return
 
+  // Validate variant selection for products with variants
+  if (currentProductHasVariants.value && !form.value.productVariantId && !editingStock.value) {
+    notify({ type: 'error', message: t('stocks.selectVariant') })
+    return
+  }
+
   try {
     if (editingStock.value) {
       await update(editingStock.value.id!, {
@@ -480,6 +569,7 @@ const handleSubmit = async () => {
     } else {
       await create({
         productId: form.value.productId,
+        productVariantId: form.value.productVariantId || undefined,
         quantity: form.value.quantity,
         brokenQuantity: form.value.brokenQuantity,
         totalValue: form.value.totalValue,

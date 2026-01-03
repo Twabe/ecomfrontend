@@ -358,6 +358,7 @@
     "editProduct": "Edit Product",
     "reference": "Reference",
     "sellingPrice": "Selling Price",
+    "inStock": "In Stock",
     "buyingPrice": "Buying Price",
     "shippingPrice": "Shipping Price",
     "marketingPrice": "Marketing Price",
@@ -367,6 +368,7 @@
     "trackStockHint": "If disabled, stock check and deduction will be skipped when confirming orders with this product",
     "hasVariants": "This product has variants",
     "hasVariantsHint": "Enable to add size, color, or other variations",
+    "noVariantsFound": "No variants found for this product",
     "simpleProduct": "Simple Product",
     "simpleProductHint": "Single product without variations",
     "variableProduct": "Variable Product",
@@ -460,7 +462,8 @@
     "addStock": "Add Stock",
     "quantityToAdd": "Quantity to Add",
     "unitCost": "Unit Cost",
-    "newTotalValue": "New Total Value"
+    "newTotalValue": "New Total Value",
+    "selectVariant": "Please select a variant"
   },
   "purchases": {
     "title": "Purchases",

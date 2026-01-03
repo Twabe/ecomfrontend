@@ -350,6 +350,7 @@
     "editProduct": "تعديل المنتج",
     "reference": "المرجع",
     "sellingPrice": "سعر البيع",
+    "inStock": "في المخزون",
     "buyingPrice": "سعر الشراء",
     "shippingPrice": "سعر الشحن",
     "marketingPrice": "سعر التسويق",
@@ -359,6 +360,7 @@
     "trackStockHint": "إذا تم تعطيله، سيتم تجاوز فحص وخصم المخزون عند تأكيد الطلبات التي تحتوي على هذا المنتج",
     "hasVariants": "هذا المنتج له متغيرات",
     "hasVariantsHint": "تفعيل لإضافة أحجام أو ألوان أو تباينات أخرى",
+    "noVariantsFound": "لم يتم العثور على متغيرات لهذا المنتج",
     "simpleProduct": "منتج بسيط",
     "simpleProductHint": "منتج واحد بدون تباينات",
     "variableProduct": "منتج متغير",
@@ -452,7 +454,8 @@
     "addStock": "إضافة مخزون",
     "quantityToAdd": "الكمية المراد إضافتها",
     "unitCost": "تكلفة الوحدة",
-    "newTotalValue": "القيمة الإجمالية الجديدة"
+    "newTotalValue": "القيمة الإجمالية الجديدة",
+    "selectVariant": "يرجى اختيار المتغير"
   },
   "purchases": {
     "title": "المشتريات",

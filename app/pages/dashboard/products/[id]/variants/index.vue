@@ -187,6 +187,7 @@
               <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">SKU</th>
               <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('products.barcode') }}</th>
               <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('products.sellingPrice') }}</th>
+              <th class="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('products.inStock') }}</th>
               <th class="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('common.status') }}</th>
               <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('common.actions') }}</th>
             </tr>
@@ -207,6 +208,20 @@
                   {{ formatPrice(variant.price) }}
                 </span>
                 <span v-else class="text-gray-400 italic text-sm">{{ $t('products.fromProduct') }}</span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <span
+                  :class="[
+                    'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                    (variant.inStock ?? 0) > 10
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : (variant.inStock ?? 0) > 0
+                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                  ]"
+                >
+                  {{ variant.inStock ?? 0 }}
+                </span>
               </td>
               <td class="py-3 px-4 text-center">
                 <span

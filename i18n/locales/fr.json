@@ -367,6 +367,7 @@
     "editProduct": "Modifier le produit",
     "reference": "Référence",
     "sellingPrice": "Prix de vente",
+    "inStock": "En stock",
     "buyingPrice": "Prix d'achat",
     "shippingPrice": "Prix de livraison",
     "marketingPrice": "Prix marketing",
@@ -376,6 +377,7 @@
     "trackStockHint": "Si désactivé, la vérification et la déduction du stock seront ignorées lors de la confirmation des commandes avec ce produit",
     "hasVariants": "Ce produit a des variantes",
     "hasVariantsHint": "Activer pour ajouter des tailles, couleurs ou autres variations",
+    "noVariantsFound": "Aucune variante trouvée pour ce produit",
     "simpleProduct": "Produit simple",
     "simpleProductHint": "Produit unique sans variations",
     "variableProduct": "Produit variable",
@@ -469,7 +471,8 @@
     "addStock": "Ajouter Stock",
     "quantityToAdd": "Quantité à ajouter",
     "unitCost": "Coût unitaire",
-    "newTotalValue": "Nouvelle valeur totale"
+    "newTotalValue": "Nouvelle valeur totale",
+    "selectVariant": "Veuillez sélectionner une variante"
   },
   "purchases": {
     "title": "Achats",
