@@ -80,6 +80,11 @@ export interface UpdateOrderRequest {
   /** @nullable */
   utm2?: string | null;
   /**
+   * City name as entered/edited by user (can be text from platform or manual input).
+   * @nullable
+   */
+  sourceCity?: string | null;
+  /**
    * Delivery location from CityLocationMappings.
 Selected by Confirmateur when assigning delivery company.
    * @nullable

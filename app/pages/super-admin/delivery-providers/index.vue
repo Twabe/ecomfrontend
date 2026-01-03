@@ -34,28 +34,28 @@
           </div>
         </div>
 
-        <!-- Total Connections -->
+        <!-- Total Tenant Companies -->
         <div class="card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('deliveryProviders.admin.totalConnections') }}</p>
-              <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats?.totalConnections ?? 0 }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Tenant Companies</p>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ tenantCompanies?.length ?? 0 }}</p>
             </div>
             <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-              <LinkIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <BuildingOfficeIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
 
-        <!-- Active Connections -->
+        <!-- Companies with Credentials -->
         <div class="card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ $t('deliveryProviders.admin.activeConnections') }}</p>
-              <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats?.activeConnections ?? 0 }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">With Credentials</p>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ companiesWithCredentials }}</p>
             </div>
             <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-              <CheckCircleIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+              <KeyIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
@@ -76,20 +76,136 @@
         </div>
       </div>
 
-      <!-- Provider Statistics Table -->
+      <!-- Tenant Delivery Companies Table -->
       <div class="card">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ $t('deliveryProviders.admin.providerStats') }}
+            Tenant Delivery Companies
           </h3>
           <button
-            @click="refreshStats"
+            @click="refreshAll"
             class="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
             :disabled="isRefreshing"
           >
             <ArrowPathIcon class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
             {{ $t('common.refresh') }}
           </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap gap-4 mb-4">
+          <select
+            v-model="tenantFilter"
+            class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm"
+          >
+            <option value="">All Tenants</option>
+            <option v-for="tenant in uniqueTenants" :key="tenant" :value="tenant">{{ tenant }}</option>
+          </select>
+          <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <input
+              v-model="activeOnly"
+              type="checkbox"
+              class="rounded border-gray-300 dark:border-gray-600"
+            />
+            Active only
+          </label>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Tenant
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Company
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Type
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Credentials
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Orders
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Cities
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr v-if="!filteredCompanies?.length">
+                <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  {{ $t('common.noData') }}
+                </td>
+              </tr>
+              <tr v-for="company in filteredCompanies" :key="company.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 rounded">
+                    {{ company.tenantId }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-3">
+                    <TruckIcon class="w-8 h-8 text-gray-400" />
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ company.name }}</p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ company.email || company.phone || '-' }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  {{ company.typeName }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-1">
+                    <span
+                      v-if="company.hasCredentials"
+                      class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    >
+                      <CheckCircleIcon class="w-4 h-4 inline" />
+                      Configured
+                    </span>
+                    <span
+                      v-else
+                      class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                    >
+                      <XCircleIcon class="w-4 h-4 inline" />
+                      Missing
+                    </span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    class="px-2 py-1 text-xs font-medium rounded-full"
+                    :class="company.active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
+                  >
+                    {{ company.active ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  {{ company.orderCount }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  {{ company.cityMappingsCount }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Provider Statistics Table -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            {{ $t('deliveryProviders.admin.providerStats') }}
+          </h3>
         </div>
 
         <div class="overflow-x-auto">
@@ -234,8 +350,13 @@ import {
   ExclamationTriangleIcon,
   ArrowPathIcon,
   ClockIcon,
+  BuildingOfficeIcon,
+  KeyIcon,
+  XCircleIcon,
 } from '@heroicons/vue/24/outline'
 import { useDeliveryProviderTemplatesService } from '~/services'
+import { useDeliveryCompaniesGetAllAdmin } from '~/api/generated/endpoints/delivery-companies/delivery-companies'
+import type { AdminDeliveryCompanyDto } from '~/api/generated/endpoints/delivery-companies/delivery-companies'
 
 definePageMeta({
   layout: 'super-admin',
@@ -247,18 +368,45 @@ const templatesService = useDeliveryProviderTemplatesService()
 
 // Data
 const isRefreshing = ref(false)
+const tenantFilter = ref('')
+const activeOnly = ref(false)
 
 // Queries
 const { data: stats, isLoading: isLoadingStats, refetch: refetchStats } = templatesService.useStats()
 const { data: webhookHealth, isLoading: isLoadingHealth, refetch: refetchHealth } = templatesService.useWebhookHealth()
+const { data: tenantCompanies, isLoading: isLoadingCompanies, refetch: refetchCompanies } = useDeliveryCompaniesGetAllAdmin()
 
-const isLoading = computed(() => isLoadingStats.value || isLoadingHealth.value)
+const isLoading = computed(() => isLoadingStats.value || isLoadingHealth.value || isLoadingCompanies.value)
+
+// Computed
+const uniqueTenants = computed(() => {
+  if (!tenantCompanies.value) return []
+  const tenants = new Set(tenantCompanies.value.map((c: AdminDeliveryCompanyDto) => c.tenantId))
+  return Array.from(tenants).sort()
+})
+
+const filteredCompanies = computed(() => {
+  if (!tenantCompanies.value) return []
+  let result = tenantCompanies.value
+  if (tenantFilter.value) {
+    result = result.filter((c: AdminDeliveryCompanyDto) => c.tenantId === tenantFilter.value)
+  }
+  if (activeOnly.value) {
+    result = result.filter((c: AdminDeliveryCompanyDto) => c.active)
+  }
+  return result
+})
+
+const companiesWithCredentials = computed(() => {
+  if (!tenantCompanies.value) return 0
+  return tenantCompanies.value.filter((c: AdminDeliveryCompanyDto) => c.hasCredentials).length
+})
 
 // Refresh
-const refreshStats = async () => {
+const refreshAll = async () => {
   isRefreshing.value = true
   try {
-    await Promise.all([refetchStats(), refetchHealth()])
+    await Promise.all([refetchStats(), refetchHealth(), refetchCompanies()])
   } finally {
     isRefreshing.value = false
   }

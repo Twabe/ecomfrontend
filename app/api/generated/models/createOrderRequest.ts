@@ -28,9 +28,10 @@ export interface CreateOrderRequest {
    */
   phone: string;
   /**
-   * @minLength 1
+   * Internal city from Cities table. Optional if DeliveryLocationId is provided.
+   * @nullable
    */
-  cityId: string;
+  cityId?: string | null;
   /** @minimum 0 */
   price?: number;
   /** @minimum 0 */
@@ -58,6 +59,11 @@ export interface CreateOrderRequest {
   storeId?: string | null;
   /** @nullable */
   sourceId?: string | null;
+  /**
+   * City name as entered by user (text, can be in Arabic or misspelled).
+   * @nullable
+   */
+  sourceCity?: string | null;
   /**
    * Delivery location from CityLocationMappings.
 Selected when delivery company is chosen.

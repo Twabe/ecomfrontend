@@ -30,7 +30,9 @@ import type {
 } from 'vue';
 
 import type {
+  AdminDeliveryCompanyDto,
   CreateDeliveryCompanyRequest,
+  DeliveryCompaniesGetAllAdminParams,
   DeliveryCompaniesGetProviderCitiesParams,
   DeliveryCompanyDto,
   DeliveryCompanyType,
@@ -48,6 +50,75 @@ import { customInstance } from '../../../axios-instance';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+/**
+ * @summary Get all delivery companies across all tenants (Super Admin).
+ */
+export const deliveryCompaniesGetAllAdmin = (
+    params?: MaybeRef<DeliveryCompaniesGetAllAdminParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      params = unref(params);
+      
+      return customInstance<AdminDeliveryCompanyDto[]>(
+      {url: `/api/v1/deliverycompanies/admin/all`, method: 'GET',
+        params: unref(params), signal
+    },
+      options);
+    }
+  
+
+
+
+export const getDeliveryCompaniesGetAllAdminQueryKey = (params?: MaybeRef<DeliveryCompaniesGetAllAdminParams>,) => {
+    return [
+    'api','v1','deliverycompanies','admin','all', ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getDeliveryCompaniesGetAllAdminQueryOptions = <TData = Awaited<ReturnType<typeof deliveryCompaniesGetAllAdmin>>, TError = unknown>(params?: MaybeRef<DeliveryCompaniesGetAllAdminParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetAllAdmin>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  getDeliveryCompaniesGetAllAdminQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof deliveryCompaniesGetAllAdmin>>> = ({ signal }) => deliveryCompaniesGetAllAdmin(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetAllAdmin>>, TError, TData> 
+}
+
+export type DeliveryCompaniesGetAllAdminQueryResult = NonNullable<Awaited<ReturnType<typeof deliveryCompaniesGetAllAdmin>>>
+export type DeliveryCompaniesGetAllAdminQueryError = unknown
+
+
+/**
+ * @summary Get all delivery companies across all tenants (Super Admin).
+ */
+
+export function useDeliveryCompaniesGetAllAdmin<TData = Awaited<ReturnType<typeof deliveryCompaniesGetAllAdmin>>, TError = unknown>(
+ params?: MaybeRef<DeliveryCompaniesGetAllAdminParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetAllAdmin>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDeliveryCompaniesGetAllAdminQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
 
 
 
