@@ -31,6 +31,7 @@ import type {
 
 import type {
   ConnectDeliveryProviderRequest,
+  ConnectionCityDto,
   ErrorResult,
   HttpValidationProblemDetails,
   SyncConnectionResponse,
@@ -631,4 +632,72 @@ export const useTenantDeliveryConnectionsSync = <TError = unknown,
 
       return useMutation(mutationOptions, queryClient);
     }
+    /**
+ * Returns cities available for delivery through this connection.
+ * @summary Get available cities.
+ */
+export const tenantDeliveryConnectionsGetCities = (
+    id: MaybeRef<string>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+      
+      return customInstance<ConnectionCityDto[]>(
+      {url: `/api/v1/tenantdeliveryconnections/${id}/cities`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getTenantDeliveryConnectionsGetCitiesQueryKey = (id?: MaybeRef<string>,) => {
+    return [
+    'api','v1','tenantdeliveryconnections',id,'cities'
+    ] as const;
+    }
+
     
+export const getTenantDeliveryConnectionsGetCitiesQueryOptions = <TData = Awaited<ReturnType<typeof tenantDeliveryConnectionsGetCities>>, TError = HttpValidationProblemDetails | ErrorResult>(id: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tenantDeliveryConnectionsGetCities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  getTenantDeliveryConnectionsGetCitiesQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof tenantDeliveryConnectionsGetCities>>> = ({ signal }) => tenantDeliveryConnectionsGetCities(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(id))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof tenantDeliveryConnectionsGetCities>>, TError, TData> 
+}
+
+export type TenantDeliveryConnectionsGetCitiesQueryResult = NonNullable<Awaited<ReturnType<typeof tenantDeliveryConnectionsGetCities>>>
+export type TenantDeliveryConnectionsGetCitiesQueryError = HttpValidationProblemDetails | ErrorResult
+
+
+/**
+ * @summary Get available cities.
+ */
+
+export function useTenantDeliveryConnectionsGetCities<TData = Awaited<ReturnType<typeof tenantDeliveryConnectionsGetCities>>, TError = HttpValidationProblemDetails | ErrorResult>(
+ id: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tenantDeliveryConnectionsGetCities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTenantDeliveryConnectionsGetCitiesQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+

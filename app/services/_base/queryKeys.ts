@@ -55,7 +55,6 @@ export const queryKeys = {
   productVariants: createEntityKeys('product-variants'),
   skuMappings: createEntityKeys('sku-mappings'),
   deliveryCompanies: createEntityKeys('delivery-companies'),
-  subDeliveryCompanies: createEntityKeys('sub-delivery-companies'),
   stores: createEntityKeys('stores'),
   shippingFees: createEntityKeys('shipping-fees'),
 

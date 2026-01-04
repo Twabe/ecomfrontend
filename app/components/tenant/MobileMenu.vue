@@ -218,8 +218,13 @@
                   </button>
                   <ul v-if="expandedSections.delivery" class="mt-1 ml-8 space-y-1">
                     <li>
-                      <NuxtLink to="/dashboard/delivery-companies" class="nav-link text-sm py-2" @click="$emit('close')">
-                        {{ $t('nav.deliveryCompanies') }}
+                      <NuxtLink to="/dashboard/delivery-providers" class="nav-link text-sm py-2" @click="$emit('close')">
+                        {{ $t('nav.providerConnections') }}
+                      </NuxtLink>
+                    </li>
+                    <li>
+                      <NuxtLink to="/dashboard/shipping-fees" class="nav-link text-sm py-2" @click="$emit('close')">
+                        {{ $t('nav.shippingFees') }}
                       </NuxtLink>
                     </li>
                     <li>

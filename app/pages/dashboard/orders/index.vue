@@ -6,7 +6,6 @@ import {
   useCitiesService,
   useProductsService,
   useDeliveryCompaniesService,
-  useSubDeliveryCompaniesService,
   useSourcesService,
   useStoresService,
   useReasonsService,
@@ -73,7 +72,6 @@ const { users: workers } = useUsersService()
 const { items: cities } = useCitiesService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
 const { items: products } = useProductsService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
 const { items: deliveryCompanies } = useDeliveryCompaniesService({ initialParams: { pageSize: 100, pageNumber: 1 } })
-const { items: subDeliveryCompanies } = useSubDeliveryCompaniesService({ initialParams: { pageSize: 500, pageNumber: 1 } })
 const { items: sources } = useSourcesService({ initialParams: { pageSize: 100, pageNumber: 1 } })
 const { items: stores } = useStoresService({ initialParams: { pageSize: 100, pageNumber: 1 } })
 const { items: reasons } = useReasonsService({ initialParams: { pageSize: 100, pageNumber: 1 } })
@@ -462,12 +460,12 @@ const openAssignDeliveryModal = (orderOrOrders?: OrderDto | OrderDto[]) => {
   showAssignDeliveryModal.value = true
 }
 
-const handleAssignDelivery = async (data: { orderIds: string[]; deliveryCompanyId: string; subDeliveryCompanyId?: string }) => {
+const handleAssignDelivery = async (data: { orderIds: string[]; deliveryCompanyId: string; providerCityId?: string }) => {
   try {
     await bulkAssignDeliveryCompany({
       orderIds: data.orderIds,
       deliveryCompanyId: data.deliveryCompanyId,
-      subDeliveryCompanyId: data.subDeliveryCompanyId
+      providerCityId: data.providerCityId
     })
     showAssignDeliveryModal.value = false
     ordersForAssignment.value = []
@@ -736,7 +734,6 @@ const handleBulkCancel = async (data: CancelOrderRequest) => {
       :show="showConfirmModal"
       :order="selectedOrder"
       :delivery-companies="deliveryCompanies"
-      :sub-delivery-companies="subDeliveryCompanies"
       @close="showConfirmModal = false"
       @confirm="handleConfirm"
     />
@@ -796,7 +793,6 @@ const handleBulkCancel = async (data: CancelOrderRequest) => {
       :show="showAssignDeliveryModal"
       :orders="ordersForAssignment"
       :delivery-companies="deliveryCompanies"
-      :sub-delivery-companies="subDeliveryCompanies"
       @close="showAssignDeliveryModal = false"
       @confirm="handleAssignDelivery"
     />
@@ -815,7 +811,6 @@ const handleBulkCancel = async (data: CancelOrderRequest) => {
       :show="showBulkConfirmModal"
       :selected-count="selectedOrders.length"
       :delivery-companies="deliveryCompanies"
-      :sub-delivery-companies="subDeliveryCompanies"
       @close="showBulkConfirmModal = false"
       @confirm="handleBulkConfirm"
     />

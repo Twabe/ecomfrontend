@@ -1,58 +1,37 @@
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
-import type { SubDeliveryCompany } from '~/types/subDeliveryCompany'
 import type { DeliveryCompany } from '~/types/deliverycompany'
 
 const props = defineProps<{
   show: boolean
   orderCount: number
-  subDeliveryCompanies: SubDeliveryCompany[]
   deliveryCompanies: DeliveryCompany[]
   isSubmitting?: boolean
 }>()
 
 const emit = defineEmits<{
   close: []
-  submit: [data: { deliveryCompanyId: string; subDeliveryCompanyId?: string }]
+  submit: [data: { deliveryCompanyId: string }]
 }>()
 
 const { t } = useI18n()
 
 const formData = ref({
-  deliveryCompanyId: '',
-  subDeliveryCompanyId: undefined as string | undefined
+  deliveryCompanyId: ''
 })
 
 // Reset form when modal opens
 watch(() => props.show, (val) => {
   if (val) {
     formData.value = {
-      deliveryCompanyId: '',
-      subDeliveryCompanyId: undefined
+      deliveryCompanyId: ''
     }
   }
-})
-
-// Get sub-companies for selected delivery company
-const filteredSubDeliveryCompanies = computed(() => {
-  const dcId = formData.value.deliveryCompanyId
-  if (!dcId) return []
-  return props.subDeliveryCompanies.filter(s => s.deliveryCompanyId === dcId)
-})
-
-// Check if selected delivery company has sub-companies
-const hasSubCompanies = computed(() => {
-  return filteredSubDeliveryCompanies.value.length > 0
 })
 
 // Check if form is valid
 const isFormValid = computed(() => {
   return !!formData.value.deliveryCompanyId
-})
-
-// When delivery company changes, reset sub-delivery company selection
-watch(() => formData.value.deliveryCompanyId, () => {
-  formData.value.subDeliveryCompanyId = undefined
 })
 
 const handleSubmit = () => {
@@ -111,21 +90,6 @@ const handleClose = () => {
                   >
                     <option value="">{{ t('common.select') }}</option>
                     <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">{{ dc.name }}</option>
-                  </select>
-                </div>
-
-                <!-- Sub-Delivery Company Selection (only shown if parent has sub-companies) -->
-                <div v-if="hasSubCompanies">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ t('nav.subDeliveryCompanies') }}
-                  </label>
-                  <select
-                    v-model="formData.subDeliveryCompanyId"
-                    class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    :disabled="isSubmitting"
-                  >
-                    <option :value="undefined">{{ t('common.select') }}</option>
-                    <option v-for="sdc in filteredSubDeliveryCompanies" :key="sdc.id" :value="sdc.id">{{ sdc.name }}</option>
                   </select>
                 </div>
               </div>

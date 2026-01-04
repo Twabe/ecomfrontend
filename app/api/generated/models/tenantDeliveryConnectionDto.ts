@@ -33,6 +33,10 @@ export interface TenantDeliveryConnectionDto {
   /** @nullable */
   deliveryCompanyName?: string | null;
   /** @nullable */
+  hubCityId?: string | null;
+  /** @nullable */
+  hubCityName?: string | null;
+  /** @nullable */
   templateName?: string | null;
   /** @nullable */
   templateCode?: string | null;

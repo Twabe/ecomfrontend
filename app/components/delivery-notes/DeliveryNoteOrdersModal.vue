@@ -2,13 +2,11 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import type { CreateDeliveryNoteWithOrdersRequest } from '~/types/deliveryNote'
 import type { DeliveryCompany } from '~/types/deliveryCompany'
-import type { SubDeliveryCompany } from '~/types/subDeliveryCompany'
 import type { Order } from '~/types/order'
 
 const props = defineProps<{
   show: boolean
   deliveryCompanies: DeliveryCompany[]
-  subDeliveryCompanies: SubDeliveryCompany[]
   availableOrders: Order[]
   isLoadingOrders: boolean
   mode: 'create' | 'add'
@@ -19,14 +17,13 @@ const emit = defineEmits<{
   close: []
   createWithOrders: [data: CreateDeliveryNoteWithOrdersRequest]
   addOrders: [orderIds: string[]]
-  searchOrders: [params: { deliveryCompanyId?: string; subDeliveryCompanyId?: string }]
+  searchOrders: [params: { deliveryCompanyId?: string }]
 }>()
 
 const { t } = useI18n()
 
 const selectedOrderIds = ref<string[]>([])
 const deliveryCompanyId = ref<string>('')
-const subDeliveryCompanyId = ref<string>('')
 const autoGenerateCode = ref(true)
 const code = ref<string>('')
 
@@ -34,16 +31,14 @@ watch(() => props.show, (val) => {
   if (val) {
     selectedOrderIds.value = []
     deliveryCompanyId.value = ''
-    subDeliveryCompanyId.value = ''
     autoGenerateCode.value = true
     code.value = ''
   }
 })
 
-watch([deliveryCompanyId, subDeliveryCompanyId], () => {
+watch(deliveryCompanyId, () => {
   emit('searchOrders', {
-    deliveryCompanyId: deliveryCompanyId.value || undefined,
-    subDeliveryCompanyId: subDeliveryCompanyId.value || undefined
+    deliveryCompanyId: deliveryCompanyId.value || undefined
   })
 })
 
@@ -81,8 +76,7 @@ const handleSubmit = () => {
       orderIds: selectedOrderIds.value,
       autoGenerateCode: autoGenerateCode.value,
       code: autoGenerateCode.value ? undefined : code.value,
-      deliveryCompanyId: deliveryCompanyId.value,
-      subDeliveryCompanyId: subDeliveryCompanyId.value || undefined
+      deliveryCompanyId: deliveryCompanyId.value
     })
   } else {
     emit('addOrders', selectedOrderIds.value)
@@ -139,32 +133,18 @@ const handleClose = () => {
                 </div>
 
                 <!-- Filters -->
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ t('nav.deliveryCompanies') }} {{ mode === 'create' ? '*' : '' }}
-                    </label>
-                    <select
-                      v-model="deliveryCompanyId"
-                      :required="mode === 'create'"
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                      <option value="">{{ mode === 'create' ? t('common.select') : t('common.all') }}</option>
-                      <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">{{ dc.name }}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ t('nav.subDeliveryCompanies') }}
-                    </label>
-                    <select
-                      v-model="subDeliveryCompanyId"
-                      class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                      <option value="">{{ t('common.all') }}</option>
-                      <option v-for="sdc in subDeliveryCompanies" :key="sdc.id" :value="sdc.id">{{ sdc.name }}</option>
-                    </select>
-                  </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('nav.deliveryCompanies') }} {{ mode === 'create' ? '*' : '' }}
+                  </label>
+                  <select
+                    v-model="deliveryCompanyId"
+                    :required="mode === 'create'"
+                    class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="">{{ mode === 'create' ? t('common.select') : t('common.all') }}</option>
+                    <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">{{ dc.name }}</option>
+                  </select>
                 </div>
 
                 <!-- Orders list -->

@@ -103,6 +103,15 @@
             {{ $t('deliveryProviders.manage') }}
           </button>
 
+          <!-- View Cities Link -->
+          <NuxtLink
+            :to="`/dashboard/delivery-providers/${connection.id}/cities`"
+            class="btn-ghost text-sm py-2 px-3 flex items-center gap-1"
+            :title="$t('deliveryProviders.viewCities')"
+          >
+            <MapPinIcon class="w-4 h-4" />
+          </NuxtLink>
+
           <!-- How to Connect Link -->
           <a
             v-if="template.howToConnectUrl"
@@ -140,6 +149,7 @@ import {
   BoltIcon,
   Cog6ToothIcon,
   VideoCameraIcon,
+  MapPinIcon,
 } from '@heroicons/vue/24/outline'
 import type { DeliveryProviderTemplateDto, TenantDeliveryConnectionDto } from '~/services'
 

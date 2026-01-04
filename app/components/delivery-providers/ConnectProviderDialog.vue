@@ -51,6 +51,37 @@
                     </select>
                   </div>
 
+                  <!-- Hub City Selector (from Provider Cities) -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <div class="flex items-center gap-2">
+                        <MapPinIcon class="w-4 h-4" />
+                        {{ $t('deliveryProviders.hubCity') }}
+                      </div>
+                    </label>
+                    <div v-if="isLoadingCities" class="flex items-center gap-2 py-2 text-sm text-gray-500">
+                      <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600" />
+                      {{ $t('common.loading') }}
+                    </div>
+                    <select
+                      v-else
+                      v-model="formData.hubCityId"
+                      class="input w-full"
+                    >
+                      <option :value="null">{{ $t('deliveryProviders.selectHubCity') }}</option>
+                      <!-- Use city.cityId (linked local city) instead of city.id (provider city) -->
+                      <option v-for="city in linkedTemplateCities" :key="city.id" :value="city.cityId">
+                        {{ city.cityName || city.externalCityName || city.externalCityId }}
+                      </option>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      {{ $t('deliveryProviders.hubCityHelp') }}
+                    </p>
+                    <p v-if="linkedTemplateCities.length === 0 && !isLoadingCities" class="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                      {{ $t('deliveryProviders.noCitiesLinked', 'No cities linked yet. Ask Super Admin to link provider cities to local cities.') }}
+                    </p>
+                  </div>
+
                   <!-- Dynamic Credential Fields -->
                   <div
                     v-for="field in template?.credentialSchema"
@@ -138,6 +169,25 @@
                       </label>
                     </div>
                   </div>
+
+                  <!-- Copy Default Fees Option -->
+                  <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                      <input
+                        v-model="formData.copyDefaultFees"
+                        type="checkbox"
+                        class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700"
+                      />
+                      <div>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {{ $t('deliveryProviders.copyDefaultFees') }}
+                        </span>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                          {{ $t('deliveryProviders.copyDefaultFeesHelp') }}
+                        </p>
+                      </div>
+                    </label>
+                  </div>
                 </div>
 
                 <!-- Footer -->
@@ -170,9 +220,10 @@
 
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import { XMarkIcon, LinkIcon, InformationCircleIcon } from '@heroicons/vue/24/outline'
+import { XMarkIcon, LinkIcon, InformationCircleIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 import { ConnectionMode } from '~/api/generated/models'
 import type { DeliveryProviderTemplateDto, StoreDto, ConnectDeliveryProviderRequest, CredentialFieldDto } from '~/api/generated/models'
+import { useDeliveryProviderTemplatesGetTemplateCities, type ProviderCityDto } from '~/api/generated/endpoints/delivery-provider-templates/delivery-provider-templates'
 
 const props = defineProps<{
   modelValue: boolean
@@ -186,21 +237,37 @@ const emit = defineEmits<{
   (e: 'connect', data: ConnectDeliveryProviderRequest): void
 }>()
 
-const { notify } = useNotification()
+// Fetch cities for the selected template (provider's cities, not local cities)
+const templateId = computed(() => props.template?.id || '')
+const { data: templateCities, isLoading: isLoadingCities } = useDeliveryProviderTemplatesGetTemplateCities(
+  templateId,
+  { isActive: true },
+  { query: { enabled: computed(() => !!props.template?.id && props.modelValue) } }
+)
+
+// Filter to only cities that have been linked to a local city (have cityId)
+// These are the only ones that can be used as hub cities
+const linkedTemplateCities = computed(() => {
+  return (templateCities.value || []).filter(city => city.cityId)
+})
 
 // Form data
 const formData = ref<{
   storeId: string | null
+  hubCityId: string | null
   credentials: Record<string, string>
   mode: ConnectionMode
   priority: number
   notes: string | null
+  copyDefaultFees: boolean
 }>({
   storeId: null,
+  hubCityId: null,
   credentials: {},
   mode: ConnectionMode.Default,
   priority: 1,
   notes: null,
+  copyDefaultFees: true,
 })
 
 // Reset form when dialog opens with new template
@@ -208,10 +275,12 @@ watch(() => [props.modelValue, props.template], ([isOpen, template]) => {
   if (isOpen && template) {
     formData.value = {
       storeId: null,
+      hubCityId: null,
       credentials: {},
       mode: ConnectionMode.Default,
       priority: 1,
       notes: null,
+      copyDefaultFees: true,
     }
     // Initialize credential fields
     template.credentialSchema?.forEach((field: CredentialFieldDto) => {
@@ -255,6 +324,8 @@ const handleSubmit = () => {
     mode: formData.value.mode,
     priority: formData.value.priority,
     notes: formData.value.notes,
+    hubCityId: formData.value.hubCityId,
+    copyDefaultFees: formData.value.copyDefaultFees,
   }
 
   emit('connect', data)

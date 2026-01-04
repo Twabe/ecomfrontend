@@ -60,8 +60,6 @@ export interface UpdateOrderRequest {
   /** @nullable */
   deliveryCompanyId?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
   moderatorId?: string | null;
   /** @nullable */
   mediaBuyerId?: string | null;
@@ -85,9 +83,9 @@ export interface UpdateOrderRequest {
    */
   sourceCity?: string | null;
   /**
-   * Delivery location from CityLocationMappings.
-Selected by Confirmateur when assigning delivery company.
+   * Provider city from ProviderCities table.
+Selected when delivery company is chosen.
    * @nullable
    */
-  deliveryLocationId?: string | null;
+  providerCityId?: string | null;
 }

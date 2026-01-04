@@ -5,23 +5,19 @@ import {
   ChevronDownIcon
 } from '@heroicons/vue/24/outline'
 import type { DeliveryCompany } from '~/types/deliveryCompany'
-import type { SubDeliveryCompany } from '~/types/subDeliveryCompany'
 
 interface Filters {
   deliveryCompanyId: string
-  subDeliveryCompanyId: string
 }
 
 defineProps<{
   deliveryCompanies: DeliveryCompany[]
-  subDeliveryCompanies: SubDeliveryCompany[]
 }>()
 
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
 const filters = defineModel<Filters>('filters', {
   default: () => ({
-    deliveryCompanyId: '',
-    subDeliveryCompanyId: ''
+    deliveryCompanyId: ''
   })
 })
 
@@ -52,21 +48,13 @@ const showFilters = ref(false)
     </div>
 
     <!-- Filter Panel -->
-    <div v-if="showFilters" class="grid grid-cols-2 gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+    <div v-if="showFilters" class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
       <select
         v-model="filters.deliveryCompanyId"
         class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
       >
         <option value="">{{ t('nav.deliveryCompanies') }}</option>
         <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">{{ dc.name }}</option>
-      </select>
-
-      <select
-        v-model="filters.subDeliveryCompanyId"
-        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-      >
-        <option value="">{{ t('nav.subDeliveryCompanies') }}</option>
-        <option v-for="sdc in subDeliveryCompanies" :key="sdc.id" :value="sdc.id">{{ sdc.name }}</option>
       </select>
     </div>
   </div>

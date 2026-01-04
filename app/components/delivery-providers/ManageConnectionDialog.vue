@@ -251,6 +251,7 @@ const emit = defineEmits<{
 
 const { notify } = useNotification()
 const config = useRuntimeConfig()
+const { t } = useI18n()
 
 // Full webhook URL with domain (use backend API URL, not frontend)
 const fullWebhookUrl = computed(() => {
@@ -314,7 +315,7 @@ const handleToggleActive = () => {
 }
 
 const handleDisconnect = () => {
-  if (props.connection?.id && confirm('Are you sure you want to disconnect this provider?')) {
+  if (props.connection?.id && confirm(t('deliveryProviders.disconnectConfirm'))) {
     emit('disconnect', props.connection.id)
   }
 }
@@ -323,9 +324,9 @@ const copyWebhookUrl = async () => {
   if (fullWebhookUrl.value) {
     try {
       await navigator.clipboard.writeText(fullWebhookUrl.value)
-      notify.success('Webhook URL copied!')
+      notify.success(t('deliveryProviders.webhookCopied'))
     } catch {
-      notify.error('Failed to copy')
+      notify.error(t('deliveryProviders.webhookCopyFailed'))
     }
   }
 }

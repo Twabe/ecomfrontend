@@ -329,9 +329,6 @@
               <TruckIcon class="w-3 h-3 shrink-0" />
               <span class="truncate">
                 {{ assignment.deliveryCompanyName }}
-                <span v-if="assignment.subDeliveryCompanyName" class="text-orange-400 dark:text-orange-500">
-                  → {{ assignment.subDeliveryCompanyName }}
-                </span>
               </span>
               <a
                 v-if="assignment.deliveryCompanyPhone"
@@ -431,7 +428,6 @@
       :show="showBulkAssignDeliveryModal"
       :order-count="selectedAssignments.size"
       :delivery-companies="deliveryCompanies"
-      :sub-delivery-companies="subDeliveryCompanies"
       :is-submitting="isBulkAssignDeliveryProcessing"
       @close="showBulkAssignDeliveryModal = false"
       @submit="handleBulkAssignDelivery"
@@ -461,11 +457,9 @@ import { useOrderAssignmentsService, type WorkerAssignmentDto, type BulkComplete
 import { useOrdersWorkflowService, type BulkAssignDeliveryCompanyResponse } from '~/services/orders/useOrdersService'
 import { trackingStatesSearch } from '~/api/generated/endpoints/tracking-states/tracking-states'
 import { deliveryCompaniesSearch } from '~/api/generated/endpoints/delivery-companies/delivery-companies'
-import { subDeliveryCompaniesSearch } from '~/api/generated/endpoints/sub-delivery-companies/sub-delivery-companies'
 import { ServiceTypes, SuiviResult } from '~/constants/order'
 import type { SuiviResultType } from '~/constants/order'
 import type { DeliveryCompany } from '~/types/deliverycompany'
-import type { SubDeliveryCompany } from '~/types/subDeliveryCompany'
 
 const emit = defineEmits<{
   (e: 'assign-delivery', assignment: WorkerAssignmentDto): void
@@ -514,7 +508,6 @@ const bulkDeliveryResult = ref<BulkAssignDeliveryCompanyResponse | null>(null)
 // Bulk Assign Delivery modal state
 const showBulkAssignDeliveryModal = ref(false)
 const deliveryCompanies = ref<DeliveryCompany[]>([])
-const subDeliveryCompanies = ref<SubDeliveryCompany[]>([])
 const isBulkAssignDeliveryProcessing = ref(false)
 
 // Selection helpers
@@ -747,7 +740,7 @@ const openBulkAssignDeliveryModal = () => {
 }
 
 // Handle bulk assign delivery company submission
-const handleBulkAssignDelivery = async (data: { deliveryCompanyId: string; subDeliveryCompanyId?: string }) => {
+const handleBulkAssignDelivery = async (data: { deliveryCompanyId: string }) => {
   if (selectedAssignments.value.size === 0) return
 
   isBulkAssignDeliveryProcessing.value = true
@@ -761,8 +754,7 @@ const handleBulkAssignDelivery = async (data: { deliveryCompanyId: string; subDe
 
     const response = await ordersWorkflow.bulkAssignDeliveryCompany({
       orderIds,
-      deliveryCompanyId: data.deliveryCompanyId,
-      subDeliveryCompanyId: data.subDeliveryCompanyId
+      deliveryCompanyId: data.deliveryCompanyId
     })
 
     bulkDeliveryResult.value = response
@@ -813,17 +805,12 @@ const loadTrackingStates = async () => {
 // Load delivery companies for bulk assign modal
 const loadDeliveryCompanies = async () => {
   try {
-    const [dcResponse, sdcResponse] = await Promise.all([
-      deliveryCompaniesSearch({ pageNumber: 1, pageSize: 100 }),
-      subDeliveryCompaniesSearch({ pageNumber: 1, pageSize: 200 })
-    ])
+    const dcResponse = await deliveryCompaniesSearch({ pageNumber: 1, pageSize: 100 })
     deliveryCompanies.value = (dcResponse.data || []) as unknown as DeliveryCompany[]
-    subDeliveryCompanies.value = (sdcResponse.data || []) as unknown as SubDeliveryCompany[]
-    console.log('[SuiviPanel] Loaded delivery companies:', deliveryCompanies.value.length, 'sub:', subDeliveryCompanies.value.length)
+    console.log('[SuiviPanel] Loaded delivery companies:', deliveryCompanies.value.length)
   } catch (error) {
     console.error('[SuiviPanel] Failed to load delivery companies:', error)
     deliveryCompanies.value = []
-    subDeliveryCompanies.value = []
   }
 }
 

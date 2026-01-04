@@ -20,6 +20,4 @@ export interface AssignDeliveryCompanyRequest {
    * @minLength 1
    */
   deliveryCompanyId: string;
-  /** @nullable */
-  subDeliveryCompanyId?: string | null;
 }

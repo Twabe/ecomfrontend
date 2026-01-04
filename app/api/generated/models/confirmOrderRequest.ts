@@ -21,8 +21,6 @@ export interface ConfirmOrderRequest {
   /** @nullable */
   deliveryCompanyId?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
   comment?: string | null;
   /**
    * Quality checks completed during confirmation (key -> passed).

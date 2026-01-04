@@ -37,7 +37,6 @@ export interface OrderHistoryDto {
   orderAssignmentId?: string
   serviceType?: string
   deliveryCompanyId?: string
-  subDeliveryCompanyId?: string
   reasonId?: string
   orderPrice?: number
   codAmount?: number

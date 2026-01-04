@@ -14,8 +14,6 @@ export interface CreateDeliveryNoteWithOrdersRequest {
    * @minLength 1
    */
   deliveryCompanyId: string;
-  /** @nullable */
-  subDeliveryCompanyId?: string | null;
   orderIds?: string[];
   autoGenerateCode?: boolean;
   /** @nullable */

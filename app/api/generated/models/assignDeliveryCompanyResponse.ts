@@ -11,10 +11,6 @@ export interface AssignDeliveryCompanyResponse {
   orderCode?: string;
   deliveryCompanyId?: string;
   deliveryCompanyName?: string;
-  /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
-  subDeliveryCompanyName?: string | null;
   /**
    * Tracking code returned from delivery provider API.
 Null if provider doesn't have API integration or if send failed.

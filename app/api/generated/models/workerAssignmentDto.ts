@@ -51,12 +51,6 @@ export interface WorkerAssignmentDto {
   /** @nullable */
   deliveryCompanyPhone?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
-  subDeliveryCompanyName?: string | null;
-  /** @nullable */
-  subDeliveryCompanyPhone?: string | null;
-  /** @nullable */
   suiviResult?: string | null;
   /** @nullable */
   trackingStateId?: string | null;

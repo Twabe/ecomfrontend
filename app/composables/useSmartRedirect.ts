@@ -23,9 +23,9 @@ const ROUTE_PRIORITY = [
   { path: '/dashboard/products', permission: 'Permissions.Products.View' },
 
   // Delivery & Logistics
+  { path: '/dashboard/delivery-providers', permission: 'Permissions.DeliveryConnections.View' },
   { path: '/dashboard/delivery-notes', permission: 'Permissions.DeliveryNotes.View' },
   { path: '/dashboard/shipments', permission: 'Permissions.Shipments.View' },
-  { path: '/dashboard/delivery-companies', permission: 'Permissions.DeliveryCompanies.View' },
 
   // Financial
   { path: '/dashboard/payments', permission: 'Permissions.Payments.View' },

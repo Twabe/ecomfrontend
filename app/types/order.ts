@@ -77,8 +77,6 @@ export interface Order {
   // Delivery Company
   deliveryCompanyId?: string
   deliveryCompanyName?: string
-  subDeliveryCompanyId?: string
-  subDeliveryCompanyName?: string
 
   // Delivery Tracking
   trackingCode?: string
@@ -99,9 +97,9 @@ export interface Order {
   // Source City (from external platform, may contain typos)
   sourceCity?: string
 
-  // Delivery Location (from CityLocationMappings - selected by Confirmateur)
-  deliveryLocationId?: string
-  deliveryLocationName?: string
+  // Provider City (from ProviderCities - selected when delivery company is chosen)
+  providerCityId?: string
+  providerCityName?: string
 
   // Workers (workerId removed - use activeAssignments instead)
   moderatorId?: string
@@ -198,7 +196,7 @@ export interface CreateOrderRequest {
   items: CreateOrderItemRequest[]
   fullName: string
   phone: string
-  // Internal city - optional when deliveryLocationId is provided
+  // Internal city - optional when providerCityId is provided
   cityId?: string
   address: string
   price?: number
@@ -209,13 +207,12 @@ export interface CreateOrderRequest {
   state?: string
   trackingStateId?: string
   deliveryCompanyId?: string
-  subDeliveryCompanyId?: string
   storeId?: string
   sourceId?: string
   // City name as text (can be in Arabic or misspelled)
   sourceCity?: string
-  // Delivery location from CityLocationMappings (selected when delivery company is chosen)
-  deliveryLocationId?: string
+  // Provider city (from ProviderCities - selected when delivery company is chosen)
+  providerCityId?: string
 }
 
 // Update Order Request
@@ -235,7 +232,6 @@ export interface UpdateOrderRequest {
   state?: string
   trackingStateId?: string
   deliveryCompanyId?: string
-  subDeliveryCompanyId?: string
   // workerId removed - use OrderAssignment API for worker assignment
   moderatorId?: string
   mediaBuyerId?: string
@@ -248,15 +244,14 @@ export interface UpdateOrderRequest {
   utm2?: string
   // City name as text (can be in Arabic or misspelled)
   sourceCity?: string
-  // Delivery location from CityLocationMappings (selected by Confirmateur)
-  deliveryLocationId?: string
+  // Provider city (from ProviderCities - selected when delivery company is chosen)
+  providerCityId?: string
 }
 
 // Confirm Order Request
 export interface ConfirmOrderRequest {
   orderId: string
   deliveryCompanyId?: string
-  subDeliveryCompanyId?: string
   moveToShipping?: boolean
   comment?: string
   qualityChecks?: Record<string, boolean>
@@ -274,7 +269,6 @@ export interface CancelOrderRequest {
 export interface AssignDeliveryCompanyRequest {
   orderId: string
   deliveryCompanyId: string
-  subDeliveryCompanyId?: string
 }
 
 // Assign Delivery Company Response
@@ -283,8 +277,6 @@ export interface AssignDeliveryCompanyResponse {
   orderCode: string
   deliveryCompanyId: string
   deliveryCompanyName: string
-  subDeliveryCompanyId?: string
-  subDeliveryCompanyName?: string
 }
 
 // Mark Orders as Delivered Request

@@ -3,13 +3,11 @@ import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } fro
 import { CheckCircleIcon } from '@heroicons/vue/24/outline'
 import type { ConfirmOrderRequest } from '~/types/order'
 import type { DeliveryCompany } from '~/types/deliveryCompany'
-import type { SubDeliveryCompany } from '~/types/subDeliveryCompany'
 
 const props = defineProps<{
   show: boolean
   selectedCount: number
   deliveryCompanies?: DeliveryCompany[]
-  subDeliveryCompanies?: SubDeliveryCompany[]
 }>()
 
 const emit = defineEmits<{
@@ -22,16 +20,7 @@ const { t } = useI18n()
 const confirmData = ref({
   moveToShipping: true,
   deliveryCompanyId: '',
-  subDeliveryCompanyId: '',
   comment: ''
-})
-
-// Filter sub delivery companies based on selected delivery company
-const filteredSubDeliveryCompanies = computed(() => {
-  if (!confirmData.value.deliveryCompanyId || !props.subDeliveryCompanies) return []
-  return props.subDeliveryCompanies.filter(
-    sub => sub.deliveryCompanyId === confirmData.value.deliveryCompanyId
-  )
 })
 
 watch(() => props.show, (val) => {
@@ -39,7 +28,6 @@ watch(() => props.show, (val) => {
     confirmData.value = {
       moveToShipping: true,
       deliveryCompanyId: '',
-      subDeliveryCompanyId: '',
       comment: ''
     }
   }
@@ -49,7 +37,6 @@ const handleConfirm = () => {
   emit('confirm', {
     moveToShipping: confirmData.value.moveToShipping,
     deliveryCompanyId: confirmData.value.deliveryCompanyId || undefined,
-    subDeliveryCompanyId: confirmData.value.subDeliveryCompanyId || undefined,
     comment: confirmData.value.comment || undefined
   })
 }
@@ -114,22 +101,6 @@ const handleClose = () => {
                     <option value="">{{ t('common.select') }}</option>
                     <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">
                       {{ dc.name }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Sub Delivery Company (optional) -->
-                <div v-if="confirmData.deliveryCompanyId && filteredSubDeliveryCompanies.length">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ t('orders.subDeliveryCompany') }} ({{ t('common.optional') }})
-                  </label>
-                  <select
-                    v-model="confirmData.subDeliveryCompanyId"
-                    class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">{{ t('common.select') }}</option>
-                    <option v-for="sub in filteredSubDeliveryCompanies" :key="sub.id" :value="sub.id">
-                      {{ sub.name }}
                     </option>
                   </select>
                 </div>

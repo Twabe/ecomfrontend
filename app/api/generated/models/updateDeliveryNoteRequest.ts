@@ -20,7 +20,5 @@ export interface UpdateDeliveryNoteRequest {
   /** @nullable */
   deliveryCompanyId?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
   dateAdded?: string | null;
 }

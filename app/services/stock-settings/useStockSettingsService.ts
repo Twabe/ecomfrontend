@@ -40,7 +40,7 @@ const updateStockSettings = (id: string, data: UpdateStockSettingsRequest) =>
 
 export function useStockSettingsService() {
   const queryClient = useQueryClient()
-  const toast = useToast()
+  const notification = useNotification()
   const { t } = useI18n()
 
   const queryKey = ['stock-settings'] as const
@@ -58,11 +58,11 @@ export function useStockSettingsService() {
   const updateMutation = useMutation({
     mutationFn: (data: UpdateStockSettingsRequest) => updateStockSettings(data.id, data),
     onSuccess: () => {
-      toast.success(t('stockSettings.saved'))
+      notification.success(t('stockSettings.saved'))
       queryClient.invalidateQueries({ queryKey })
     },
     onError: (error: any) => {
-      toast.error(error?.message || t('stockSettings.saveFailed'))
+      notification.error(error?.message || t('stockSettings.saveFailed'))
     },
   })
 

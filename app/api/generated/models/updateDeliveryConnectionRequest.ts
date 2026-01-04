@@ -51,4 +51,9 @@ export interface UpdateDeliveryConnectionRequest {
    * @nullable
    */
   isActive?: boolean | null;
+  /**
+   * Hub city ID - the city from which the tenant ships orders.
+   * @nullable
+   */
+  hubCityId?: string | null;
 }

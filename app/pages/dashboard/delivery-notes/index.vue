@@ -5,7 +5,6 @@ import {
   useDeliveryNotesService,
   useOrdersService,
   useDeliveryCompaniesService,
-  useSubDeliveryCompaniesService,
   type DeliveryNoteDto,
   type DeliveryNoteDetailsDto,
   type CreateDeliveryNoteRequest,
@@ -42,7 +41,6 @@ const {
 
 // Dropdown data from services (auto-fetch)
 const { items: deliveryCompanies } = useDeliveryCompaniesService()
-const { items: subDeliveryCompanies } = useSubDeliveryCompaniesService()
 
 // Orders service for orders modal (needs manual control)
 const {
@@ -54,8 +52,7 @@ const {
 // Search & Filters
 const searchQuery = ref('')
 const filters = ref({
-  deliveryCompanyId: '',
-  subDeliveryCompanyId: ''
+  deliveryCompanyId: ''
 })
 
 // Modals
@@ -76,8 +73,7 @@ watch([searchQuery, filters], () => {
 
 const applyFilters = () => {
   setFilters({
-    deliveryCompanyId: filters.value.deliveryCompanyId || undefined,
-    subDeliveryCompanyId: filters.value.subDeliveryCompanyId || undefined
+    deliveryCompanyId: filters.value.deliveryCompanyId || undefined
   })
   if (searchQuery.value) {
     setKeyword(searchQuery.value)
@@ -166,7 +162,7 @@ const openAddOrdersModal = async (note: DeliveryNoteDto) => {
   })
 }
 
-const handleSearchOrdersForModal = async (params: { deliveryCompanyId?: string; subDeliveryCompanyId?: string }) => {
+const handleSearchOrdersForModal = async (params: { deliveryCompanyId?: string }) => {
   setOrderFilters({
     state: OrderState.Confirmed,
     deliveryCompanyId: params.deliveryCompanyId
@@ -249,7 +245,6 @@ const changePage = (page: number) => {
       v-model:search-query="searchQuery"
       v-model:filters="filters"
       :delivery-companies="deliveryCompanies"
-      :sub-delivery-companies="subDeliveryCompanies"
     />
 
     <!-- Table -->
@@ -269,7 +264,6 @@ const changePage = (page: number) => {
       :show="showFormModal"
       :delivery-note="isEditMode ? selectedNote : null"
       :delivery-companies="deliveryCompanies"
-      :sub-delivery-companies="subDeliveryCompanies"
       @close="showFormModal = false"
       @create="handleCreate"
       @update="handleUpdate"
@@ -285,7 +279,6 @@ const changePage = (page: number) => {
     <DeliveryNotesDeliveryNoteOrdersModal
       :show="showOrdersModal"
       :delivery-companies="deliveryCompanies"
-      :sub-delivery-companies="subDeliveryCompanies"
       :available-orders="availableOrders"
       :is-loading-orders="isLoadingOrders"
       :mode="ordersModalMode"

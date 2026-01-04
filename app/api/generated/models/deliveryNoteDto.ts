@@ -11,10 +11,6 @@ export interface DeliveryNoteDto {
   code?: string;
   deliveryCompanyId?: string;
   deliveryCompanyName?: string;
-  /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
-  subDeliveryCompanyName?: string | null;
   orderIds?: string;
   dateAdded?: string;
 }

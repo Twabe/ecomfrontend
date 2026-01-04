@@ -6,9 +6,15 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type SearchSubDeliveryCompaniesRequestAllOf = {
+/**
+ * DTO for tenant connection selection in sync dialog.
+ */
+export interface TenantConnectionForSyncDto {
+  connectionId?: string;
   /** @nullable */
-  name?: string | null;
+  displayName?: string | null;
+  isActive?: boolean;
   /** @nullable */
-  deliveryCompanyId?: string | null;
-};
+  lastTestedAt?: string | null;
+  lastTestSuccessful?: boolean;
+}

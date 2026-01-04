@@ -14,8 +14,6 @@ export interface GetOrdersReadyForDeliveryRequest {
   /** @nullable */
   deliveryCompanyId?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
   cityId?: string | null;
   /** @nullable */
   workerId?: string | null;

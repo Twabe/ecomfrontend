@@ -1,19 +1,111 @@
+/*
+===================================================================================
+ARCHITECTURE DOCUMENTATION - ORDER CREATION CITY SELECTION
+===================================================================================
+
+🎯 CITY SELECTION - 3 MODES:
+
+This form handles 3 different ways a city can be specified for an order:
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ MODE 1: SOURCE CITY (Read-only, from external platforms)                        │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ When orders come from webhooks (Youcan, WooCommerce, etc.):                     │
+│   - Field: formData.sourceCity (string)                                         │
+│   - Display: Read-only amber box showing raw city name                          │
+│   - Contains: Raw text like "casa", "الدار البيضاء", "Casablanca"              │
+│   - Purpose: Reference only, may have typos or different language               │
+│   - NOT used for delivery company routing                                       │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ MODE 2: INTERNAL CITY (No delivery company selected)                            │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ When user creates order WITHOUT selecting a delivery company:                   │
+│   - Selector: Shows cities from props.cities (City table)                       │
+│   - Field: formData.cityId → Order.CityId                                       │
+│   - Fees: Loaded from ShippingFees API by cityId                               │
+│   - Use case: Manual orders, local delivery, no API integration                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ MODE 3: DELIVERY COMPANY CITY (Delivery company selected)                       │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ When user selects a delivery company (ForceLog, Ameex, etc.):                   │
+│   - Selector: Shows cities from ProviderCities for that company                 │
+│   - API call: GET /api/v1/deliverycompanies/{id}/cities                         │
+│   - Field: formData.providerCityId → ProviderCity.Id                            │
+│   - Fees: From selected city's DefaultDeliveredFee                              │
+│   - Use case: Integrated delivery with provider API                             │
+│                                                                                  │
+│   ✅ NEW ARCHITECTURE (ProviderCity):                                           │
+│   - Cities loaded from: ProviderCity (global, synced by Super Admin)            │
+│   - Connection found via: DeliveryCompany.Id → TenantDeliveryConnection         │
+│   - Fees from: ProviderCity.DefaultDeliveredFee (or ShippingFees if customized) │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+📊 FLOW DIAGRAM:
+
+  User opens Order Form
+         │
+         ├──► sourceCity displayed (if from webhook) [READ-ONLY]
+         │
+         └──► User selects Delivery Company?
+                │
+                ├── NO ──► Show City dropdown (from City table)
+                │              │
+                │              └──► User selects city
+                │                      │
+                │                      └──► Load fees from ShippingFees API
+                │
+                └── YES ─► Load cities from ProviderCities
+                               │
+                               └──► Show ProviderCity dropdown
+                                       │
+                                       └──► User selects city
+                                               │
+                                               └──► Use ProviderCity.DefaultDeliveredFee
+
+===================================================================================
+*/
+
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { TrashIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { shippingFeesSearch } from '~/api/generated/endpoints/shipping-fees/shipping-fees'
-import { cityLocationMappingsGetByCompany } from '~/api/generated/endpoints/city-location-mappings/city-location-mappings'
 import { useProductVariantsByProduct } from '~/services'
 import type { Order, CreateOrderRequest, UpdateOrderRequest, CreateOrderItemRequest } from '~/types/order'
 import type { City } from '~/types/city'
 import type { Product } from '~/types/product'
 import type { DeliveryCompany } from '~/types/deliverycompany'
-import type { DeliveryCompanyCityDto } from '~/api/generated/models/deliveryCompanyCityDto'
+import { customInstance } from '~/api/axios-instance'
 
-// Fetch delivery cities using generated API client
-const fetchDeliveryCities = async (deliveryCompanyId: string): Promise<DeliveryCompanyCityDto[]> => {
+// ProviderCity DTO from backend
+interface ProviderCityDto {
+  id: string
+  templateId: string
+  templateName?: string | null
+  cityId?: string | null
+  cityName?: string | null
+  externalCityId?: string | null
+  externalCityName?: string | null
+  externalZone?: string | null
+  defaultDeliveredFee?: number | null
+  defaultRefusedFee?: number | null
+  defaultCanceledFee?: number | null
+  defaultChangedFee?: number | null
+  isActive: boolean
+  isFromApi: boolean
+  lastSyncedAt?: string | null
+}
+
+// Fetch delivery cities from ProviderCities (NEW architecture)
+const fetchDeliveryCities = async (deliveryCompanyId: string): Promise<ProviderCityDto[]> => {
   try {
-    const result = await cityLocationMappingsGetByCompany(deliveryCompanyId)
+    const result = await customInstance<ProviderCityDto[]>({
+      url: `/api/v1/deliverycompanies/${deliveryCompanyId}/cities`,
+      method: 'GET'
+    })
     return result || []
   } catch (error) {
     console.error('Failed to fetch delivery cities:', error)
@@ -44,7 +136,7 @@ const { t } = useI18n()
 
 const isEdit = computed(() => !!props.order)
 
-const formData = ref<Partial<CreateOrderRequest & { deliveryLocationId?: string; sourceCity?: string }>>({
+const formData = ref<Partial<CreateOrderRequest & { providerCityId?: string; sourceCity?: string }>>({
   code: '',
   fullName: '',
   phone: '',
@@ -54,19 +146,20 @@ const formData = ref<Partial<CreateOrderRequest & { deliveryLocationId?: string;
   price: 0,
   fees: 0,
   deliveryCompanyId: '',
-  deliveryLocationId: '',
+  providerCityId: '',
   sourceCity: ''
 })
 
 // Delivery company cities (loaded when delivery company is selected)
-const deliveryCities = ref<DeliveryCompanyCityDto[]>([])
+// Now uses ProviderCities from the connection's template
+const deliveryCities = ref<ProviderCityDto[]>([])
 const isLoadingDeliveryCities = ref(false)
 
 // Convert delivery cities to format expected by UiSearchableSelect ({ id, name })
 const deliveryCitiesOptions = computed(() => {
   return deliveryCities.value.map(city => ({
     id: city.id || '',
-    name: city.externalName || ''
+    name: city.cityName || city.externalCityName || city.externalCityId || ''
   }))
 })
 
@@ -132,7 +225,7 @@ watch(() => props.show, (val) => {
         storeId: props.order.storeId || '',
         sourceId: props.order.sourceId || '',
         deliveryCompanyId: props.order.deliveryCompanyId || '',
-        deliveryLocationId: props.order.deliveryLocationId || '',
+        providerCityId: props.order.providerCityId || '',
         sourceCity: props.order.sourceCity || ''
       }
 
@@ -217,15 +310,15 @@ watch(
   }
 )
 
-// Watch for delivery location changes to auto-fill fees from CityLocationMappings
+// Watch for provider city changes to auto-fill fees from ProviderCities
 watch(
-  () => formData.value.deliveryLocationId,
-  (deliveryLocationId) => {
-    if (deliveryLocationId && formData.value.deliveryCompanyId) {
+  () => formData.value.providerCityId,
+  (providerCityId) => {
+    if (providerCityId && formData.value.deliveryCompanyId) {
       // Find the selected city in deliveryCities to get its fee
-      const selectedCity = deliveryCities.value.find(c => c.id === deliveryLocationId)
-      if (selectedCity?.deliveryFee) {
-        formData.value.fees = selectedCity.deliveryFee
+      const selectedCity = deliveryCities.value.find(c => c.id === providerCityId)
+      if (selectedCity?.defaultDeliveredFee) {
+        formData.value.fees = selectedCity.defaultDeliveredFee
         calculateTotal()
       }
     }
@@ -238,9 +331,9 @@ watch(
   async (deliveryCompanyId, oldDeliveryCompanyId) => {
     // Reset selections when switching between modes
     if (deliveryCompanyId) {
-      // Switching TO delivery company mode - reset cityId, use deliveryLocationId
+      // Switching TO delivery company mode - reset cityId, use providerCityId
       formData.value.cityId = ''
-      formData.value.deliveryLocationId = ''
+      formData.value.providerCityId = ''
       deliveryCities.value = []
 
       // Load delivery company cities
@@ -254,8 +347,8 @@ watch(
         isLoadingDeliveryCities.value = false
       }
     } else if (oldDeliveryCompanyId) {
-      // Switching FROM delivery company mode - reset deliveryLocationId, use cityId
-      formData.value.deliveryLocationId = ''
+      // Switching FROM delivery company mode - reset providerCityId, use cityId
+      formData.value.providerCityId = ''
       deliveryCities.value = []
     }
   }
@@ -353,8 +446,7 @@ const handleSubmit = () => {
     // CityId is required - keep it or use undefined (backend validates)
     cityId: formData.value.cityId || undefined,
     deliveryCompanyId: formData.value.deliveryCompanyId || undefined,
-    subDeliveryCompanyId: formData.value.subDeliveryCompanyId || undefined,
-    deliveryLocationId: formData.value.deliveryLocationId || undefined,
+    providerCityId: formData.value.providerCityId || undefined,
     storeId: formData.value.storeId || undefined,
     sourceId: formData.value.sourceId || undefined,
     trackingStateId: formData.value.trackingStateId || undefined,
@@ -485,15 +577,15 @@ const handleClose = () => {
                     </select>
                   </div>
 
-                  <!-- Delivery City - Always shown, switches between Cities table and CityLocationMappings -->
+                  <!-- Delivery City - Always shown, switches between Cities table and ProviderCities -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       {{ t('orders.deliveryCity', 'Ville de livraison') }} <span class="text-red-500">*</span>
                     </label>
-                    <!-- When delivery company is selected: show CityLocationMappings -->
+                    <!-- When delivery company is selected: show ProviderCities -->
                     <UiSearchableSelect
                       v-if="formData.deliveryCompanyId"
-                      v-model="formData.deliveryLocationId"
+                      v-model="formData.providerCityId"
                       :options="deliveryCitiesOptions"
                       :placeholder="isLoadingDeliveryCities ? t('common.loading') : t('orders.searchDeliveryCity', 'Rechercher une ville...')"
                       :disabled="isLoadingDeliveryCities"

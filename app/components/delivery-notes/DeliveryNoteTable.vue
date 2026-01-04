@@ -50,9 +50,6 @@ const formatDate = (date: string) => {
               {{ t('nav.deliveryCompanies') }}
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              {{ t('nav.subDeliveryCompanies') }}
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {{ t('deliveryNotes.ordersCount') }}
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -65,12 +62,12 @@ const formatDate = (date: string) => {
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
           <tr v-if="isLoading">
-            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
               {{ t('common.loading') }}
             </td>
           </tr>
           <tr v-else-if="deliveryNotes.length === 0">
-            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
               {{ t('common.noData') }}
             </td>
           </tr>
@@ -89,9 +86,6 @@ const formatDate = (date: string) => {
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
               {{ note.deliveryCompanyName }}
-            </td>
-            <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-              {{ note.subDeliveryCompanyName || '-' }}
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900 dark:text-white">
               {{ note.orderIds ? note.orderIds.split(',').length : 0 }}

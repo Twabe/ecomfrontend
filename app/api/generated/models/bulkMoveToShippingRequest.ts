@@ -15,7 +15,5 @@ export interface BulkMoveToShippingRequest {
    */
   orderIds: string[];
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
   newState?: string | null;
 }

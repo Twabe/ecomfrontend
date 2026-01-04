@@ -64,7 +64,6 @@ export {
   type BulkCreateSkuMappingsResult,
 } from './sku-mappings/useSkuMappingsService'
 export { useDeliveryCompaniesService, type DeliveryCompanyDto, type CreateDeliveryCompanyRequest, type UpdateDeliveryCompanyRequest } from './delivery-companies/useDeliveryCompaniesService'
-export { useSubDeliveryCompaniesService, type SubDeliveryCompanyDto, type CreateSubDeliveryCompanyRequest, type UpdateSubDeliveryCompanyRequest } from './sub-delivery-companies/useSubDeliveryCompaniesService'
 export { useStoresService, type StoreDto, type CreateStoreRequest, type UpdateStoreRequest } from './stores/useStoresService'
 export { useShippingFeesService, type ShippingFeeDto, type CreateShippingFeeRequest, type UpdateShippingFeeRequest } from './shipping-fees/useShippingFeesService'
 
@@ -158,6 +157,14 @@ export {
   type TestConnectionResponse,
   type SyncConnectionResponse,
 } from './tenant-delivery-connections/useTenantDeliveryConnectionsService'
+export {
+  useProviderCitiesService,
+  type ProviderCityDto2,
+  type CreateProviderCityRequest,
+  type UpdateProviderCityRequest,
+  type BulkCreateProviderCitiesRequest,
+  type BulkCreateResult,
+} from './provider-cities/useProviderCitiesService'
 
 // ============================================
 // IDENTITY & ACCESS SERVICES

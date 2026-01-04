@@ -34,10 +34,6 @@ export interface OrderHistoryDto {
   /** @nullable */
   deliveryCompanyName?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
-  subDeliveryCompanyName?: string | null;
-  /** @nullable */
   reasonId?: string | null;
   /** @nullable */
   reasonTitle?: string | null;

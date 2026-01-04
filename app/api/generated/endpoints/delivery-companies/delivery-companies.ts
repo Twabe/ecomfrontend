@@ -33,9 +33,7 @@ import type {
   AdminDeliveryCompanyDto,
   CreateDeliveryCompanyRequest,
   DeliveryCompaniesGetAllAdminParams,
-  DeliveryCompaniesGetProviderCitiesParams,
   DeliveryCompanyDto,
-  DeliveryCompanyType,
   ErrorResult,
   HttpValidationProblemDetails,
   PaginationResponseOfDeliveryCompanyDto,
@@ -575,19 +573,17 @@ export const useDeliveryCompaniesUpdatePaymentTerms = <TError = HttpValidationPr
       return useMutation(mutationOptions, queryClient);
     }
     /**
- * @summary Get cities from a delivery provider API.
+ * Returns cities available for delivery through this company.
+ * @summary Get cities for a delivery company.
  */
-export const deliveryCompaniesGetProviderCities = (
-    providerType: MaybeRef<DeliveryCompanyType>,
-    params?: MaybeRef<DeliveryCompaniesGetProviderCitiesParams>,
+export const deliveryCompaniesGetDeliveryCompanyCities = (
+    id: MaybeRef<string>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-      providerType = unref(providerType);
-params = unref(params);
+      id = unref(id);
       
       return customInstance<ProviderCityDto[]>(
-      {url: `/api/v1/deliverycompanies/provider-cities/${providerType}`, method: 'GET',
-        params: unref(params), signal
+      {url: `/api/v1/deliverycompanies/${id}/cities`, method: 'GET', signal
     },
       options);
     }
@@ -595,48 +591,45 @@ params = unref(params);
 
 
 
-export const getDeliveryCompaniesGetProviderCitiesQueryKey = (providerType?: MaybeRef<DeliveryCompanyType>,
-    params?: MaybeRef<DeliveryCompaniesGetProviderCitiesParams>,) => {
+export const getDeliveryCompaniesGetDeliveryCompanyCitiesQueryKey = (id?: MaybeRef<string>,) => {
     return [
-    'api','v1','deliverycompanies','provider-cities',providerType, ...(params ? [params]: [])
+    'api','v1','deliverycompanies',id,'cities'
     ] as const;
     }
 
     
-export const getDeliveryCompaniesGetProviderCitiesQueryOptions = <TData = Awaited<ReturnType<typeof deliveryCompaniesGetProviderCities>>, TError = HttpValidationProblemDetails | ErrorResult>(providerType: MaybeRef<DeliveryCompanyType>,
-    params?: MaybeRef<DeliveryCompaniesGetProviderCitiesParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetProviderCities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getDeliveryCompaniesGetDeliveryCompanyCitiesQueryOptions = <TData = Awaited<ReturnType<typeof deliveryCompaniesGetDeliveryCompanyCities>>, TError = HttpValidationProblemDetails | ErrorResult>(id: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetDeliveryCompanyCities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  getDeliveryCompaniesGetProviderCitiesQueryKey(providerType,params);
+  const queryKey =  getDeliveryCompaniesGetDeliveryCompanyCitiesQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof deliveryCompaniesGetProviderCities>>> = ({ signal }) => deliveryCompaniesGetProviderCities(providerType,params, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof deliveryCompaniesGetDeliveryCompanyCities>>> = ({ signal }) => deliveryCompaniesGetDeliveryCompanyCities(id, requestOptions, signal);
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: computed(() => !!(unref(providerType))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetProviderCities>>, TError, TData> 
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(id))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetDeliveryCompanyCities>>, TError, TData> 
 }
 
-export type DeliveryCompaniesGetProviderCitiesQueryResult = NonNullable<Awaited<ReturnType<typeof deliveryCompaniesGetProviderCities>>>
-export type DeliveryCompaniesGetProviderCitiesQueryError = HttpValidationProblemDetails | ErrorResult
+export type DeliveryCompaniesGetDeliveryCompanyCitiesQueryResult = NonNullable<Awaited<ReturnType<typeof deliveryCompaniesGetDeliveryCompanyCities>>>
+export type DeliveryCompaniesGetDeliveryCompanyCitiesQueryError = HttpValidationProblemDetails | ErrorResult
 
 
 /**
- * @summary Get cities from a delivery provider API.
+ * @summary Get cities for a delivery company.
  */
 
-export function useDeliveryCompaniesGetProviderCities<TData = Awaited<ReturnType<typeof deliveryCompaniesGetProviderCities>>, TError = HttpValidationProblemDetails | ErrorResult>(
- providerType: MaybeRef<DeliveryCompanyType>,
-    params?: MaybeRef<DeliveryCompaniesGetProviderCitiesParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetProviderCities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useDeliveryCompaniesGetDeliveryCompanyCities<TData = Awaited<ReturnType<typeof deliveryCompaniesGetDeliveryCompanyCities>>, TError = HttpValidationProblemDetails | ErrorResult>(
+ id: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deliveryCompaniesGetDeliveryCompanyCities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getDeliveryCompaniesGetProviderCitiesQueryOptions(providerType,params,options)
+  const queryOptions = getDeliveryCompaniesGetDeliveryCompanyCitiesQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

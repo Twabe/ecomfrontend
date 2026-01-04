@@ -6,12 +6,35 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * DTO for provider city mapping.
+ */
 export interface ProviderCityDto {
-  name?: string;
+  id?: string;
+  templateId?: string;
   /** @nullable */
-  district?: string | null;
+  templateName?: string | null;
   /** @nullable */
-  deliveryFees?: number | null;
+  cityId?: string | null;
   /** @nullable */
-  deliveryFeesSameCity?: number | null;
+  cityName?: string | null;
+  isLinked?: boolean;
+  /** @nullable */
+  externalCityId?: string | null;
+  /** @nullable */
+  externalCityName?: string | null;
+  /** @nullable */
+  externalZone?: string | null;
+  /** @nullable */
+  defaultDeliveredFee?: number | null;
+  /** @nullable */
+  defaultRefusedFee?: number | null;
+  /** @nullable */
+  defaultCanceledFee?: number | null;
+  /** @nullable */
+  defaultChangedFee?: number | null;
+  isActive?: boolean;
+  isFromApi?: boolean;
+  /** @nullable */
+  lastSyncedAt?: string | null;
 }

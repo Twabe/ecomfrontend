@@ -16,6 +16,4 @@ export interface CreateDeliveryNoteRequest {
    * @minLength 1
    */
   deliveryCompanyId: string;
-  /** @nullable */
-  subDeliveryCompanyId?: string | null;
 }

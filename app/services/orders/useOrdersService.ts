@@ -92,7 +92,6 @@ export interface GetSuiviOrdersParams {
 export interface BulkAssignDeliveryCompanyRequest {
   orderIds: string[]
   deliveryCompanyId: string
-  subDeliveryCompanyId?: string
 }
 
 // Types for provider labels
@@ -199,8 +198,6 @@ export interface ReadyForDeliveryOrderDto {
   price: number
   deliveryCompanyId?: string
   deliveryCompanyName?: string
-  subDeliveryCompanyId?: string
-  subDeliveryCompanyName?: string
   storeId?: string
   storeName?: string
   createdOn: string
@@ -621,7 +618,7 @@ export function useOrdersWorkflowService() {
    * Suivi Agent assigns delivery company.
    * Returns the result with trackingCode and sendToProviderSuccess for UI feedback.
    */
-  const assignDeliveryCompany = async (data: { orderId: string; deliveryCompanyId: string; subDeliveryCompanyId?: string }) => {
+  const assignDeliveryCompany = async (data: { orderId: string; deliveryCompanyId: string }) => {
     const result = await ordersAssignDeliveryCompany(data)
     // Show success only if no tracking info (Manual providers)
     // If tracking info available, caller will show specific message

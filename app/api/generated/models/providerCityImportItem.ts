@@ -6,23 +6,21 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface SubDeliveryCompanyDto {
-  id?: string;
-  name?: string;
-  deliveryCompanyId?: string;
+export interface ProviderCityImportItem {
+  cityId?: string;
   /** @nullable */
-  deliveryCompanyName?: string | null;
+  externalCityId?: string | null;
   /** @nullable */
-  phone?: string | null;
+  externalCityName?: string | null;
   /** @nullable */
-  whatsAppPhone?: string | null;
+  externalZone?: string | null;
   /** @nullable */
-  email?: string | null;
+  defaultDeliveredFee?: number | null;
   /** @nullable */
-  address?: string | null;
+  defaultRefusedFee?: number | null;
   /** @nullable */
-  contactPerson?: string | null;
-  createdOn?: string;
+  defaultCanceledFee?: number | null;
   /** @nullable */
-  lastModifiedOn?: string | null;
+  defaultChangedFee?: number | null;
+  isFromApi?: boolean;
 }

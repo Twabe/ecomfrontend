@@ -41,4 +41,12 @@ export interface ConnectDeliveryProviderRequest {
    * @nullable
    */
   notes?: string | null;
+  /**
+   * Hub city ID - the city from which the tenant ships orders.
+Used to calculate shipping costs from Hub to destination city.
+   * @nullable
+   */
+  hubCityId?: string | null;
+  /** If true, copies default shipping fees from ProviderCities to tenant's ShippingFees. */
+  copyDefaultFees?: boolean;
 }

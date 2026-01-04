@@ -18,7 +18,7 @@ import {
   BanknotesIcon,
   ArchiveBoxIcon,
 } from '@heroicons/vue/24/outline'
-import { useOrdersWorkflowService, useDeliveryCompaniesService, useSubDeliveryCompaniesService, useReasonsService } from '~/services'
+import { useOrdersWorkflowService, useDeliveryCompaniesService, useReasonsService } from '~/services'
 import { useOrderHistoriesService, type OrderHistoryDto } from '~/services/order-histories/useOrderHistoriesService'
 import { OrderStateColors, OrderPhaseColors } from '~/types/order'
 import { OrderPhase, OrderState } from '~/constants/order'
@@ -50,7 +50,6 @@ const {
 } = useOrdersWorkflowService()
 
 const { items: deliveryCompanies } = useDeliveryCompaniesService()
-const { items: subDeliveryCompanies } = useSubDeliveryCompaniesService()
 const { items: reasons } = useReasonsService()
 
 // Fetch order
@@ -65,7 +64,6 @@ const showAssignDeliveryModal = ref(false)
 const showCancelModal = ref(false)
 const showHistoryExpanded = ref(false)
 const selectedDeliveryCompanyId = ref('')
-const selectedSubDeliveryCompanyId = ref<string | undefined>(undefined)
 const selectedReasonId = ref<string | undefined>(undefined)
 const cancelComment = ref('')
 
@@ -140,12 +138,6 @@ const canMarkReturned = computed(() => {
   return order.value?.phase === OrderPhase.Shipping && order.value?.state !== OrderState.Delivered && order.value?.state !== OrderState.Returned
 })
 
-// Get filtered sub-companies
-const filteredSubDeliveryCompanies = computed(() => {
-  if (!selectedDeliveryCompanyId.value) return []
-  return subDeliveryCompanies.value?.filter(s => s.deliveryCompanyId === selectedDeliveryCompanyId.value) || []
-})
-
 // Actions
 const handleConfirm = async () => {
   if (!order.value?.id) return
@@ -181,13 +173,11 @@ const handleAssignDelivery = async () => {
   try {
     await assignDeliveryCompany({
       orderId: order.value.id,
-      deliveryCompanyId: selectedDeliveryCompanyId.value,
-      subDeliveryCompanyId: selectedSubDeliveryCompanyId.value
+      deliveryCompanyId: selectedDeliveryCompanyId.value
     })
     notify({ type: 'success', message: 'Société de livraison assignée' })
     showAssignDeliveryModal.value = false
     selectedDeliveryCompanyId.value = ''
-    selectedSubDeliveryCompanyId.value = undefined
     refetch()
   } catch (err: any) {
     notify({ type: 'error', message: err.message || 'Erreur lors de l\'assignation' })
@@ -402,10 +392,6 @@ const getActionColor = (actionType: string) => actionColors[actionType] ?? actio
               <dd class="text-sm font-medium text-gray-900 dark:text-white">
                 {{ order.deliveryCompanyName || '-' }}
               </dd>
-            </div>
-            <div v-if="order.subDeliveryCompanyName" class="flex justify-between">
-              <dt class="text-sm text-gray-500 dark:text-gray-400">Sous-société</dt>
-              <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ order.subDeliveryCompanyName }}</dd>
             </div>
             <div v-if="order.trackingCode" class="flex justify-between items-center">
               <dt class="text-sm text-gray-500 dark:text-gray-400">Code suivi</dt>
@@ -701,20 +687,6 @@ const getActionColor = (actionType: string) => actionColors[actionType] ?? actio
               </select>
             </div>
 
-            <div v-if="filteredSubDeliveryCompanies.length > 0">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Sous-société (optionnel)
-              </label>
-              <select
-                v-model="selectedSubDeliveryCompanyId"
-                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-              >
-                <option :value="undefined">Aucune</option>
-                <option v-for="sdc in filteredSubDeliveryCompanies" :key="sdc.id" :value="sdc.id">
-                  {{ sdc.name }}
-                </option>
-              </select>
-            </div>
           </div>
 
           <div class="flex justify-end gap-3 mt-6">

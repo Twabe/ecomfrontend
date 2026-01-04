@@ -2,13 +2,11 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import type { DeliveryNote, CreateDeliveryNoteRequest, UpdateDeliveryNoteRequest } from '~/types/deliveryNote'
 import type { DeliveryCompany } from '~/types/deliveryCompany'
-import type { SubDeliveryCompany } from '~/types/subDeliveryCompany'
 
 const props = defineProps<{
   show: boolean
   deliveryNote: DeliveryNote | null
   deliveryCompanies: DeliveryCompany[]
-  subDeliveryCompanies: SubDeliveryCompany[]
 }>()
 
 const emit = defineEmits<{
@@ -23,8 +21,7 @@ const isEditMode = computed(() => !!props.deliveryNote)
 
 const formData = ref<CreateDeliveryNoteRequest>({
   code: '',
-  deliveryCompanyId: '',
-  subDeliveryCompanyId: undefined
+  deliveryCompanyId: ''
 })
 
 watch(() => props.show, (val) => {
@@ -32,14 +29,12 @@ watch(() => props.show, (val) => {
     if (props.deliveryNote) {
       formData.value = {
         code: props.deliveryNote.code,
-        deliveryCompanyId: props.deliveryNote.deliveryCompanyId,
-        subDeliveryCompanyId: props.deliveryNote.subDeliveryCompanyId || undefined
+        deliveryCompanyId: props.deliveryNote.deliveryCompanyId
       }
     } else {
       formData.value = {
         code: '',
-        deliveryCompanyId: '',
-        subDeliveryCompanyId: undefined
+        deliveryCompanyId: ''
       }
     }
   }
@@ -103,19 +98,6 @@ const handleClose = () => {
                   >
                     <option value="">{{ t('common.select') }}</option>
                     <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">{{ dc.name }}</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ t('nav.subDeliveryCompanies') }}
-                  </label>
-                  <select
-                    v-model="formData.subDeliveryCompanyId"
-                    class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option :value="undefined">{{ t('common.select') }}</option>
-                    <option v-for="sdc in subDeliveryCompanies" :key="sdc.id" :value="sdc.id">{{ sdc.name }}</option>
                   </select>
                 </div>
 

@@ -6,13 +6,17 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/vue-query';
 import type {
   DataTag,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationReturnType,
   UseQueryOptions,
   UseQueryReturnType
 } from '@tanstack/vue-query';
@@ -26,11 +30,15 @@ import type {
 } from 'vue';
 
 import type {
+  CreateDeliveryProviderTemplateRequest,
   DeliveryProviderTemplateDto,
   DeliveryProviderTemplatesGetAllParams,
+  DeliveryProviderTemplatesGetTemplateCitiesParams,
   ErrorResult,
   HttpValidationProblemDetails,
+  ProviderCityDto,
   TemplateStatsDto,
+  UpdateDeliveryProviderTemplateRequest,
   WebhookHealthReport
 } from '../../models';
 
@@ -112,6 +120,71 @@ export function useDeliveryProviderTemplatesGetAll<TData = Awaited<ReturnType<ty
 
 
 /**
+ * Creates a new provider in the global catalog. Super admin only.
+ * @summary Create a new delivery provider template.
+ */
+export const deliveryProviderTemplatesCreate = (
+    createDeliveryProviderTemplateRequest: MaybeRef<CreateDeliveryProviderTemplateRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      createDeliveryProviderTemplateRequest = unref(createDeliveryProviderTemplateRequest);
+      
+      return customInstance<string>(
+      {url: `/api/v1/deliveryprovidertemplates`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createDeliveryProviderTemplateRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getDeliveryProviderTemplatesCreateMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesCreate>>, TError,{data: CreateDeliveryProviderTemplateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesCreate>>, TError,{data: CreateDeliveryProviderTemplateRequest}, TContext> => {
+
+const mutationKey = ['deliveryProviderTemplatesCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deliveryProviderTemplatesCreate>>, {data: CreateDeliveryProviderTemplateRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  deliveryProviderTemplatesCreate(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeliveryProviderTemplatesCreateMutationResult = NonNullable<Awaited<ReturnType<typeof deliveryProviderTemplatesCreate>>>
+    export type DeliveryProviderTemplatesCreateMutationBody = CreateDeliveryProviderTemplateRequest
+    export type DeliveryProviderTemplatesCreateMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Create a new delivery provider template.
+ */
+export const useDeliveryProviderTemplatesCreate = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesCreate>>, TError,{data: CreateDeliveryProviderTemplateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof deliveryProviderTemplatesCreate>>,
+        TError,
+        {data: CreateDeliveryProviderTemplateRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getDeliveryProviderTemplatesCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * Returns detailed information about a specific delivery provider template.
  * @summary Get delivery provider template details.
  */
@@ -181,6 +254,134 @@ export function useDeliveryProviderTemplatesGet<TData = Awaited<ReturnType<typeo
 
 
 /**
+ * Updates provider details. Super admin only.
+ * @summary Update a delivery provider template.
+ */
+export const deliveryProviderTemplatesUpdate = (
+    id: MaybeRef<string>,
+    updateDeliveryProviderTemplateRequest: MaybeRef<UpdateDeliveryProviderTemplateRequest>,
+ options?: SecondParameter<typeof customInstance>,) => {
+      id = unref(id);
+updateDeliveryProviderTemplateRequest = unref(updateDeliveryProviderTemplateRequest);
+      
+      return customInstance<string>(
+      {url: `/api/v1/deliveryprovidertemplates/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: updateDeliveryProviderTemplateRequest
+    },
+      options);
+    }
+  
+
+
+export const getDeliveryProviderTemplatesUpdateMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesUpdate>>, TError,{id: string;data: UpdateDeliveryProviderTemplateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesUpdate>>, TError,{id: string;data: UpdateDeliveryProviderTemplateRequest}, TContext> => {
+
+const mutationKey = ['deliveryProviderTemplatesUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deliveryProviderTemplatesUpdate>>, {id: string;data: UpdateDeliveryProviderTemplateRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  deliveryProviderTemplatesUpdate(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeliveryProviderTemplatesUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof deliveryProviderTemplatesUpdate>>>
+    export type DeliveryProviderTemplatesUpdateMutationBody = UpdateDeliveryProviderTemplateRequest
+    export type DeliveryProviderTemplatesUpdateMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Update a delivery provider template.
+ */
+export const useDeliveryProviderTemplatesUpdate = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesUpdate>>, TError,{id: string;data: UpdateDeliveryProviderTemplateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof deliveryProviderTemplatesUpdate>>,
+        TError,
+        {id: string;data: UpdateDeliveryProviderTemplateRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getDeliveryProviderTemplatesUpdateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * Removes provider from catalog. Fails if tenants are connected. Super admin only.
+ * @summary Delete a delivery provider template.
+ */
+export const deliveryProviderTemplatesDelete = (
+    id: MaybeRef<string>,
+ options?: SecondParameter<typeof customInstance>,) => {
+      id = unref(id);
+      
+      return customInstance<string>(
+      {url: `/api/v1/deliveryprovidertemplates/${id}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getDeliveryProviderTemplatesDeleteMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesDelete>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesDelete>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deliveryProviderTemplatesDelete'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deliveryProviderTemplatesDelete>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deliveryProviderTemplatesDelete(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeliveryProviderTemplatesDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof deliveryProviderTemplatesDelete>>>
+    
+    export type DeliveryProviderTemplatesDeleteMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Delete a delivery provider template.
+ */
+export const useDeliveryProviderTemplatesDelete = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesDelete>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof deliveryProviderTemplatesDelete>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDeliveryProviderTemplatesDeleteMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * Returns cross-tenant statistics for all delivery provider templates.
  * @summary Get template statistics.
  */
@@ -307,6 +508,81 @@ export function useDeliveryProviderTemplatesGetWebhookHealth<TData = Awaited<Ret
  ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getDeliveryProviderTemplatesGetWebhookHealthQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+
+/**
+ * Returns cities available for delivery through this provider template.
+ * @summary Get template cities.
+ */
+export const deliveryProviderTemplatesGetTemplateCities = (
+    id: MaybeRef<string>,
+    params?: MaybeRef<DeliveryProviderTemplatesGetTemplateCitiesParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+params = unref(params);
+      
+      return customInstance<ProviderCityDto[]>(
+      {url: `/api/v1/deliveryprovidertemplates/${id}/cities`, method: 'GET',
+        params: unref(params), signal
+    },
+      options);
+    }
+  
+
+
+
+export const getDeliveryProviderTemplatesGetTemplateCitiesQueryKey = (id?: MaybeRef<string>,
+    params?: MaybeRef<DeliveryProviderTemplatesGetTemplateCitiesParams>,) => {
+    return [
+    'api','v1','deliveryprovidertemplates',id,'cities', ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getDeliveryProviderTemplatesGetTemplateCitiesQueryOptions = <TData = Awaited<ReturnType<typeof deliveryProviderTemplatesGetTemplateCities>>, TError = HttpValidationProblemDetails | ErrorResult>(id: MaybeRef<string>,
+    params?: MaybeRef<DeliveryProviderTemplatesGetTemplateCitiesParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesGetTemplateCities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  getDeliveryProviderTemplatesGetTemplateCitiesQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof deliveryProviderTemplatesGetTemplateCities>>> = ({ signal }) => deliveryProviderTemplatesGetTemplateCities(id,params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(id))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesGetTemplateCities>>, TError, TData> 
+}
+
+export type DeliveryProviderTemplatesGetTemplateCitiesQueryResult = NonNullable<Awaited<ReturnType<typeof deliveryProviderTemplatesGetTemplateCities>>>
+export type DeliveryProviderTemplatesGetTemplateCitiesQueryError = HttpValidationProblemDetails | ErrorResult
+
+
+/**
+ * @summary Get template cities.
+ */
+
+export function useDeliveryProviderTemplatesGetTemplateCities<TData = Awaited<ReturnType<typeof deliveryProviderTemplatesGetTemplateCities>>, TError = HttpValidationProblemDetails | ErrorResult>(
+ id: MaybeRef<string>,
+    params?: MaybeRef<DeliveryProviderTemplatesGetTemplateCitiesParams>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deliveryProviderTemplatesGetTemplateCities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDeliveryProviderTemplatesGetTemplateCitiesQueryOptions(id,params,options)
 
   const query = useQuery(queryOptions, queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

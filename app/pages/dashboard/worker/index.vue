@@ -506,7 +506,6 @@
       :show="showAssignDeliveryModal"
       :order="assignDeliveryOrder"
       :delivery-companies="deliveryCompanies"
-      :sub-delivery-companies="subDeliveryCompanies"
       :is-submitting="isAssigningDelivery"
       @close="closeAssignDeliveryModal"
       @submit="submitAssignDelivery"
@@ -564,7 +563,6 @@ import {
   useOrdersWorkflowService,
   useOrdersService,
   useDeliveryCompaniesService,
-  useSubDeliveryCompaniesService,
   useReasonsService,
   useAutoAssignmentSettingsService,
   useCitiesService,
@@ -591,7 +589,6 @@ const workerConfigsService = useWorkerServiceConfigsService()
 const ordersWorkflow = useOrdersWorkflowService()
 const { update: updateOrder } = useOrdersService()
 const deliveryCompaniesService = useDeliveryCompaniesService()
-const subDeliveryCompaniesService = useSubDeliveryCompaniesService()
 const reasonsService = useReasonsService()
 const autoAssignmentSettingsService = useAutoAssignmentSettingsService()
 const { items: cities } = useCitiesService({ initialParams: { pageSize: 1000, pageNumber: 1 } })
@@ -642,7 +639,6 @@ const isLoading = computed(() => myPendingQuery.isLoading.value || myActiveQuery
 // Calculate current assignment count from actual data (pending + active)
 const currentAssignmentCount = computed(() => myPendingAssignments.value.length + myActiveAssignments.value.length)
 const deliveryCompanies = computed(() => deliveryCompaniesService.items.value)
-const subDeliveryCompanies = computed(() => subDeliveryCompaniesService.items.value)
 const reasons = computed(() => reasonsService.items.value)
 
 // Panel refs for refresh
@@ -1211,12 +1207,11 @@ const submitAssignDelivery = async (data: AssignDeliveryCompanyRequest) => {
 }
 
 // Load data on mount - Vue Query handles automatic fetching
-// Load worker config on mount (delivery companies, sub-delivery companies, and reasons auto-fetch via Vue Query)
+// Load worker config on mount (delivery companies and reasons auto-fetch via Vue Query)
 onMounted(async () => {
   await workerConfigsService.refetchMyConfig()
   // Set page size for dropdown data
   deliveryCompaniesService.setPageSize(100)
-  subDeliveryCompaniesService.setPageSize(100)
   reasonsService.setPageSize(100)
 })
 </script>

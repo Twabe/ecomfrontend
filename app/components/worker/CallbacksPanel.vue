@@ -391,9 +391,6 @@
             <div v-if="callback.deliveryCompanyName" class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 mt-1">
               <TruckIcon class="w-3 h-3" />
               <span>{{ callback.deliveryCompanyName }}</span>
-              <span v-if="callback.subDeliveryCompanyName" class="text-gray-400">
-                → {{ callback.subDeliveryCompanyName }}
-              </span>
             </div>
 
             <!-- Suivi Result & Tracking State -->
@@ -513,7 +510,6 @@
       :show="showAssignDeliveryModal"
       :order="assignDeliveryOrder"
       :delivery-companies="deliveryCompaniesService.items.value ?? []"
-      :sub-delivery-companies="subDeliveryCompaniesService.items.value ?? []"
       :is-submitting="isAssigningDelivery"
       @close="closeAssignDeliveryModal"
       @submit="handleAssignDelivery"
@@ -524,7 +520,6 @@
       :show="showBulkAssignDeliveryModal"
       :order-count="assignableSelectedCount"
       :delivery-companies="deliveryCompaniesService.items.value ?? []"
-      :sub-delivery-companies="subDeliveryCompaniesService.items.value ?? []"
       :is-submitting="isBulkProcessing"
       @close="closeBulkAssignDeliveryModal"
       @submit="handleBulkAssignDelivery"
@@ -554,7 +549,6 @@ import {
   useOrderAssignmentsService,
   useTrackingStatesService,
   useDeliveryCompaniesService,
-  useSubDeliveryCompaniesService,
   useOrdersWorkflowService,
   type WorkerAssignmentDto
 } from '~/services'
@@ -574,7 +568,6 @@ const { t } = useI18n()
 const orderAssignmentsService = useOrderAssignmentsService()
 const trackingStatesService = useTrackingStatesService()
 const deliveryCompaniesService = useDeliveryCompaniesService()
-const subDeliveryCompaniesService = useSubDeliveryCompaniesService()
 const ordersWorkflowService = useOrdersWorkflowService()
 
 // Filter state - filtering done in frontend for accurate counts
@@ -910,8 +903,7 @@ const assignDeliveryOrder = computed(() => {
     fullName: cb.customerName,
     phone: cb.customerPhone,
     cityName: cb.customerCity || cb.cityName,
-    deliveryCompanyId: cb.deliveryCompanyId,
-    subDeliveryCompanyId: cb.subDeliveryCompanyId
+    deliveryCompanyId: cb.deliveryCompanyId
   }
 })
 
@@ -928,7 +920,6 @@ const closeAssignDeliveryModal = () => {
 const handleAssignDelivery = async (data: {
   orderId: string
   deliveryCompanyId: string
-  subDeliveryCompanyId?: string
 }) => {
   isAssigningDelivery.value = true
   try {
@@ -971,7 +962,6 @@ const closeBulkAssignDeliveryModal = () => {
 
 const handleBulkAssignDelivery = async (data: {
   deliveryCompanyId: string
-  subDeliveryCompanyId?: string
 }) => {
   if (assignableSelectedCount.value === 0) return
 
@@ -984,8 +974,7 @@ const handleBulkAssignDelivery = async (data: {
     // Use bulk assign from ordersService
     await ordersWorkflowService.bulkAssignDeliveryCompany({
       orderIds,
-      deliveryCompanyId: data.deliveryCompanyId,
-      subDeliveryCompanyId: data.subDeliveryCompanyId
+      deliveryCompanyId: data.deliveryCompanyId
     })
 
     closeBulkAssignDeliveryModal()
@@ -1037,7 +1026,6 @@ const handleBulkDelivered = async () => {
 onMounted(() => {
   trackingStatesService.setPageSize(100)
   deliveryCompaniesService.setPageSize(100)
-  subDeliveryCompaniesService.setPageSize(100)
 })
 
 // Expose refresh method

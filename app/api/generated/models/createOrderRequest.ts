@@ -28,7 +28,7 @@ export interface CreateOrderRequest {
    */
   phone: string;
   /**
-   * Internal city from Cities table. Optional if DeliveryLocationId is provided.
+   * Internal city from Cities table. Optional if ProviderCityId is provided.
    * @nullable
    */
   cityId?: string | null;
@@ -54,8 +54,6 @@ export interface CreateOrderRequest {
   /** @nullable */
   deliveryCompanyId?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
   storeId?: string | null;
   /** @nullable */
   sourceId?: string | null;
@@ -65,9 +63,9 @@ export interface CreateOrderRequest {
    */
   sourceCity?: string | null;
   /**
-   * Delivery location from CityLocationMappings.
+   * Provider city from ProviderCities table.
 Selected when delivery company is chosen.
    * @nullable
    */
-  deliveryLocationId?: string | null;
+  providerCityId?: string | null;
 }

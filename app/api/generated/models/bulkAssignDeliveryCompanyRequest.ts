@@ -19,6 +19,4 @@ export interface BulkAssignDeliveryCompanyRequest {
    * @minLength 1
    */
   deliveryCompanyId: string;
-  /** @nullable */
-  subDeliveryCompanyId?: string | null;
 }

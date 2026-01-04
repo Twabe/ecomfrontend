@@ -29,10 +29,6 @@ export interface ReadyForDeliveryOrderDto {
   /** @nullable */
   deliveryCompanyName?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
-  subDeliveryCompanyName?: string | null;
-  /** @nullable */
   storeId?: string | null;
   /** @nullable */
   storeName?: string | null;

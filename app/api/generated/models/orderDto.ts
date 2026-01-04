@@ -53,10 +53,6 @@ export interface OrderDto {
   /** @nullable */
   deliveryCompanyName?: string | null;
   /** @nullable */
-  subDeliveryCompanyId?: string | null;
-  /** @nullable */
-  subDeliveryCompanyName?: string | null;
-  /** @nullable */
   trackingCode?: string | null;
   /** @nullable */
   deliveryStatus?: string | null;
@@ -79,9 +75,9 @@ export interface OrderDto {
   /** @nullable */
   sourceCity?: string | null;
   /** @nullable */
-  deliveryLocationId?: string | null;
+  providerCityId?: string | null;
   /** @nullable */
-  deliveryLocationName?: string | null;
+  providerCityName?: string | null;
   /** @nullable */
   moderatorId?: string | null;
   /** @nullable */

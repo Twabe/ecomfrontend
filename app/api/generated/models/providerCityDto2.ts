@@ -5,34 +5,36 @@
  * Clean Architecture Template for .NET 7 WebApi built with Multitenancy Support.
  * OpenAPI spec version: 1.0.0
  */
-import type { LocationType } from './locationType';
 
-export interface CityLocationMappingDto {
+/**
+ * DTO for provider city mapping.
+ */
+export interface ProviderCityDto2 {
   id?: string;
-  deliveryCompanyId?: string;
+  templateId?: string;
   /** @nullable */
-  deliveryCompanyName?: string | null;
+  templateName?: string | null;
   /** @nullable */
   cityId?: string | null;
   /** @nullable */
   cityName?: string | null;
+  isLinked?: boolean;
   /** @nullable */
-  sectorId?: string | null;
+  externalCityId?: string | null;
   /** @nullable */
-  sectorName?: string | null;
-  type?: LocationType;
-  externalId?: string;
-  externalName?: string;
+  externalCityName?: string | null;
   /** @nullable */
-  externalRegion?: string | null;
+  externalZone?: string | null;
   /** @nullable */
-  deliveryFee?: number | null;
+  defaultDeliveredFee?: number | null;
   /** @nullable */
-  returnFee?: number | null;
+  defaultRefusedFee?: number | null;
   /** @nullable */
-  estimatedDays?: number | null;
+  defaultCanceledFee?: number | null;
+  /** @nullable */
+  defaultChangedFee?: number | null;
+  isActive?: boolean;
+  isFromApi?: boolean;
   /** @nullable */
   lastSyncedAt?: string | null;
-  isActive?: boolean;
-  isManuallyMapped?: boolean;
 }

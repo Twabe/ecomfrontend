@@ -9,6 +9,4 @@
 export type SearchDeliveryNotesRequestAllOf = {
   /** @nullable */
   deliveryCompanyId?: string | null;
-  /** @nullable */
-  subDeliveryCompanyId?: string | null;
 };

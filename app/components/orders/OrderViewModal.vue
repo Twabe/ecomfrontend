@@ -115,9 +115,6 @@ const handleClose = () => {
                   <h4 class="font-medium text-gray-900 dark:text-white">{{ t('nav.delivery') }}</h4>
                   <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
                     <div><span class="text-gray-500">{{ t('nav.deliveryCompanies') }}:</span> {{ order.deliveryCompanyName }}</div>
-                    <div v-if="order.subDeliveryCompanyName">
-                      <span class="text-gray-500">{{ t('nav.subDeliveryCompanies') }}:</span> {{ order.subDeliveryCompanyName }}
-                    </div>
                     <div v-if="order.trackingCode">
                       <span class="text-gray-500">{{ t('orders.trackingCode') }}:</span> {{ order.trackingCode }}
                     </div>

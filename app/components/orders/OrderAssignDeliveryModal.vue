@@ -1,50 +1,70 @@
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
-import { cityLocationMappingsGetByCompany } from '~/api/generated/endpoints/city-location-mappings/city-location-mappings'
+import { customInstance } from '~/api/axios-instance'
 import type { Order } from '~/types/order'
-import type { DeliveryCompanyCityDto } from '~/api/generated/models/deliveryCompanyCityDto'
 import { ServiceTypes, OrderPhase, OrderState } from '~/constants/order'
+
+// ProviderCity DTO from backend
+interface ProviderCityDto {
+  id: string
+  templateId: string
+  templateName?: string | null
+  cityId?: string | null
+  cityName?: string | null
+  externalCityId?: string | null
+  externalCityName?: string | null
+  externalZone?: string | null
+  defaultDeliveredFee?: number | null
+  defaultRefusedFee?: number | null
+  isActive: boolean
+}
 
 interface DeliveryCompany {
   id: string
   name: string
 }
 
-interface SubDeliveryCompany {
-  id: string
-  name: string
-  deliveryCompanyId?: string
+// Fetch provider cities from DeliveryCompany
+const fetchDeliveryCities = async (deliveryCompanyId: string): Promise<ProviderCityDto[]> => {
+  try {
+    const result = await customInstance<ProviderCityDto[]>({
+      url: `/api/v1/deliverycompanies/${deliveryCompanyId}/cities`,
+      method: 'GET'
+    })
+    return result || []
+  } catch (error) {
+    console.error('Failed to fetch delivery cities:', error)
+    return []
+  }
 }
 
 const props = defineProps<{
   show: boolean
   orders: Order[]
   deliveryCompanies: DeliveryCompany[]
-  subDeliveryCompanies: SubDeliveryCompany[]
 }>()
 
 const emit = defineEmits<{
   close: []
-  confirm: [data: { orderIds: string[]; deliveryCompanyId: string; subDeliveryCompanyId?: string; deliveryLocationId?: string }]
+  confirm: [data: { orderIds: string[]; deliveryCompanyId: string; providerCityId?: string }]
 }>()
 
 const { t } = useI18n()
 
 const deliveryCompanyId = ref('')
-const subDeliveryCompanyId = ref('')
-const deliveryLocationId = ref('')
+const providerCityId = ref('')
 const isSubmitting = ref(false)
 
-// Delivery cities for selected company
-const deliveryCities = ref<DeliveryCompanyCityDto[]>([])
+// Delivery cities for selected company (from ProviderCities)
+const deliveryCities = ref<ProviderCityDto[]>([])
 const isLoadingCities = ref(false)
 
 // Convert to options format for UiSearchableSelect
 const deliveryCitiesOptions = computed(() => {
   return deliveryCities.value.map(city => ({
     id: city.id || '',
-    name: city.externalName || ''
+    name: city.cityName || city.externalCityName || city.externalCityId || ''
   }))
 })
 
@@ -64,9 +84,9 @@ const invalidOrders = computed(() => {
   return props.orders.filter(order => !validOrders.value.includes(order))
 })
 
-// Check if single order with existing delivery location
+// Check if single order with existing provider city
 const isSingleOrderWithCity = computed(() => {
-  return validOrders.value.length === 1 && validOrders.value[0].deliveryLocationId
+  return validOrders.value.length === 1 && validOrders.value[0].providerCityId
 })
 
 // Get the single order's existing city info
@@ -74,25 +94,16 @@ const singleOrderCity = computed(() => {
   if (!isSingleOrderWithCity.value) return null
   const order = validOrders.value[0]
   return {
-    id: order.deliveryLocationId,
-    name: order.deliveryLocationName || order.sourceCity || order.cityName || ''
+    id: order.providerCityId,
+    name: order.providerCityName || order.sourceCity || order.cityName || ''
   }
-})
-
-// Filter sub-delivery companies based on selected delivery company
-const filteredSubDeliveryCompanies = computed(() => {
-  if (!deliveryCompanyId.value) return []
-  return props.subDeliveryCompanies.filter(sub =>
-    sub.deliveryCompanyId === deliveryCompanyId.value
-  )
 })
 
 // Reset form when modal opens
 watch(() => props.show, (val) => {
   if (val) {
     deliveryCompanyId.value = ''
-    subDeliveryCompanyId.value = ''
-    deliveryLocationId.value = ''
+    providerCityId.value = ''
     deliveryCities.value = []
     isSubmitting.value = false
   }
@@ -100,14 +111,13 @@ watch(() => props.show, (val) => {
 
 // Load cities when delivery company changes
 watch(deliveryCompanyId, async (newId) => {
-  subDeliveryCompanyId.value = ''
-  deliveryLocationId.value = ''
+  providerCityId.value = ''
   deliveryCities.value = []
 
   if (newId) {
     isLoadingCities.value = true
     try {
-      const cities = await cityLocationMappingsGetByCompany(newId)
+      const cities = await fetchDeliveryCities(newId)
       deliveryCities.value = cities || []
     } catch (error) {
       console.error('Failed to load delivery cities:', error)
@@ -128,15 +138,14 @@ const handleConfirm = () => {
 
   // For single order with existing city, use that city
   // For bulk or new city selection, use the selected value
-  const finalDeliveryLocationId = isSingleOrderWithCity.value
+  const finalProviderCityId = isSingleOrderWithCity.value
     ? singleOrderCity.value?.id
-    : (deliveryLocationId.value || undefined)
+    : (providerCityId.value || undefined)
 
   emit('confirm', {
     orderIds: validOrders.value.map(o => o.id),
     deliveryCompanyId: deliveryCompanyId.value,
-    subDeliveryCompanyId: subDeliveryCompanyId.value || undefined,
-    deliveryLocationId: finalDeliveryLocationId
+    providerCityId: finalProviderCityId
   })
 }
 
@@ -204,23 +213,6 @@ const handleClose = () => {
                   </select>
                 </div>
 
-                <!-- Sub-Delivery Company -->
-                <div v-if="filteredSubDeliveryCompanies.length > 0">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ t('orders.subDeliveryCompany') }}
-                  </label>
-                  <select
-                    v-model="subDeliveryCompanyId"
-                    class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    :disabled="isSubmitting"
-                  >
-                    <option value="">{{ t('common.none') }}</option>
-                    <option v-for="sub in filteredSubDeliveryCompanies" :key="sub.id" :value="sub.id">
-                      {{ sub.name }}
-                    </option>
-                  </select>
-                </div>
-
                 <!-- Delivery City - Show existing city for single order (readonly) -->
                 <div v-if="isSingleOrderWithCity && singleOrderCity">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -238,7 +230,7 @@ const handleClose = () => {
                     {{ t('orders.deliveryCity', 'Ville de livraison') }}
                   </label>
                   <UiSearchableSelect
-                    v-model="deliveryLocationId"
+                    v-model="providerCityId"
                     :options="deliveryCitiesOptions"
                     :placeholder="isLoadingCities ? t('common.loading') : t('orders.searchDeliveryCity', 'Rechercher une ville...')"
                     :disabled="isSubmitting || isLoadingCities"

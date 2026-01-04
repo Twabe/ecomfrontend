@@ -257,19 +257,6 @@
           </button>
           <Transition name="slide">
             <ul v-if="expandedSections.delivery && !isCollapsed" class="mt-1 ml-8 space-y-1">
-              <!-- OLD: Replaced by Provider Connections (Shadow Entity Pattern)
-              <li v-if="canAccessDeliveryCompanies">
-                <NuxtLink to="/dashboard/delivery-companies" class="nav-link text-sm py-2">
-                  {{ $t('nav.deliveryCompanies') }}
-                </NuxtLink>
-              </li>
-              <li v-if="canAccessSubDeliveryCompanies">
-                <NuxtLink to="/dashboard/sub-delivery-companies" class="nav-link text-sm py-2">
-                  {{ $t('nav.subDeliveryCompanies') }}
-                </NuxtLink>
-              </li>
-              -->
-              <!-- Provider Connections - always visible for now (TODO: add proper permission) -->
               <li>
                 <NuxtLink to="/dashboard/delivery-providers" class="nav-link text-sm py-2">
                   {{ $t('nav.providerConnections') }}
@@ -643,14 +630,11 @@ const canAccessShippingFees = computed(() =>
 const canAccessDeliveryNotes = computed(() =>
   hasPermission('Permissions.DeliveryNotes.View')
 )
-const canAccessSubDeliveryCompanies = computed(() =>
-  hasPermission('Permissions.SubDeliveryCompanies.View')
-)
 const canAccessProviderConnections = computed(() =>
   hasPermission('Permissions.TenantDeliveryConnections.View')
 )
 const canAccessDeliverySection = computed(() =>
-  canAccessDeliveryCompanies.value || canAccessShippingFees.value || canAccessDeliveryNotes.value || canAccessSubDeliveryCompanies.value || canAccessProviderConnections.value
+  canAccessDeliveryCompanies.value || canAccessShippingFees.value || canAccessDeliveryNotes.value || canAccessProviderConnections.value
 )
 // Finance section
 const canAccessPayments = computed(() =>

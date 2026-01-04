@@ -118,7 +118,7 @@ definePageMeta({
   requiredPermission: 'Permissions.TenantDeliveryConnections.View',
 })
 
-const { notify } = useNotification()
+const notification = useNotification()
 
 // Services
 const templatesService = useDeliveryProviderTemplatesService()
@@ -197,9 +197,9 @@ const handleConnect = async (data: ConnectDeliveryProviderRequest) => {
   try {
     await connect(data)
     showConnectDialog.value = false
-    notify.success('Connected successfully!')
+    notification.success('Connected successfully!')
   } catch (error: any) {
-    notify.error(error.message || 'Failed to connect')
+    notification.error(error.message || 'Failed to connect')
   }
 }
 
@@ -208,12 +208,12 @@ const handleTest = async (id: string) => {
     const result = await test(id)
     manageDialogRef.value?.setTestResult(result)
     if (result.success) {
-      notify.success('Connection test successful!')
+      notification.success('Connection test successful!')
     } else {
-      notify.error(result.message || 'Connection test failed')
+      notification.error(result.message || 'Connection test failed')
     }
   } catch (error: any) {
-    notify.error(error.message || 'Test failed')
+    notification.error(error.message || 'Test failed')
   }
 }
 
@@ -221,9 +221,9 @@ const handleSync = async (id: string) => {
   try {
     const result = await sync(id)
     manageDialogRef.value?.setSyncResult(result)
-    notify.success(`Synced ${result.ordersUpdated || 0} orders`)
+    notification.success(`Synced ${result.ordersUpdated || 0} orders`)
   } catch (error: any) {
-    notify.error(error.message || 'Sync failed')
+    notification.error(error.message || 'Sync failed')
   }
 }
 
@@ -232,9 +232,9 @@ const handleActivate = async (id: string) => {
     await activate(id)
     // Update selected connection
     selectedConnection.value = connections.value.find(c => c.id === id)
-    notify.success('Connection activated')
+    notification.success('Connection activated')
   } catch (error: any) {
-    notify.error(error.message || 'Failed to activate')
+    notification.error(error.message || 'Failed to activate')
   }
 }
 
@@ -243,9 +243,9 @@ const handleDeactivate = async (id: string) => {
     await deactivate(id)
     // Update selected connection
     selectedConnection.value = connections.value.find(c => c.id === id)
-    notify.success('Connection deactivated')
+    notification.success('Connection deactivated')
   } catch (error: any) {
-    notify.error(error.message || 'Failed to deactivate')
+    notification.error(error.message || 'Failed to deactivate')
   }
 }
 
@@ -253,9 +253,9 @@ const handleDisconnect = async (id: string) => {
   try {
     await disconnect(id)
     showManageDialog.value = false
-    notify.success('Disconnected successfully')
+    notification.success('Disconnected successfully')
   } catch (error: any) {
-    notify.error(error.message || 'Failed to disconnect')
+    notification.error(error.message || 'Failed to disconnect')
   }
 }
 </script>
