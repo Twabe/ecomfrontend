@@ -196,35 +196,56 @@
               </div>
             </div>
 
-            <!-- Actions for Confirmation -->
-            <div class="flex gap-2 mt-2 pt-2 border-t border-purple-200 dark:border-purple-700">
+            <!-- Actions for Confirmation - Row 1: Communication + Callback + Release -->
+            <div class="flex gap-1.5 mt-2 pt-2 border-t border-purple-200 dark:border-purple-700">
               <a
                 :href="'tel:' + callback.customerPhone"
-                class="btn-primary flex-1 text-xs py-1.5 flex items-center justify-center"
+                class="btn-secondary flex-1 text-xs py-1.5 flex items-center justify-center"
               >
-                <PhoneIcon class="w-3 h-3 mr-1" />
+                <PhoneIcon class="w-3.5 h-3.5 mr-1" />
                 {{ $t('worker.call') }}
               </a>
-              <button
-                @click="emit('confirm', callback)"
-                class="btn-secondary text-xs py-1.5 px-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
-                :title="$t('orders.confirmOrder')"
+              <a
+                :href="getWhatsAppLink(callback.customerPhone)"
+                target="_blank"
+                class="btn-secondary flex-1 text-xs py-1.5 flex items-center justify-center text-green-600 dark:text-green-400"
               >
-                <CheckIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click="emit('cancel', callback)"
-                class="btn-secondary text-xs py-1.5 px-2 text-red-600 hover:text-red-700 dark:text-red-400"
-                :title="$t('orders.cancelOrder')"
-              >
-                <XMarkIcon class="w-4 h-4" />
-              </button>
+                <ChatBubbleLeftRightIcon class="w-3.5 h-3.5 mr-1" />
+                WA
+              </a>
               <button
                 @click="openRescheduleModal(callback)"
                 class="btn-secondary text-xs py-1.5 px-2 text-purple-600 hover:text-purple-700 dark:text-purple-400"
                 :title="$t('worker.rescheduleCallback')"
               >
                 <CalendarIcon class="w-4 h-4" />
+              </button>
+              <button
+                @click="handleRelease(callback)"
+                class="btn-secondary text-xs py-1.5 px-2"
+                :title="$t('worker.release')"
+                :disabled="isReleasing"
+              >
+                <ArrowUturnLeftIcon class="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <!-- Actions for Confirmation - Row 2: Confirm + Cancel -->
+            <div class="flex gap-1.5 mt-1.5">
+              <button
+                @click="emit('confirm', callback)"
+                class="btn-primary flex-1 text-xs py-1.5"
+                :title="$t('orders.confirmOrder')"
+              >
+                <CheckIcon class="w-3.5 h-3.5 mr-1" />
+                {{ $t('orders.confirmOrder') }}
+              </button>
+              <button
+                @click="emit('cancel', callback)"
+                class="btn-secondary flex-1 text-xs py-1.5 text-red-600 hover:text-red-700 dark:text-red-400"
+                :title="$t('orders.cancelOrder')"
+              >
+                <XMarkIcon class="w-3.5 h-3.5 mr-1" />
+                {{ $t('orders.cancelOrder') }}
               </button>
             </div>
           </div>
@@ -433,25 +454,52 @@
               </div>
             </div>
 
-            <!-- Actions for Suivi -->
-            <div class="flex gap-2 mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+            <!-- Actions for Suivi - Row 1: Communication + Release -->
+            <div class="flex gap-1.5 mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
               <a
                 :href="'tel:' + callback.customerPhone"
-                class="btn-primary flex-1 text-xs py-1.5 flex items-center justify-center"
+                class="btn-secondary flex-1 text-xs py-1.5 flex items-center justify-center"
               >
-                <PhoneIcon class="w-3 h-3 mr-1" />
+                <PhoneIcon class="w-3.5 h-3.5 mr-1" />
                 {{ $t('worker.call') }}
               </a>
+              <a
+                :href="getWhatsAppLink(callback.customerPhone)"
+                target="_blank"
+                class="btn-secondary flex-1 text-xs py-1.5 flex items-center justify-center text-green-600 dark:text-green-400"
+              >
+                <ChatBubbleLeftRightIcon class="w-3.5 h-3.5 mr-1" />
+                WA
+              </a>
+              <button
+                @click="openRescheduleModal(callback)"
+                class="btn-secondary text-xs py-1.5 px-2 text-purple-600 hover:text-purple-700 dark:text-purple-400"
+                :title="$t('worker.rescheduleCallback')"
+              >
+                <CalendarIcon class="w-4 h-4" />
+              </button>
+              <button
+                @click="handleRelease(callback)"
+                class="btn-secondary text-xs py-1.5 px-2"
+                :title="$t('worker.release')"
+                :disabled="isReleasing"
+              >
+                <ArrowUturnLeftIcon class="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <!-- Actions for Suivi - Row 2: Delivery + Status -->
+            <div class="flex gap-1.5 mt-1.5">
               <button
                 @click="openAssignDeliveryModal(callback)"
-                class="btn-secondary text-xs py-1.5 px-2"
+                class="btn-secondary flex-1 text-xs py-1.5 flex items-center justify-center"
                 :class="canAssignDelivery(callback)
                   ? 'text-amber-600 hover:text-amber-700 dark:text-amber-400'
                   : 'text-gray-400 dark:text-gray-600 cursor-not-allowed'"
                 :title="canAssignDelivery(callback) ? $t('worker.assignDelivery') : $t('worker.orderNeedsConfirmation')"
                 :disabled="isMutating || isAssigningDelivery || !canAssignDelivery(callback)"
               >
-                <TruckIcon class="w-4 h-4" />
+                <TruckIcon class="w-3.5 h-3.5 mr-1" />
+                {{ $t('worker.assignDelivery') }}
               </button>
               <button
                 @click="handleQuickDelivered(callback)"
@@ -468,13 +516,6 @@
                 :disabled="isMutating"
               >
                 <ArrowUturnLeftIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click="openRescheduleModal(callback)"
-                class="btn-secondary text-xs py-1.5 px-2 text-purple-600 hover:text-purple-700 dark:text-purple-400"
-                :title="$t('worker.rescheduleCallback')"
-              >
-                <CalendarIcon class="w-4 h-4" />
               </button>
               <button
                 @click="openSuiviModal(callback)"
@@ -543,7 +584,8 @@ import {
   ArrowUturnLeftIcon,
   EllipsisHorizontalIcon,
   TruckIcon,
-  SparklesIcon
+  SparklesIcon,
+  ArrowUturnLeftIcon as ReleaseIcon
 } from '@heroicons/vue/24/outline'
 import {
   useOrderAssignmentsService,
@@ -591,7 +633,11 @@ const selectedSuiviCallback = ref<WorkerAssignmentDto | null>(null)
 const selectedAssignDeliveryCallback = ref<WorkerAssignmentDto | null>(null)
 const isAssigningDelivery = ref(false)
 const isBulkProcessing = ref(false)
+const isReleasing = ref(false)
 const settings = ref<{ maxCallbackAttempts?: number } | null>(null)
+
+// Notification for release
+const notification = useNotification()
 
 // Bulk selection state for Suivi
 const selectedSuiviIds = ref<string[]>([])
@@ -805,6 +851,32 @@ const handleReschedule = async (data: { scheduledAt: string; notes?: string }) =
     await myCallbacksQuery.refetch()
   } catch {
     // Error handled by service
+  }
+}
+
+// Release callback assignment
+const handleRelease = async (callback: WorkerAssignmentDto) => {
+  if (!confirm(t('worker.confirmRelease'))) return
+
+  isReleasing.value = true
+  try {
+    await orderAssignmentsService.release(callback.id, { reason: 'Worker released from callback' })
+    notification.success(t('worker.releaseSuccess'))
+    await myCallbacksQuery.refetch()
+  } catch (error: any) {
+    const status = error?.response?.status
+    const errorMessage = error?.response?.data?.exception || error?.response?.data?.message || ''
+
+    if (status === 404) {
+      notification.warning(t('worker.assignmentNotFound'))
+    } else if (status === 409) {
+      notification.info(t('worker.assignmentAlreadyProcessed'))
+    } else {
+      notification.error(errorMessage || t('common.errorOccurred'))
+    }
+    await myCallbacksQuery.refetch()
+  } finally {
+    isReleasing.value = false
   }
 }
 
