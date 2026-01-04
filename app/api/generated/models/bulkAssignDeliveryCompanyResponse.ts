@@ -11,6 +11,7 @@ export interface BulkAssignDeliveryCompanyResponse {
   totalOrders?: number;
   successfullyAssigned?: number;
   failed?: number;
+  skipped?: number;
   errors?: string[];
   assignedItems?: BulkAssignDeliveryItem[];
 }

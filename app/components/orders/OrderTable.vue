@@ -200,6 +200,102 @@ const getAssignmentStatusLabel = (status: string) => {
   return translated === key ? status : translated
 }
 
+// Normalize delivery status from various providers (French, English, Arabic)
+// Supports: ForceLog (IN_PROGRESS, NO_ANSWER, DELIVERED, RELAUNCH, etc.)
+//           AMEEX (NEW_PARCEL, PICKED_UP, DELIVERED, etc.)
+//           Sendit (En attente, Ramassé, Livré, etc.)
+const normalizeDeliveryStatus = (status: string): string => {
+  if (!status) return 'unknown'
+  const upper = status.toUpperCase().trim()
+
+  // Sent / Created
+  if (upper === 'SENT' || upper === 'CRÉÉ' || upper === 'CREE' || upper === 'CREATED') return 'sent'
+
+  // Pending / Awaiting / New
+  if (upper === 'PENDING' || upper === 'NOUVEAU' || upper === 'NEW' || upper === 'NEW_PARCEL' ||
+      upper === 'EN ATTENTE' || upper === 'EN ATTENTE DE RAMASSAGE' || upper === 'EN ATTENTE RAMASSAGE' ||
+      upper === 'AWAITING PICKUP' || upper === 'WAITING_PICKUP') return 'pending'
+
+  // Confirmed / Validated
+  if (upper === 'CONFIRMED' || upper === 'VALIDATED' || upper === 'CONFIRMÉ') return 'confirmed'
+
+  // Picked Up / Collected
+  if (upper.includes('RAMASS') || upper.includes('COLLECT') ||
+      upper === 'PICKED UP' || upper === 'PICKED_UP') return 'picked_up'
+
+  // In Transit / In Progress
+  if (upper === 'EN COURS' || upper === 'EN TRANSIT' || upper === 'IN TRANSIT' ||
+      upper === 'IN_TRANSIT' || upper === 'IN_PROGRESS' || upper === 'EN ROUTE' ||
+      upper === 'SHIPPING' || upper === 'SENT' ||
+      upper.includes('EXPÉDI') || upper.includes('EXPEDI')) return 'in_transit'
+
+  // Out for Delivery / Distribution
+  if (upper.includes('EN COURS DE LIVRAISON') || upper === 'DISTRIBUTION' ||
+      upper === 'EN LIVRAISON' || upper === 'OUT FOR DELIVERY' ||
+      upper === 'OUT_FOR_DELIVERY') return 'out_for_delivery'
+
+  // Delivered / Paid
+  if (upper === 'LIVRÉ' || upper === 'LIVRE' || upper === 'DELIVERED' || upper === 'PAID' ||
+      upper.includes('LIVRÉ') || upper.includes('LIVRE')) return 'delivered'
+
+  // Returning (in progress)
+  if (upper === 'RETURNING' || upper === 'RETURN_IN_PROGRESS' || upper === 'EN RETOUR') return 'returning'
+
+  // Returned / Back
+  if (upper.includes('RETOUR') || upper === 'RETURNED' || upper === 'BACK') return 'returned'
+
+  // Canceled
+  if (upper.includes('ANNUL') || upper === 'CANCELED' || upper === 'CANCELLED') return 'cancelled'
+
+  // Failed / No Answer / Unreachable
+  if (upper.includes('ÉCHEC') || upper.includes('ECHEC') || upper === 'FAILED' ||
+      upper === 'INJOIGNABLE' || upper === 'UNREACHABLE' ||
+      upper.includes('PAS DE RÉPONSE') || upper.includes('PAS DE REPONSE') ||
+      upper === 'NO_ANSWER' || upper === 'NO ANSWER' ||
+      upper === 'OUT_OF_AREA' || upper === 'WRONG_ADDRESS' || upper === 'WRONG_PHONE' ||
+      upper === 'FAILED DELIVERY') return 'failed'
+
+  // Refused
+  if (upper === 'REFUSÉ' || upper === 'REFUSE' || upper === 'REFUSED') return 'refused'
+
+  // Postponed / Scheduled / On Hold / Relaunch
+  if (upper.includes('REPORT') || upper === 'POSTPONED' || upper === 'SCHEDULED' ||
+      upper === 'ON_HOLD' || upper === 'BLOCKED' || upper === 'BLOQUÉ' ||
+      upper === 'RELAUNCH' || upper === 'PLANIFIÉ' || upper === 'PLANIFIE') return 'postponed'
+
+  return 'unknown'
+}
+
+// Delivery status colors
+const getDeliveryStatusColor = (status: string) => {
+  const normalized = normalizeDeliveryStatus(status)
+  switch (normalized) {
+    case 'sent': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'confirmed': return 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400'
+    case 'picked_up': return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400'
+    case 'in_transit': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'out_for_delivery': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400'
+    case 'delivered': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
+    case 'returning': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    case 'returned': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    case 'cancelled': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+    case 'failed': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    case 'refused': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    case 'postponed': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+  }
+}
+
+// Delivery status label - try translation first, then fallback to raw status
+const getDeliveryStatusLabel = (status: string) => {
+  const normalized = normalizeDeliveryStatus(status)
+  const key = `orders.deliveryStatus.${normalized}`
+  const translated = t(key)
+  // If translation found, use it. Otherwise show the original status
+  return translated === key ? (status || '-') : translated
+}
+
 // Calculate duration from assignedAt or takenAt
 const formatDuration = (assignedAt: string | null, takenAt: string | null) => {
   const startDate = takenAt ? new Date(takenAt) : assignedAt ? new Date(assignedAt) : null
@@ -371,6 +467,15 @@ const handleAction = (action: string, order: Order) => {
             <td class="px-4 py-3">
               <div v-if="order.deliveryCompanyName">
                 <span class="font-medium text-gray-900 dark:text-white">{{ order.deliveryCompanyName }}</span>
+                <!-- Delivery Status Badge -->
+                <div v-if="order.deliveryStatus" class="mt-1">
+                  <span
+                    class="inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                    :class="getDeliveryStatusColor(order.deliveryStatus)"
+                  >
+                    {{ getDeliveryStatusLabel(order.deliveryStatus) }}
+                  </span>
+                </div>
               </div>
               <span v-else class="text-gray-400">-</span>
             </td>

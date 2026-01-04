@@ -342,7 +342,23 @@
     "labelError": "Erreur lors du téléchargement de l'étiquette",
     "bulkPrintLabels": "Étiquettes ({count})",
     "labelsSuccess": "{count} étiquette(s) récupérée(s)",
-    "labelsFailed": "{count} échec(s)"
+    "labelsFailed": "{count} échec(s)",
+    "deliveryStatus": {
+      "sent": "Envoyé",
+      "pending": "En attente",
+      "confirmed": "Confirmé",
+      "picked_up": "Ramassé",
+      "in_transit": "En transit",
+      "out_for_delivery": "En cours de livraison",
+      "delivered": "Livré",
+      "returning": "En retour",
+      "returned": "Retourné",
+      "cancelled": "Annulé",
+      "failed": "Échoué",
+      "refused": "Refusé",
+      "postponed": "Reporté",
+      "unknown": "Inconnu"
+    }
   },
   "delivery": {
     "company": "Société de livraison",

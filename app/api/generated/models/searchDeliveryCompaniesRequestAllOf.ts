@@ -9,4 +9,7 @@
 export type SearchDeliveryCompaniesRequestAllOf = {
   /** @nullable */
   name?: string | null;
+  /** If true, only return companies that have credentials configured (ApiKey, BearerToken, or CustomerId).
+Default is true - only connected companies are returned. */
+  onlyWithCredentials?: boolean;
 };

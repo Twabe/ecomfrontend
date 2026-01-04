@@ -12,4 +12,11 @@ export interface BulkAssignDeliveryItem {
   success?: boolean;
   /** @nullable */
   error?: string | null;
+  /** True if order was skipped because it was already sent to this delivery company. */
+  wasSkipped?: boolean;
+  /**
+   * Tracking code from delivery provider (existing or newly assigned).
+   * @nullable
+   */
+  trackingCode?: string | null;
 }

@@ -5,16 +5,20 @@
  * Clean Architecture Template for .NET 7 WebApi built with Multitenancy Support.
  * OpenAPI spec version: 1.0.0
  */
-import type { ProductDetailsDtoBrand } from './productDetailsDtoBrand';
 
-export interface ProductDetailsDto {
-  id?: string;
-  name?: string;
+export interface CreateStockRequest {
+  /**
+   * @minLength 1
+   */
+  productId: string;
   /** @nullable */
-  description?: string | null;
-  rate?: number;
+  productVariantId?: string | null;
+  /** @minimum 0 */
+  quantity?: number;
+  /** @minimum 0 */
+  brokenQuantity?: number;
   /** @nullable */
-  imagePath?: string | null;
+  details?: string | null;
   /** @nullable */
-  brand?: ProductDetailsDtoBrand;
+  deliveryCompanyId?: string | null;
 }

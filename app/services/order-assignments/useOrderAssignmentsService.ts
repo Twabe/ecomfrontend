@@ -154,7 +154,12 @@ export function useOrderAssignmentsService() {
   const scheduleCallbackMutation = useOrderAssignmentsScheduleCallback()
 
   // Invalidation helpers
-  const invalidateAll = () => queryClient.invalidateQueries({ queryKey: keys.all })
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: keys.all })
+    // Also invalidate orders queries that depend on assignment state
+    queryClient.invalidateQueries({ queryKey: ['orders', 'available-for-grabbing'] })
+    queryClient.invalidateQueries({ queryKey: ['orders'] })
+  }
 
   // Targeted invalidation for worker self-assign
   // Only invalidates queries that are actually affected
@@ -173,6 +178,19 @@ export function useOrderAssignmentsService() {
   const invalidateAfterTake = () => {
     queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-pending'] })
     queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-active'] })
+  }
+
+  // Targeted invalidation for release action
+  // Order goes back to "Nouvelles" (available for grabbing)
+  const invalidateAfterRelease = () => {
+    queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-pending'] })
+    queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-active'] })
+    queryClient.invalidateQueries({ queryKey: ['order-assignments', 'my-stats'] })
+    // Critical: Order returns to available pool
+    queryClient.invalidateQueries({ queryKey: ['orders', 'available-for-grabbing'] })
+    queryClient.invalidateQueries({ queryKey: ['orders', 'confirmation-orders'] })
+    // Worker config - currentAssignmentCount changes
+    queryClient.invalidateQueries({ queryKey: ['workerServiceConfigs', 'myConfig'] })
   }
 
   // Query Hooks
@@ -333,7 +351,8 @@ export function useOrderAssignmentsService() {
 
   const release = async (id: string, data: ReleaseAssignmentRequest) => {
     const result = await releaseMutation.mutateAsync({ id, data })
-    invalidateAll()
+    // Use targeted invalidation - order returns to available pool
+    invalidateAfterRelease()
     return result
   }
 

@@ -333,7 +333,13 @@ watch(
     if (deliveryCompanyId) {
       // Switching TO delivery company mode - reset cityId, use providerCityId
       formData.value.cityId = ''
-      formData.value.providerCityId = ''
+
+      // Only reset providerCityId if user is actively switching companies (not initial load in edit mode)
+      // In edit mode, the modal open handler already sets providerCityId from the order
+      if (oldDeliveryCompanyId && oldDeliveryCompanyId !== deliveryCompanyId) {
+        formData.value.providerCityId = ''
+      }
+
       deliveryCities.value = []
 
       // Load delivery company cities

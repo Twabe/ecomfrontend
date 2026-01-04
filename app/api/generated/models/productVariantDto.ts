@@ -29,4 +29,6 @@ export interface ProductVariantDto {
   createdOn?: string;
   /** @nullable */
   lastModifiedOn?: string | null;
+  /** Available stock for this variant (Quantity - BrokenQuantity). */
+  inStock?: number;
 }

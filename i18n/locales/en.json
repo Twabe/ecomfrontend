@@ -334,7 +334,23 @@
     "labelError": "Error downloading label",
     "bulkPrintLabels": "Labels ({count})",
     "labelsSuccess": "{count} label(s) retrieved",
-    "labelsFailed": "{count} failed"
+    "labelsFailed": "{count} failed",
+    "deliveryStatus": {
+      "sent": "Sent",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "picked_up": "Picked Up",
+      "in_transit": "In Transit",
+      "out_for_delivery": "Out for Delivery",
+      "delivered": "Delivered",
+      "returning": "Returning",
+      "returned": "Returned",
+      "cancelled": "Cancelled",
+      "failed": "Failed",
+      "refused": "Refused",
+      "postponed": "Postponed",
+      "unknown": "Unknown"
+    }
   },
   "delivery": {
     "company": "Delivery Company",

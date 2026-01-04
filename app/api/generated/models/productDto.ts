@@ -25,8 +25,14 @@ export interface ProductDto {
   /** @nullable */
   link?: string | null;
   trackStock?: boolean;
-  brandId?: string;
-  brandName?: string;
+  /** @nullable */
+  brandId?: string | null;
+  /** @nullable */
+  brandName?: string | null;
   hasVariants?: boolean;
   variantCount?: number;
+  /** Total available stock (Quantity - BrokenQuantity) across all locations.
+For products with variants: sum of all variant stocks.
+For simple products: direct product stock. */
+  inStock?: number;
 }

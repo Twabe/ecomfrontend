@@ -19,10 +19,8 @@ export interface UpdateProductRequest {
   description?: string | null;
   /** @minimum 1 */
   rate?: number;
-  /**
-   * @minLength 1
-   */
-  brandId: string;
+  /** @nullable */
+  brandId?: string | null;
   buyingPrice?: number;
   shippingPrice?: number;
   marketingPrice?: number;

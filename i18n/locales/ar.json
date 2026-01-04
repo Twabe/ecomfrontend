@@ -326,7 +326,23 @@
     "labelError": "خطأ في تحميل الملصق",
     "bulkPrintLabels": "ملصقات ({count})",
     "labelsSuccess": "تم استرجاع {count} ملصق(ات)",
-    "labelsFailed": "{count} فشل(ت)"
+    "labelsFailed": "{count} فشل(ت)",
+    "deliveryStatus": {
+      "sent": "تم الإرسال",
+      "pending": "قيد الانتظار",
+      "confirmed": "تم التأكيد",
+      "picked_up": "تم الاستلام",
+      "in_transit": "في الطريق",
+      "out_for_delivery": "قيد التوصيل",
+      "delivered": "تم التوصيل",
+      "returning": "في طريق العودة",
+      "returned": "مرتجع",
+      "cancelled": "ملغي",
+      "failed": "فشل",
+      "refused": "مرفوض",
+      "postponed": "مؤجل",
+      "unknown": "غير معروف"
+    }
   },
   "delivery": {
     "company": "شركة التوصيل",

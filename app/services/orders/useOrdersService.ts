@@ -158,6 +158,7 @@ export interface BulkAssignDeliveryCompanyResponse {
   totalOrders: number
   successfullyAssigned: number
   failed: number
+  skipped: number
   errors: string[]
   assignedItems: BulkAssignDeliveryItem[]
 }
@@ -167,6 +168,8 @@ export interface BulkAssignDeliveryItem {
   orderCode: string
   success: boolean
   error?: string
+  wasSkipped?: boolean
+  trackingCode?: string
 }
 
 // Types for Ready for Delivery with worker assignments
@@ -635,12 +638,19 @@ export function useOrdersWorkflowService() {
    */
   const bulkAssignDeliveryCompany = async (data: BulkAssignDeliveryCompanyRequest): Promise<BulkAssignDeliveryCompanyResponse> => {
     const api = useApi()
+    const { info, warning } = useNotification()
     const result = await api.post<BulkAssignDeliveryCompanyResponse>(
       '/api/v1/orders/bulk-assign-delivery-company',
       data
     )
     if (result.successfullyAssigned > 0) {
       success(`${result.successfullyAssigned} order(s) assigned to delivery company`)
+    }
+    if (result.skipped > 0) {
+      // Show info message for skipped orders (already sent to provider)
+      const skippedItems = result.assignedItems.filter(i => i.wasSkipped)
+      const skippedCodes = skippedItems.map(i => i.orderCode).join(', ')
+      info(`${result.skipped} order(s) already sent: ${skippedCodes}`)
     }
     if (result.failed > 0) {
       error(`${result.failed} order(s) failed to assign`)

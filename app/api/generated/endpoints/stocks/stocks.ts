@@ -30,12 +30,15 @@ import type {
 } from 'vue';
 
 import type {
+  AddStockWithCostRequest,
   AdjustStockRequest,
+  CreateStockRequest,
   ErrorResult,
   HttpValidationProblemDetails,
   PaginationResponseOfStockDto,
   SearchStocksRequest,
-  StockDto
+  StockDto,
+  UpdateStockRequest
 } from '../../models';
 
 import { customInstance } from '../../../axios-instance';
@@ -178,6 +181,196 @@ export function useStocksGet<TData = Awaited<ReturnType<typeof stocksGet>>, TErr
 
 
 /**
+ * @summary Update stock details.
+ */
+export const stocksUpdate = (
+    id: MaybeRef<string>,
+    updateStockRequest: MaybeRef<UpdateStockRequest>,
+ options?: SecondParameter<typeof customInstance>,) => {
+      id = unref(id);
+updateStockRequest = unref(updateStockRequest);
+      
+      return customInstance<string>(
+      {url: `/api/v1/stocks/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: updateStockRequest
+    },
+      options);
+    }
+  
+
+
+export const getStocksUpdateMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stocksUpdate>>, TError,{id: string;data: UpdateStockRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof stocksUpdate>>, TError,{id: string;data: UpdateStockRequest}, TContext> => {
+
+const mutationKey = ['stocksUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof stocksUpdate>>, {id: string;data: UpdateStockRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  stocksUpdate(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StocksUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof stocksUpdate>>>
+    export type StocksUpdateMutationBody = UpdateStockRequest
+    export type StocksUpdateMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Update stock details.
+ */
+export const useStocksUpdate = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stocksUpdate>>, TError,{id: string;data: UpdateStockRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof stocksUpdate>>,
+        TError,
+        {id: string;data: UpdateStockRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getStocksUpdateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Delete a stock record.
+ */
+export const stocksDelete = (
+    id: MaybeRef<string>,
+ options?: SecondParameter<typeof customInstance>,) => {
+      id = unref(id);
+      
+      return customInstance<string>(
+      {url: `/api/v1/stocks/${id}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getStocksDeleteMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stocksDelete>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof stocksDelete>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['stocksDelete'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof stocksDelete>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  stocksDelete(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StocksDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof stocksDelete>>>
+    
+    export type StocksDeleteMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Delete a stock record.
+ */
+export const useStocksDelete = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stocksDelete>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof stocksDelete>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getStocksDeleteMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Create a new stock record.
+ */
+export const stocksCreate = (
+    createStockRequest: MaybeRef<CreateStockRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      createStockRequest = unref(createStockRequest);
+      
+      return customInstance<string>(
+      {url: `/api/v1/stocks`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createStockRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getStocksCreateMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stocksCreate>>, TError,{data: CreateStockRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof stocksCreate>>, TError,{data: CreateStockRequest}, TContext> => {
+
+const mutationKey = ['stocksCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof stocksCreate>>, {data: CreateStockRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  stocksCreate(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StocksCreateMutationResult = NonNullable<Awaited<ReturnType<typeof stocksCreate>>>
+    export type StocksCreateMutationBody = CreateStockRequest
+    export type StocksCreateMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Create a new stock record.
+ */
+export const useStocksCreate = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stocksCreate>>, TError,{data: CreateStockRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof stocksCreate>>,
+        TError,
+        {data: CreateStockRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getStocksCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Manually adjust stock (damage, correction, return, etc.).
  */
 export const stocksAdjustStock = (
@@ -238,6 +431,72 @@ export const useStocksAdjustStock = <TError = unknown,
       > => {
 
       const mutationOptions = getStocksAdjustStockMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Add stock quantity with unit cost for inventory value tracking.
+ */
+export const stocksAddStockWithCost = (
+    id: MaybeRef<string>,
+    addStockWithCostRequest: MaybeRef<AddStockWithCostRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+addStockWithCostRequest = unref(addStockWithCostRequest);
+      
+      return customInstance<string>(
+      {url: `/api/v1/stocks/${id}/add-with-cost`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addStockWithCostRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getStocksAddStockWithCostMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stocksAddStockWithCost>>, TError,{id: string;data: AddStockWithCostRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof stocksAddStockWithCost>>, TError,{id: string;data: AddStockWithCostRequest}, TContext> => {
+
+const mutationKey = ['stocksAddStockWithCost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof stocksAddStockWithCost>>, {id: string;data: AddStockWithCostRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  stocksAddStockWithCost(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StocksAddStockWithCostMutationResult = NonNullable<Awaited<ReturnType<typeof stocksAddStockWithCost>>>
+    export type StocksAddStockWithCostMutationBody = AddStockWithCostRequest
+    export type StocksAddStockWithCostMutationError = unknown
+
+    /**
+ * @summary Add stock quantity with unit cost for inventory value tracking.
+ */
+export const useStocksAddStockWithCost = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stocksAddStockWithCost>>, TError,{id: string;data: AddStockWithCostRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof stocksAddStockWithCost>>,
+        TError,
+        {id: string;data: AddStockWithCostRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getStocksAddStockWithCostMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
