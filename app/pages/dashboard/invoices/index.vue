@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { PlusIcon, DocumentPlusIcon } from '@heroicons/vue/24/outline'
-import { OrderState } from '~/constants/order'
+import {
+  DocumentTextIcon,
+  LockClosedIcon,
+  ClockIcon,
+  CheckCircleIcon
+} from '@heroicons/vue/24/outline'
 import {
   useInvoicesService,
-  useOrdersService,
   useDeliveryCompaniesService,
   useStoresService,
   type InvoiceDto,
   type InvoiceDetailsDto,
-  type CreateInvoiceRequest,
   type UpdateInvoiceRequest,
-  type GenerateInvoiceRequest,
   type MarkInvoicePaidRequest
 } from '~/services'
 
@@ -28,28 +29,19 @@ const {
   items: invoices,
   pagination,
   isLoading,
-  isMutating,
   setPage,
   setKeyword,
   setFilters,
-  create: createInvoice,
   update: updateInvoice,
   remove: deleteInvoice,
   getInvoiceDetails,
-  generateInvoice,
+  validateInvoice,
   markInvoicePaid
 } = useInvoicesService()
 
 // Dropdown data from services (auto-fetch)
 const { items: deliveryCompanies } = useDeliveryCompaniesService()
 const { items: stores } = useStoresService()
-
-// Orders service for generate modal (needs manual control)
-const {
-  items: availableOrders,
-  isLoading: isLoadingOrders,
-  setFilters: setOrderFilters
-} = useOrdersService()
 
 // Search & Filters
 const searchQuery = ref('')
@@ -63,13 +55,11 @@ const filters = ref({
 // Modals
 const showFormModal = ref(false)
 const showViewModal = ref(false)
-const showGenerateModal = ref(false)
 const showMarkPaidModal = ref(false)
 const showDeleteModal = ref(false)
 
 const selectedInvoice = ref<InvoiceDto | null>(null)
 const invoiceDetails = ref<InvoiceDetailsDto | null>(null)
-const isEditMode = ref(false)
 
 // Watch filters
 watch([searchQuery, filters], () => {
@@ -89,15 +79,8 @@ const applyFilters = () => {
 }
 
 // CRUD handlers
-const openCreateModal = () => {
-  selectedInvoice.value = null
-  isEditMode.value = false
-  showFormModal.value = true
-}
-
 const openEditModal = (invoice: InvoiceDto) => {
   selectedInvoice.value = invoice
-  isEditMode.value = true
   showFormModal.value = true
 }
 
@@ -122,11 +105,11 @@ const openMarkPaidModal = (invoice: InvoiceDto) => {
   showMarkPaidModal.value = true
 }
 
-const handleCreate = async (data: CreateInvoiceRequest) => {
+// Validate invoice
+const handleValidate = async (invoice: InvoiceDto) => {
   try {
-    await createInvoice(data)
-    showFormModal.value = false
-    notify({ type: 'success', message: t('messages.createSuccess') })
+    await validateInvoice(invoice.id!)
+    notify({ type: 'success', message: t('invoices.validateSuccess') })
   } catch (error: any) {
     notify({ type: 'error', message: error.message || t('messages.error') })
   }
@@ -155,35 +138,6 @@ const handleDelete = async () => {
   }
 }
 
-// Generate invoice from orders
-const openGenerateModal = async () => {
-  showGenerateModal.value = true
-  // Load delivered orders that are not yet invoiced
-  setOrderFilters({
-    state: OrderState.Delivered,
-    isInvoiced: false
-  })
-}
-
-const handleSearchOrdersForGenerate = async (params: { deliveryCompanyId?: string; storeId?: string }) => {
-  setOrderFilters({
-    state: OrderState.Delivered,
-    isInvoiced: false,
-    deliveryCompanyId: params.deliveryCompanyId,
-    storeId: params.storeId
-  })
-}
-
-const handleGenerate = async (data: GenerateInvoiceRequest) => {
-  try {
-    await generateInvoice(data)
-    showGenerateModal.value = false
-    notify({ type: 'success', message: t('messages.createSuccess') })
-  } catch (error: any) {
-    notify({ type: 'error', message: error.message || t('messages.error') })
-  }
-}
-
 // Mark as paid
 const handleMarkPaid = async (data: MarkInvoicePaidRequest) => {
   try {
@@ -200,6 +154,34 @@ const handleMarkPaid = async (data: MarkInvoicePaidRequest) => {
 const changePage = (page: number) => {
   setPage(page)
 }
+
+// Statistics computed from invoices
+const stats = computed(() => {
+  const total = invoices.value.length
+  const open = invoices.value.filter(i => !i.isValidated).length
+  const validated = invoices.value.filter(i => i.isValidated && !i.isReceived).length
+  const received = invoices.value.filter(i => i.isReceived).length
+
+  const totalAmount = invoices.value.reduce((sum, i) => sum + (i.totalPrice || 0), 0)
+  const openAmount = invoices.value.filter(i => !i.isValidated).reduce((sum, i) => sum + (i.totalPrice || 0), 0)
+  const pendingAmount = invoices.value.filter(i => i.isValidated && !i.isReceived).reduce((sum, i) => sum + (i.totalPrice || 0), 0)
+  const receivedAmount = invoices.value.filter(i => i.isReceived).reduce((sum, i) => sum + (i.totalPrice || 0), 0)
+
+  return {
+    total,
+    open,
+    validated,
+    received,
+    totalAmount,
+    openAmount,
+    pendingAmount,
+    receivedAmount
+  }
+})
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(amount)
+}
 </script>
 
 <template>
@@ -209,21 +191,64 @@ const changePage = (page: number) => {
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
         {{ t('invoices.title') }}
       </h1>
-      <div class="flex gap-2">
-        <button
-          class="inline-flex items-center gap-2 rounded-lg border border-primary-600 px-4 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 dark:border-primary-400 dark:text-primary-400"
-          @click="openGenerateModal"
-        >
-          <DocumentPlusIcon class="h-5 w-5" />
-          {{ t('invoices.generateFromOrders') }}
-        </button>
-        <button
-          class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
-          @click="openCreateModal"
-        >
-          <PlusIcon class="h-5 w-5" />
-          {{ t('invoices.createInvoice') }}
-        </button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- Total Invoices -->
+      <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg bg-gray-100 p-2 dark:bg-gray-700">
+            <DocumentTextIcon class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('invoices.stats.total') }}</p>
+            <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ stats.total }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatCurrency(stats.totalAmount) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Open Invoices -->
+      <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 shadow-sm dark:border-yellow-800 dark:bg-yellow-900/20">
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg bg-yellow-100 p-2 dark:bg-yellow-800/30">
+            <ClockIcon class="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+          </div>
+          <div>
+            <p class="text-sm text-yellow-700 dark:text-yellow-400">{{ t('invoices.stats.open') }}</p>
+            <p class="text-xl font-semibold text-yellow-800 dark:text-yellow-300">{{ stats.open }}</p>
+            <p class="text-xs text-yellow-600 dark:text-yellow-500">{{ formatCurrency(stats.openAmount) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validated (Pending Payment) -->
+      <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-800 dark:bg-amber-900/20">
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg bg-amber-100 p-2 dark:bg-amber-800/30">
+            <LockClosedIcon class="h-6 w-6 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div>
+            <p class="text-sm text-amber-700 dark:text-amber-400">{{ t('invoices.stats.pendingPayment') }}</p>
+            <p class="text-xl font-semibold text-amber-800 dark:text-amber-300">{{ stats.validated }}</p>
+            <p class="text-xs text-amber-600 dark:text-amber-500">{{ formatCurrency(stats.pendingAmount) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Received (Paid) -->
+      <div class="rounded-lg border border-green-200 bg-green-50 p-4 shadow-sm dark:border-green-800 dark:bg-green-900/20">
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg bg-green-100 p-2 dark:bg-green-800/30">
+            <CheckCircleIcon class="h-6 w-6 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <p class="text-sm text-green-700 dark:text-green-400">{{ t('invoices.stats.received') }}</p>
+            <p class="text-xl font-semibold text-green-800 dark:text-green-300">{{ stats.received }}</p>
+            <p class="text-xs text-green-600 dark:text-green-500">{{ formatCurrency(stats.receivedAmount) }}</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -243,6 +268,7 @@ const changePage = (page: number) => {
       @view="openViewModal"
       @edit="openEditModal"
       @delete="openDeleteModal"
+      @validate="handleValidate"
       @mark-paid="openMarkPaidModal"
       @page-change="changePage"
     />
@@ -250,11 +276,10 @@ const changePage = (page: number) => {
     <!-- Modals -->
     <InvoicesInvoiceFormModal
       :show="showFormModal"
-      :invoice="isEditMode ? selectedInvoice : null"
+      :invoice="selectedInvoice"
       :delivery-companies="deliveryCompanies"
       :stores="stores"
       @close="showFormModal = false"
-      @create="handleCreate"
       @update="handleUpdate"
     />
 
@@ -262,17 +287,6 @@ const changePage = (page: number) => {
       :show="showViewModal"
       :invoice="invoiceDetails"
       @close="showViewModal = false"
-    />
-
-    <InvoicesInvoiceGenerateModal
-      :show="showGenerateModal"
-      :delivery-companies="deliveryCompanies"
-      :stores="stores"
-      :available-orders="availableOrders"
-      :is-loading-orders="isLoadingOrders"
-      @close="showGenerateModal = false"
-      @generate="handleGenerate"
-      @search-orders="handleSearchOrdersForGenerate"
     />
 
     <InvoicesInvoiceMarkPaidModal

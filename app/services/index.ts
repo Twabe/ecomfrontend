@@ -99,7 +99,7 @@ export {
   type OrderAssignmentSummaryDto,
   type GetOrdersReadyForDeliveryRequestExtended,
 } from './orders/useOrdersService'
-export { useInvoicesService, type InvoiceDto, type CreateInvoiceRequest, type UpdateInvoiceRequest } from './invoices/useInvoicesService'
+export { useInvoicesService, type InvoiceDto, type InvoiceDetailsDto, type UpdateInvoiceRequest, type MarkInvoicePaidRequest } from './invoices/useInvoicesService'
 export { useDeliveryNotesService, type DeliveryNoteDto, type CreateDeliveryNoteRequest, type UpdateDeliveryNoteRequest } from './delivery-notes/useDeliveryNotesService'
 export { usePaymentsService, type PaymentDto, type CreatePaymentRequest, type UpdatePaymentRequest } from './payments/usePaymentsService'
 export { useDropshippingsService, type DropshippingDto, type CreateDropshippingRequest, type UpdateDropshippingRequest } from './dropshippings/useDropshippingsService'

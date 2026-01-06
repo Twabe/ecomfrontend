@@ -430,9 +430,7 @@
     "variantsPartialSuccess": "{created} variants created, {skipped} skipped",
     "variantsFailed": "Failed to create variants",
     "commissionSettings": "Commission Settings",
-    "confirmationCommission": "Confirmation Commission",
     "mediaBuyerCommissionRate": "Media Buyer Commission Rate",
-    "confirmationCommissionDesc": "Fixed commission for confirmation agent (per item)",
     "mediaBuyerCommissionRateDesc": "Percentage commission for Media Buyer"
   },
   "shippingFees": {
@@ -632,6 +630,8 @@
     "generateFromOrders": "Generate from Orders",
     "generate": "Generate",
     "markAsPaid": "Mark as Paid",
+    "validate": "Validate",
+    "validateSuccess": "Invoice validated successfully",
     "invoiceDetails": "Invoice Details",
     "information": "Information",
     "includedOrders": "Included Orders",
@@ -643,7 +643,13 @@
     "typeDeliveryCompany": "Delivery Company",
     "typeWorker": "Worker",
     "typeMediaBuyer": "Media Buyer",
-    "typeManual": "Manual"
+    "typeManual": "Manual",
+    "stats": {
+      "total": "Total Invoices",
+      "open": "Open",
+      "pendingPayment": "Pending Payment",
+      "received": "Received"
+    }
   },
   "deliveryNotes": {
     "title": "Delivery Notes",
@@ -1338,7 +1344,13 @@
     "allWorkers": "All Workers",
     "confirmedBy": "Confirmed by",
     "qualityBy": "Quality by",
-    "suiviBy": "Tracking by"
+    "suiviBy": "Tracking by",
+    "commission": "Confirmation Commission",
+    "commissionType": "Commission Type",
+    "fixedPerOrder": "Fixed amount per order",
+    "percentage": "Percentage of order total",
+    "fixedCommissionHint": "This amount will be added to the invoice for each delivered order",
+    "percentageCommissionHint": "Commission will be calculated as a percentage of the order total"
   },
   "autoAssignment": {
     "title": "Auto-Assignment Settings",

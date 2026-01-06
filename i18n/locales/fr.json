@@ -438,9 +438,7 @@
     "variantsPartialSuccess": "{created} variantes créées, {skipped} ignorées",
     "variantsFailed": "Échec de création des variantes",
     "commissionSettings": "Paramètres des commissions",
-    "confirmationCommission": "Commission de confirmation",
     "mediaBuyerCommissionRate": "Taux de commission Media Buyer",
-    "confirmationCommissionDesc": "Commission fixe pour l'agent de confirmation (par article)",
     "mediaBuyerCommissionRateDesc": "Pourcentage de commission pour le Media Buyer"
   },
   "shippingFees": {
@@ -664,6 +662,8 @@
     "generateFromOrders": "Générer depuis commandes",
     "generate": "Générer",
     "markAsPaid": "Marquer comme reçue",
+    "validate": "Valider",
+    "validateSuccess": "Facture validée avec succès",
     "invoiceDetails": "Détails de la facture",
     "information": "Informations",
     "includedOrders": "Commandes incluses",
@@ -675,7 +675,13 @@
     "typeDeliveryCompany": "Société de livraison",
     "typeWorker": "Agent",
     "typeMediaBuyer": "Media Buyer",
-    "typeManual": "Manuel"
+    "typeManual": "Manuel",
+    "stats": {
+      "total": "Total Factures",
+      "open": "Ouvertes",
+      "pendingPayment": "En attente paiement",
+      "received": "Payées"
+    }
   },
   "deliveryNotes": {
     "title": "Bons de livraison",
@@ -1419,7 +1425,13 @@
     "allWorkers": "Tous les agents",
     "confirmedBy": "Confirmé par",
     "qualityBy": "Qualité par",
-    "suiviBy": "Suivi par"
+    "suiviBy": "Suivi par",
+    "commission": "Commission de confirmation",
+    "commissionType": "Type de commission",
+    "fixedPerOrder": "Montant fixe par commande",
+    "percentage": "Pourcentage de la commande",
+    "fixedCommissionHint": "Ce montant sera ajouté à la facture pour chaque commande livrée",
+    "percentageCommissionHint": "La commission sera calculée en pourcentage du total de la commande"
   },
   "autoAssignment": {
     "title": "Paramètres d'auto-assignation",

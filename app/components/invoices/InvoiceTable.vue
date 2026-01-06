@@ -4,7 +4,8 @@ import {
   PencilSquareIcon,
   TrashIcon,
   CheckCircleIcon,
-  BanknotesIcon
+  BanknotesIcon,
+  LockClosedIcon
 } from '@heroicons/vue/24/outline'
 import type { Invoice } from '~/types/invoice'
 
@@ -23,6 +24,7 @@ const emit = defineEmits<{
   view: [invoice: Invoice]
   edit: [invoice: Invoice]
   delete: [invoice: Invoice]
+  validate: [invoice: Invoice]
   markPaid: [invoice: Invoice]
   pageChange: [page: number]
 }>()
@@ -126,12 +128,21 @@ const getInvoiceTypeBadge = (type: string | undefined) => {
               </button>
             </td>
             <td class="whitespace-nowrap px-4 py-3">
-              <span
-                class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
-                :class="getInvoiceTypeBadge(invoice.invoiceType).class"
-              >
-                {{ invoice.invoiceTypeName || getInvoiceTypeBadge(invoice.invoiceType).label }}
-              </span>
+              <div class="flex flex-col gap-1">
+                <span
+                  class="inline-flex rounded-full px-2 py-1 text-xs font-medium w-fit"
+                  :class="getInvoiceTypeBadge(invoice.invoiceType).class"
+                >
+                  {{ invoice.invoiceTypeName || getInvoiceTypeBadge(invoice.invoiceType).label }}
+                </span>
+                <!-- Show beneficiary name based on invoice type -->
+                <span v-if="invoice.workerName && invoice.invoiceType === 'worker'" class="text-xs text-gray-600 dark:text-gray-400">
+                  {{ invoice.workerName }}
+                </span>
+                <span v-else-if="invoice.mediaBuyerName && invoice.invoiceType === 'media_buyer'" class="text-xs text-gray-600 dark:text-gray-400">
+                  {{ invoice.mediaBuyerName }}
+                </span>
+              </div>
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
               {{ invoice.deliveryCompanyName || '-' }}
@@ -174,20 +185,29 @@ const getInvoiceTypeBadge = (type: string | undefined) => {
                 >
                   <EyeIcon class="h-5 w-5" />
                 </button>
-                <!-- Mark as paid button (only if not received) -->
+                <!-- Validate button (only if not validated) -->
                 <button
-                  v-if="!invoice.isReceived"
+                  v-if="!invoice.isValidated"
+                  class="rounded p-1 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                  :title="t('invoices.validate')"
+                  @click="emit('validate', invoice)"
+                >
+                  <LockClosedIcon class="h-5 w-5" />
+                </button>
+                <!-- Mark as paid button (only if validated but not received) -->
+                <button
+                  v-if="invoice.isValidated && !invoice.isReceived"
                   class="rounded p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
                   :title="t('invoices.markAsPaid')"
                   @click="emit('markPaid', invoice)"
                 >
                   <BanknotesIcon class="h-5 w-5" />
                 </button>
-                <!-- Validated indicator -->
+                <!-- Received indicator -->
                 <CheckCircleIcon
-                  v-if="invoice.isValidated"
+                  v-if="invoice.isReceived"
                   class="h-5 w-5 text-green-500"
-                  :title="t('invoices.validated')"
+                  :title="t('invoices.received')"
                 />
                 <!-- Edit button -->
                 <button

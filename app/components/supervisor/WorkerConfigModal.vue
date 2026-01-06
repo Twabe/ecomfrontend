@@ -140,6 +140,62 @@
                   </p>
                 </div>
 
+                <!-- Commission Section (only shown if canDoConfirmation is enabled) -->
+                <div v-if="form.canDoConfirmation" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <label class="label mb-3 flex items-center gap-2">
+                    <BanknotesIcon class="w-4 h-4 text-blue-600" />
+                    {{ $t('supervisor.commission') }}
+                  </label>
+
+                  <!-- Commission Type Selection -->
+                  <div class="flex gap-4 mb-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        v-model="form.confirmationCommissionType"
+                        type="radio"
+                        value="fixed"
+                        class="w-4 h-4 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span class="text-sm text-gray-700 dark:text-gray-300">
+                        {{ $t('supervisor.fixedPerOrder') }}
+                      </span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        v-model="form.confirmationCommissionType"
+                        type="radio"
+                        value="percentage"
+                        class="w-4 h-4 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span class="text-sm text-gray-700 dark:text-gray-300">
+                        {{ $t('supervisor.percentage') }}
+                      </span>
+                    </label>
+                  </div>
+
+                  <!-- Commission Value Input -->
+                  <div class="relative">
+                    <input
+                      v-model.number="form.confirmationCommissionValue"
+                      type="number"
+                      min="0"
+                      :max="form.confirmationCommissionType === 'percentage' ? 100 : undefined"
+                      step="0.01"
+                      class="input pr-12"
+                      placeholder="0"
+                    />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">
+                      {{ form.confirmationCommissionType === 'fixed' ? 'MAD' : '%' }}
+                    </span>
+                  </div>
+
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    {{ form.confirmationCommissionType === 'fixed'
+                        ? $t('supervisor.fixedCommissionHint')
+                        : $t('supervisor.percentageCommissionHint') }}
+                  </p>
+                </div>
+
                 <!-- Actions -->
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <button
@@ -172,7 +228,7 @@
 
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
-import { Cog6ToothIcon } from '@heroicons/vue/24/outline'
+import { Cog6ToothIcon, BanknotesIcon } from '@heroicons/vue/24/outline'
 import { useWorkerServiceConfigsService, useAutoAssignmentSettingsService, type WorkerServiceConfigDto, type CreateWorkerConfigRequest, type UpdateWorkerConfigRequest, type UserDetailsDto } from '~/services'
 
 const props = defineProps<{
@@ -241,7 +297,9 @@ const form = ref({
   canDoSuivi: false,
   canDoQuality: false,
   canDoCallback: false,
-  autoAssignPriority: 100
+  autoAssignPriority: 100,
+  confirmationCommissionType: 'fixed' as 'fixed' | 'percentage',
+  confirmationCommissionValue: 0
 })
 
 const isSubmitting = ref(false)
@@ -257,7 +315,9 @@ watch(() => [props.modelValue, props.config, props.preselectedUser], ([open, con
         canDoSuivi: (config as WorkerServiceConfigDto).canDoSuivi ?? false,
         canDoQuality: (config as WorkerServiceConfigDto).canDoQuality ?? false,
         canDoCallback: (config as WorkerServiceConfigDto).canDoCallback ?? false,
-        autoAssignPriority: (config as WorkerServiceConfigDto).autoAssignPriority ?? 100
+        autoAssignPriority: (config as WorkerServiceConfigDto).autoAssignPriority ?? 100,
+        confirmationCommissionType: ((config as WorkerServiceConfigDto).confirmationCommissionType as 'fixed' | 'percentage') ?? 'fixed',
+        confirmationCommissionValue: (config as WorkerServiceConfigDto).confirmationCommissionValue ?? 0
       }
     } else {
       // Create mode - reset to defaults, but set userId if preselected
@@ -267,7 +327,9 @@ watch(() => [props.modelValue, props.config, props.preselectedUser], ([open, con
         canDoSuivi: false,
         canDoQuality: false,
         canDoCallback: false,
-        autoAssignPriority: 100
+        autoAssignPriority: 100,
+        confirmationCommissionType: 'fixed',
+        confirmationCommissionValue: 0
       }
     }
   }
@@ -284,7 +346,9 @@ const handleSubmit = async () => {
         canDoSuivi: form.value.canDoSuivi,
         canDoQuality: form.value.canDoQuality,
         canDoCallback: form.value.canDoCallback,
-        autoAssignPriority: form.value.autoAssignPriority
+        autoAssignPriority: form.value.autoAssignPriority,
+        confirmationCommissionType: form.value.confirmationCommissionType,
+        confirmationCommissionValue: form.value.confirmationCommissionValue
       }
       await workerConfigsService.update(props.config.id!, updateRequest)
       // Emit the updated config (can be constructed from form data for immediate UI update)
@@ -297,7 +361,9 @@ const handleSubmit = async () => {
         canDoSuivi: form.value.canDoSuivi,
         canDoQuality: form.value.canDoQuality,
         canDoCallback: form.value.canDoCallback,
-        autoAssignPriority: form.value.autoAssignPriority
+        autoAssignPriority: form.value.autoAssignPriority,
+        confirmationCommissionType: form.value.confirmationCommissionType,
+        confirmationCommissionValue: form.value.confirmationCommissionValue
       }
       const configId = await workerConfigsService.create(createRequest)
       // Emit the created config (construct from form data + returned id)

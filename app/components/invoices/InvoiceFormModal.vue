@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
-import type { Invoice, CreateInvoiceRequest, UpdateInvoiceRequest } from '~/types/invoice'
+import type { Invoice, UpdateInvoiceRequest } from '~/types/invoice'
 import type { DeliveryCompany } from '~/types/deliveryCompany'
 import type { Store } from '~/types/store'
 
@@ -13,15 +13,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: []
-  create: [data: CreateInvoiceRequest]
   update: [id: string, data: UpdateInvoiceRequest]
 }>()
 
 const { t } = useI18n()
 
-const isEditMode = computed(() => !!props.invoice)
-
-const formData = ref<CreateInvoiceRequest>({
+const formData = ref<UpdateInvoiceRequest>({
+  id: '',
   code: '',
   ordersCount: 0,
   totalPrice: 0,
@@ -32,36 +30,23 @@ const formData = ref<CreateInvoiceRequest>({
 })
 
 watch(() => props.show, (val) => {
-  if (val) {
-    if (props.invoice) {
-      formData.value = {
-        code: props.invoice.code,
-        ordersCount: props.invoice.ordersCount,
-        totalPrice: props.invoice.totalPrice,
-        deliveryCompanyId: props.invoice.deliveryCompanyId || undefined,
-        storeId: props.invoice.storeId || undefined,
-        dateCreated: props.invoice.dateCreated || undefined,
-        note: props.invoice.note || undefined
-      }
-    } else {
-      formData.value = {
-        code: '',
-        ordersCount: 0,
-        totalPrice: 0,
-        deliveryCompanyId: undefined,
-        storeId: undefined,
-        dateCreated: undefined,
-        note: undefined
-      }
+  if (val && props.invoice) {
+    formData.value = {
+      id: props.invoice.id,
+      code: props.invoice.code,
+      ordersCount: props.invoice.ordersCount,
+      totalPrice: props.invoice.totalPrice,
+      deliveryCompanyId: props.invoice.deliveryCompanyId || undefined,
+      storeId: props.invoice.storeId || undefined,
+      dateCreated: props.invoice.dateCreated || undefined,
+      note: props.invoice.note || undefined
     }
   }
 })
 
 const handleSubmit = () => {
-  if (isEditMode.value && props.invoice) {
+  if (props.invoice) {
     emit('update', props.invoice.id, formData.value)
-  } else {
-    emit('create', formData.value)
   }
 }
 
@@ -88,7 +73,7 @@ const handleClose = () => {
           >
             <DialogPanel class="w-full max-w-lg transform rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
               <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white">
-                {{ isEditMode ? t('invoices.editInvoice') : t('invoices.createInvoice') }}
+                {{ t('invoices.editInvoice') }}
               </DialogTitle>
 
               <form class="mt-4 space-y-4" @submit.prevent="handleSubmit">
@@ -190,7 +175,7 @@ const handleClose = () => {
                     type="submit"
                     class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
                   >
-                    {{ isEditMode ? t('common.update') : t('common.create') }}
+                    {{ t('common.update') }}
                   </button>
                 </div>
               </form>

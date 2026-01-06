@@ -75,6 +75,8 @@ const handleClose = () => {
                   <div class="mt-2 grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
                     <div><span class="text-gray-500">{{ t('nav.deliveryCompanies') }}:</span> {{ invoice.deliveryCompanyName || '-' }}</div>
                     <div><span class="text-gray-500">{{ t('nav.stores') }}:</span> {{ invoice.storeName || '-' }}</div>
+                    <div v-if="invoice.workerName"><span class="text-gray-500">{{ t('invoices.typeWorker') }}:</span> {{ invoice.workerName }}</div>
+                    <div v-if="invoice.mediaBuyerName"><span class="text-gray-500">{{ t('invoices.typeMediaBuyer') }}:</span> {{ invoice.mediaBuyerName }}</div>
                     <div><span class="text-gray-500">{{ t('invoices.ordersCount') }}:</span> {{ invoice.ordersCount }}</div>
                     <div><span class="text-gray-500">{{ t('invoices.totalPrice') }}:</span> {{ formatCurrency(invoice.totalPrice) }}</div>
                     <div><span class="text-gray-500">{{ t('invoices.dateCreated') }}:</span> {{ formatDate(invoice.dateCreated) }}</div>

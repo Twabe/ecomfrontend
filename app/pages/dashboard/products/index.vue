@@ -132,22 +132,6 @@
                         {{ $t('products.commissionSettings') || 'Commission Settings' }}
                       </h3>
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Confirmation Commission (Worker) -->
-                        <div>
-                          <label class="label">{{ $t('products.confirmationCommission') || 'Confirmation Commission' }}</label>
-                          <input
-                            v-model.number="form.confirmationCommission"
-                            type="number"
-                            class="input"
-                            min="0"
-                            step="0.01"
-                            :placeholder="$t('products.confirmationCommissionHint') || 'Fixed amount per order'"
-                          />
-                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {{ $t('products.confirmationCommissionDesc') || 'Fixed commission for confirmation worker' }}
-                          </p>
-                        </div>
-
                         <!-- Media Buyer Commission Rate -->
                         <div>
                           <label class="label">{{ $t('products.mediaBuyerCommissionRate') || 'Media Buyer Rate (%)' }}</label>
@@ -539,7 +523,6 @@ const form = ref({
   shippingPrice: 0,
   marketingPrice: 0,
   charges: 0,
-  confirmationCommission: 0,
   mediaBuyerCommissionRate: 0,
   link: '',
   description: '',
@@ -613,7 +596,6 @@ const openCreateModal = () => {
     shippingPrice: 0,
     marketingPrice: 0,
     charges: 0,
-    confirmationCommission: 0,
     mediaBuyerCommissionRate: 0,
     link: '',
     description: '',
@@ -637,7 +619,6 @@ const openEditModal = (product: ProductDto) => {
     shippingPrice: product.shippingPrice || 0,
     marketingPrice: product.marketingPrice || 0,
     charges: product.charges || 0,
-    confirmationCommission: product.confirmationCommission || 0,
     mediaBuyerCommissionRate: product.mediaBuyerCommissionRate || 0,
     link: product.link || '',
     description: product.description || '',
@@ -667,7 +648,6 @@ const handleSubmit = async () => {
       shippingPrice: form.value.shippingPrice || undefined,
       marketingPrice: form.value.marketingPrice || undefined,
       charges: form.value.charges || undefined,
-      confirmationCommission: form.value.confirmationCommission || undefined,
       mediaBuyerCommissionRate: form.value.mediaBuyerCommissionRate || undefined,
       link: form.value.link || undefined,
       description: form.value.description || undefined,

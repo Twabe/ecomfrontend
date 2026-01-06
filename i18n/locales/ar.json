@@ -422,9 +422,7 @@
     "variantsPartialSuccess": "تم إنشاء {created} متغيرات، تم تخطي {skipped}",
     "variantsFailed": "فشل في إنشاء المتغيرات",
     "commissionSettings": "إعدادات العمولات",
-    "confirmationCommission": "عمولة التأكيد",
     "mediaBuyerCommissionRate": "نسبة عمولة المسوق",
-    "confirmationCommissionDesc": "عمولة ثابتة لموظف التأكيد (لكل قطعة)",
     "mediaBuyerCommissionRateDesc": "نسبة العمولة للمسوق"
   },
   "shippingFees": {
@@ -634,6 +632,8 @@
     "generateFromOrders": "إنشاء من الطلبات",
     "generate": "إنشاء",
     "markAsPaid": "تحديد كمدفوعة",
+    "validate": "تأكيد",
+    "validateSuccess": "تم تأكيد الفاتورة بنجاح",
     "invoiceDetails": "تفاصيل الفاتورة",
     "information": "المعلومات",
     "includedOrders": "الطلبات المضمنة",
@@ -645,7 +645,13 @@
     "typeDeliveryCompany": "شركة التوصيل",
     "typeWorker": "الموظف",
     "typeMediaBuyer": "المسوق",
-    "typeManual": "يدوي"
+    "typeManual": "يدوي",
+    "stats": {
+      "total": "إجمالي الفواتير",
+      "open": "مفتوحة",
+      "pendingPayment": "في انتظار الدفع",
+      "received": "مدفوعة"
+    }
   },
   "deliveryNotes": {
     "title": "سندات التسليم",
@@ -1269,7 +1275,13 @@
     "allWorkers": "كل الوكلاء",
     "confirmedBy": "تأكيد بواسطة",
     "qualityBy": "جودة بواسطة",
-    "suiviBy": "متابعة بواسطة"
+    "suiviBy": "متابعة بواسطة",
+    "commission": "عمولة التأكيد",
+    "commissionType": "نوع العمولة",
+    "fixedPerOrder": "مبلغ ثابت لكل طلب",
+    "percentage": "نسبة من قيمة الطلب",
+    "fixedCommissionHint": "سيتم إضافة هذا المبلغ للفاتورة لكل طلب مسلم",
+    "percentageCommissionHint": "سيتم حساب العمولة كنسبة من إجمالي الطلب"
   },
   "autoAssignment": {
     "title": "إعدادات التوزيع التلقائي",
