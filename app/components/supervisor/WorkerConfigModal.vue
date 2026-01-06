@@ -140,6 +140,25 @@
                   </p>
                 </div>
 
+                <!-- Max Concurrent Assignments -->
+                <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <label class="label mb-3 flex items-center gap-2">
+                    <ChartBarIcon class="w-4 h-4 text-blue-500" />
+                    {{ $t('supervisor.maxConcurrentAssignments') }}
+                  </label>
+                  <input
+                    v-model.number="form.maxConcurrentAssignments"
+                    type="number"
+                    min="0"
+                    max="100"
+                    class="input"
+                    placeholder="0"
+                  />
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    {{ $t('supervisor.maxConcurrentDescription') }}
+                  </p>
+                </div>
+
                 <!-- Commission Section (only shown if canDoConfirmation is enabled) -->
                 <div v-if="form.canDoConfirmation" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <label class="label mb-3 flex items-center gap-2">
@@ -196,6 +215,90 @@
                   </p>
                 </div>
 
+                <!-- Product Restrictions - Searchable Multi-Select -->
+                <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <label class="label mb-3 flex items-center gap-2">
+                    <CubeIcon class="w-4 h-4 text-orange-500" />
+                    {{ $t('supervisor.restrictedProducts') }}
+                  </label>
+
+                  <!-- Selected Products Tags -->
+                  <div v-if="form.restrictedProductIds.length > 0" class="flex flex-wrap gap-2 mb-3">
+                    <span
+                      v-for="productId in form.restrictedProductIds"
+                      :key="productId"
+                      class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded-full"
+                    >
+                      {{ getProductName(productId) }}
+                      <button
+                        type="button"
+                        @click="removeProduct(productId)"
+                        class="hover:text-orange-600 dark:hover:text-orange-300"
+                      >
+                        <XMarkIcon class="w-3 h-3" />
+                      </button>
+                    </span>
+                    <button
+                      v-if="form.restrictedProductIds.length > 0"
+                      type="button"
+                      @click="form.restrictedProductIds = []"
+                      class="text-xs text-gray-500 hover:text-red-500"
+                    >
+                      {{ $t('common.clearAll') }}
+                    </button>
+                  </div>
+
+                  <!-- Search Input with Dropdown -->
+                  <div class="relative">
+                    <div class="relative">
+                      <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        v-model="productSearch"
+                        type="text"
+                        class="input pl-9"
+                        :placeholder="$t('supervisor.searchProducts')"
+                        @focus="showProductDropdown = true"
+                        @blur="closeProductDropdown"
+                      />
+                    </div>
+
+                    <!-- Dropdown -->
+                    <div
+                      v-if="showProductDropdown && filteredProducts.length > 0"
+                      class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                    >
+                      <button
+                        v-for="product in filteredProducts"
+                        :key="product.id"
+                        type="button"
+                        class="w-full flex items-center gap-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+                        @click="toggleProduct(product.id!)"
+                      >
+                        <input
+                          type="checkbox"
+                          :checked="form.restrictedProductIds.includes(product.id!)"
+                          class="w-4 h-4 rounded border-gray-300 text-primary-600 pointer-events-none"
+                        />
+                        <img
+                          v-if="product.imagePath"
+                          :src="product.imagePath"
+                          :alt="product.name"
+                          class="w-8 h-8 rounded object-cover flex-shrink-0"
+                        />
+                        <div v-else class="w-8 h-8 rounded bg-gray-200 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
+                          <CubeIcon class="w-4 h-4 text-gray-400" />
+                        </div>
+                        <span class="text-sm text-gray-900 dark:text-white truncate">{{ product.name }}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    {{ $t('supervisor.restrictedProductsDescription') }}
+                    <span class="font-medium">({{ form.restrictedProductIds.length }} {{ $t('common.selected') }})</span>
+                  </p>
+                </div>
+
                 <!-- Actions -->
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <button
@@ -228,8 +331,8 @@
 
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
-import { Cog6ToothIcon, BanknotesIcon } from '@heroicons/vue/24/outline'
-import { useWorkerServiceConfigsService, useAutoAssignmentSettingsService, type WorkerServiceConfigDto, type CreateWorkerConfigRequest, type UpdateWorkerConfigRequest, type UserDetailsDto } from '~/services'
+import { Cog6ToothIcon, BanknotesIcon, CubeIcon, ChartBarIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { useWorkerServiceConfigsService, useAutoAssignmentSettingsService, useProductsService, type WorkerServiceConfigDto, type CreateWorkerConfigRequest, type UpdateWorkerConfigRequest, type UserDetailsDto, type ProductDto } from '~/services'
 
 const props = defineProps<{
   modelValue: boolean
@@ -247,6 +350,54 @@ const emit = defineEmits<{
 
 const workerConfigsService = useWorkerServiceConfigsService()
 const autoAssignmentSettingsService = useAutoAssignmentSettingsService()
+// Load all products for multi-select dropdown
+const productsService = useProductsService({
+  initialParams: { pageNumber: 1, pageSize: 1000 }
+})
+
+// Products list for multi-select
+const productOptions = computed(() => productsService.items.value || [])
+
+// Product search state
+const productSearch = ref('')
+const showProductDropdown = ref(false)
+
+// Filtered products based on search
+const filteredProducts = computed(() => {
+  const search = productSearch.value.toLowerCase()
+  if (!search) return productOptions.value.slice(0, 50) // Show first 50 when no search
+  return productOptions.value.filter(p =>
+    p.name?.toLowerCase().includes(search)
+  ).slice(0, 50) // Limit to 50 results
+})
+
+// Get product name by ID
+const getProductName = (productId: string) => {
+  const product = productOptions.value.find(p => p.id === productId)
+  return product?.name || productId.substring(0, 8) + '...'
+}
+
+// Remove product from selection
+const removeProduct = (productId: string) => {
+  form.value.restrictedProductIds = form.value.restrictedProductIds.filter(id => id !== productId)
+}
+
+// Toggle product selection
+const toggleProduct = (productId: string) => {
+  const index = form.value.restrictedProductIds.indexOf(productId)
+  if (index === -1) {
+    form.value.restrictedProductIds.push(productId)
+  } else {
+    form.value.restrictedProductIds.splice(index, 1)
+  }
+}
+
+// Close dropdown with delay (to allow clicking on items)
+const closeProductDropdown = () => {
+  setTimeout(() => {
+    showProductDropdown.value = false
+  }, 200)
+}
 
 // Check if Quality is enabled in auto-assignment settings
 const isQualityEnabled = computed(() => autoAssignmentSettingsService.settings.value?.enableQualityCheck ?? false)
@@ -298,26 +449,37 @@ const form = ref({
   canDoQuality: false,
   canDoCallback: false,
   autoAssignPriority: 100,
+  maxConcurrentAssignments: 0,
+  restrictedProductIds: [] as string[],
   confirmationCommissionType: 'fixed' as 'fixed' | 'percentage',
   confirmationCommissionValue: 0
 })
 
 const isSubmitting = ref(false)
 
+// Helper to parse comma-separated string to array
+const parseCommaSeparated = (value: string | null | undefined): string[] => {
+  if (!value) return []
+  return value.split(',').map(s => s.trim()).filter(s => s.length > 0)
+}
+
 // Reset form when modal opens or config changes
 watch(() => [props.modelValue, props.config, props.preselectedUser], ([open, config, preselectedUser]) => {
   if (open) {
     if (config) {
       // Edit mode - populate from existing config
+      const c = config as WorkerServiceConfigDto
       form.value = {
-        userId: (config as WorkerServiceConfigDto).userId ?? '',
-        canDoConfirmation: (config as WorkerServiceConfigDto).canDoConfirmation ?? true,
-        canDoSuivi: (config as WorkerServiceConfigDto).canDoSuivi ?? false,
-        canDoQuality: (config as WorkerServiceConfigDto).canDoQuality ?? false,
-        canDoCallback: (config as WorkerServiceConfigDto).canDoCallback ?? false,
-        autoAssignPriority: (config as WorkerServiceConfigDto).autoAssignPriority ?? 100,
-        confirmationCommissionType: ((config as WorkerServiceConfigDto).confirmationCommissionType as 'fixed' | 'percentage') ?? 'fixed',
-        confirmationCommissionValue: (config as WorkerServiceConfigDto).confirmationCommissionValue ?? 0
+        userId: c.userId ?? '',
+        canDoConfirmation: c.canDoConfirmation ?? true,
+        canDoSuivi: c.canDoSuivi ?? false,
+        canDoQuality: c.canDoQuality ?? false,
+        canDoCallback: c.canDoCallback ?? false,
+        autoAssignPriority: c.autoAssignPriority ?? 100,
+        maxConcurrentAssignments: c.maxConcurrentAssignments ?? 0,
+        restrictedProductIds: parseCommaSeparated(c.restrictedProductIds),
+        confirmationCommissionType: (c.confirmationCommissionType as 'fixed' | 'percentage') ?? 'fixed',
+        confirmationCommissionValue: c.confirmationCommissionValue ?? 0
       }
     } else {
       // Create mode - reset to defaults, but set userId if preselected
@@ -328,6 +490,8 @@ watch(() => [props.modelValue, props.config, props.preselectedUser], ([open, con
         canDoQuality: false,
         canDoCallback: false,
         autoAssignPriority: 100,
+        maxConcurrentAssignments: 0,
+        restrictedProductIds: [],
         confirmationCommissionType: 'fixed',
         confirmationCommissionValue: 0
       }
@@ -339,20 +503,28 @@ watch(() => [props.modelValue, props.config, props.preselectedUser], ([open, con
 const handleSubmit = async () => {
   isSubmitting.value = true
   try {
+    // Convert array to comma-separated string (empty array = empty string = no restrictions)
+    const restrictedProductIdsString = form.value.restrictedProductIds.length > 0
+      ? form.value.restrictedProductIds.join(',')
+      : ''
+
     if (isEdit.value && props.config) {
       // Update existing config
       const updateRequest: UpdateWorkerConfigRequest = {
+        id: props.config.id!,
         canDoConfirmation: form.value.canDoConfirmation,
         canDoSuivi: form.value.canDoSuivi,
         canDoQuality: form.value.canDoQuality,
         canDoCallback: form.value.canDoCallback,
         autoAssignPriority: form.value.autoAssignPriority,
+        maxConcurrentAssignments: form.value.maxConcurrentAssignments,
+        restrictedProductIds: restrictedProductIdsString,
         confirmationCommissionType: form.value.confirmationCommissionType,
         confirmationCommissionValue: form.value.confirmationCommissionValue
       }
       await workerConfigsService.update(props.config.id!, updateRequest)
       // Emit the updated config (can be constructed from form data for immediate UI update)
-      emit('updated', { ...props.config, ...updateRequest } as WorkerServiceConfigDto)
+      emit('updated', { ...props.config, ...updateRequest, restrictedProductIds: restrictedProductIdsString } as WorkerServiceConfigDto)
     } else {
       // Create new config
       const createRequest: CreateWorkerConfigRequest = {
@@ -362,6 +534,8 @@ const handleSubmit = async () => {
         canDoQuality: form.value.canDoQuality,
         canDoCallback: form.value.canDoCallback,
         autoAssignPriority: form.value.autoAssignPriority,
+        maxConcurrentAssignments: form.value.maxConcurrentAssignments,
+        restrictedProductIds: restrictedProductIdsString,
         confirmationCommissionType: form.value.confirmationCommissionType,
         confirmationCommissionValue: form.value.confirmationCommissionValue
       }

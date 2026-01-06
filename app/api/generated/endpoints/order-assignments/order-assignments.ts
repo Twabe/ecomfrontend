@@ -52,6 +52,8 @@ import type {
   OrderAssignmentsGetMyStatsParams,
   OrderAssignmentsGetUnassignedParams,
   OrderAssignmentsGetWorkersStatsParams,
+  OrderAssignmentsTestNotificationAllParams,
+  OrderAssignmentsTestNotificationParams,
   PaginationResponseOfOrderDto,
   ReleaseAssignmentRequest,
   ReleaseAssignmentResponse,
@@ -1335,6 +1337,134 @@ export const useOrderAssignmentsScheduleCallback = <TError = unknown,
       > => {
 
       const mutationOptions = getOrderAssignmentsScheduleCallbackMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Send test notification to current user.
+ */
+export const orderAssignmentsTestNotification = (
+    params?: MaybeRef<OrderAssignmentsTestNotificationParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      params = unref(params);
+      
+      return customInstance<Blob>(
+      {url: `/api/v1/orderassignments/test-notification`, method: 'POST',
+        params: unref(params),
+        responseType: 'blob', signal
+    },
+      options);
+    }
+  
+
+
+export const getOrderAssignmentsTestNotificationMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsTestNotification>>, TError,{params?: OrderAssignmentsTestNotificationParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsTestNotification>>, TError,{params?: OrderAssignmentsTestNotificationParams}, TContext> => {
+
+const mutationKey = ['orderAssignmentsTestNotification'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof orderAssignmentsTestNotification>>, {params?: OrderAssignmentsTestNotificationParams}> = (props) => {
+          const {params} = props ?? {};
+
+          return  orderAssignmentsTestNotification(params,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrderAssignmentsTestNotificationMutationResult = NonNullable<Awaited<ReturnType<typeof orderAssignmentsTestNotification>>>
+    
+    export type OrderAssignmentsTestNotificationMutationError = unknown
+
+    /**
+ * @summary Send test notification to current user.
+ */
+export const useOrderAssignmentsTestNotification = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsTestNotification>>, TError,{params?: OrderAssignmentsTestNotificationParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof orderAssignmentsTestNotification>>,
+        TError,
+        {params?: OrderAssignmentsTestNotificationParams},
+        TContext
+      > => {
+
+      const mutationOptions = getOrderAssignmentsTestNotificationMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Send test notification to all users in tenant.
+ */
+export const orderAssignmentsTestNotificationAll = (
+    params?: MaybeRef<OrderAssignmentsTestNotificationAllParams>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      params = unref(params);
+      
+      return customInstance<Blob>(
+      {url: `/api/v1/orderassignments/test-notification-all`, method: 'POST',
+        params: unref(params),
+        responseType: 'blob', signal
+    },
+      options);
+    }
+  
+
+
+export const getOrderAssignmentsTestNotificationAllMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsTestNotificationAll>>, TError,{params?: OrderAssignmentsTestNotificationAllParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsTestNotificationAll>>, TError,{params?: OrderAssignmentsTestNotificationAllParams}, TContext> => {
+
+const mutationKey = ['orderAssignmentsTestNotificationAll'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof orderAssignmentsTestNotificationAll>>, {params?: OrderAssignmentsTestNotificationAllParams}> = (props) => {
+          const {params} = props ?? {};
+
+          return  orderAssignmentsTestNotificationAll(params,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrderAssignmentsTestNotificationAllMutationResult = NonNullable<Awaited<ReturnType<typeof orderAssignmentsTestNotificationAll>>>
+    
+    export type OrderAssignmentsTestNotificationAllMutationError = unknown
+
+    /**
+ * @summary Send test notification to all users in tenant.
+ */
+export const useOrderAssignmentsTestNotificationAll = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof orderAssignmentsTestNotificationAll>>, TError,{params?: OrderAssignmentsTestNotificationAllParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof orderAssignmentsTestNotificationAll>>,
+        TError,
+        {params?: OrderAssignmentsTestNotificationAllParams},
+        TContext
+      > => {
+
+      const mutationOptions = getOrderAssignmentsTestNotificationAllMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

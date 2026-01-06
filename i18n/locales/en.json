@@ -43,6 +43,7 @@
     "of": "of",
     "selected": "selected",
     "selectAll": "Select All",
+    "clearAll": "Clear All",
     "ordersSelected": "order(s) selected",
     "processing": "Processing...",
     "andMore": "and {count} more",
@@ -1295,6 +1296,11 @@
     "maxConcurrent": "Max Concurrent",
     "priority": "Priority",
     "priorityHint": "1 = high priority, 1000 = low priority",
+    "maxConcurrentAssignments": "Max Concurrent Orders",
+    "maxConcurrentDescription": "0 = use global limit from settings",
+    "restrictedProducts": "Allowed Products",
+    "restrictedProductsDescription": "Empty = can handle all products",
+    "searchProducts": "Search products...",
     "callbacks": "Callbacks",
     "callbacksOverview": "Callbacks Overview",
     "noCallbacks": "No callbacks scheduled",
@@ -1406,7 +1412,9 @@
     "defaultSuiviPriorityDescription": "Priority assigned to new follow-up assignments (1=high, 10=low)",
     "integrations": "Integrations",
     "enableWhatsApp": "Enable WhatsApp",
-    "enableWhatsAppDescription": "Show WhatsApp button to contact customers"
+    "enableWhatsAppDescription": "Show WhatsApp button to contact customers",
+    "saveSuccess": "Auto-assignment settings saved successfully",
+    "saveError": "Failed to save settings"
   },
   "stockSettings": {
     "title": "Stock Settings",

@@ -21,10 +21,13 @@ export interface WorkerServiceConfigDto {
   autoAssignPriority?: number;
   /** @nullable */
   lastAssignedAt?: string | null;
+  maxConcurrentAssignments?: number;
   /** @nullable */
   restrictedCityIds?: string | null;
   /** @nullable */
   restrictedSourceIds?: string | null;
+  /** @nullable */
+  restrictedProductIds?: string | null;
   createdOn?: string;
   /** @nullable */
   lastModifiedOn?: string | null;

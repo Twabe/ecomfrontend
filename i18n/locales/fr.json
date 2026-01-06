@@ -44,6 +44,7 @@
     "of": "sur",
     "selected": "sélectionné(s)",
     "selectAll": "Tout sélectionner",
+    "clearAll": "Tout effacer",
     "ordersSelected": "commande(s) sélectionnée(s)",
     "processing": "Traitement...",
     "andMore": "et {count} autre(s)",
@@ -1372,6 +1373,11 @@
     "maxConcurrent": "Max simultanées",
     "priority": "Priorité",
     "priorityHint": "1 = haute priorité, 1000 = basse priorité",
+    "maxConcurrentAssignments": "Max commandes simultanées",
+    "maxConcurrentDescription": "0 = utiliser la limite globale des paramètres",
+    "restrictedProducts": "Produits autorisés",
+    "restrictedProductsDescription": "Vide = peut traiter tous les produits",
+    "searchProducts": "Rechercher un produit...",
     "callbacks": "Rappels",
     "callbacksOverview": "Vue d'ensemble des rappels",
     "noCallbacks": "Aucun rappel programmé",
@@ -1487,7 +1493,9 @@
     "defaultSuiviPriorityDescription": "Priorité attribuée aux nouvelles assignations de suivi (1=haute, 10=basse)",
     "integrations": "Intégrations",
     "enableWhatsApp": "Activer WhatsApp",
-    "enableWhatsAppDescription": "Afficher le bouton WhatsApp pour contacter les clients"
+    "enableWhatsAppDescription": "Afficher le bouton WhatsApp pour contacter les clients",
+    "saveSuccess": "Paramètres d'auto-assignation enregistrés avec succès",
+    "saveError": "Échec de l'enregistrement des paramètres"
   },
   "stockSettings": {
     "title": "Paramètres du Stock",

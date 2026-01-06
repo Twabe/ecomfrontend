@@ -28,4 +28,16 @@ export interface UpdateWorkerConfigRequest {
    * @nullable
    */
   autoAssignPriority?: number | null;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  maxConcurrentAssignments?: number | null;
+  /**
+   * Comma-separated product GUIDs this worker can handle.
+Null = no change, empty string = clear restrictions (can handle any product).
+   * @nullable
+   */
+  restrictedProductIds?: string | null;
 }

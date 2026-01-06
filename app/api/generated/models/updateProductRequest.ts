@@ -25,10 +25,6 @@ export interface UpdateProductRequest {
   shippingPrice?: number;
   marketingPrice?: number;
   charges?: number;
-  /** Fixed commission for confirmation worker (fprice in old system). */
-  confirmationCommission?: number;
-  /** Commission percentage for media buyer (mprice in old system). */
-  mediaBuyerCommissionRate?: number;
   /** @nullable */
   reference?: string | null;
   /** @nullable */
@@ -36,6 +32,10 @@ export interface UpdateProductRequest {
   /** Whether to track stock for this product.
 If false, stock check and deduction will be skipped during order confirmation. */
   trackStock?: boolean;
+  /** Fixed commission for confirmation worker (fprice in old system). */
+  confirmationCommission?: number;
+  /** Commission percentage for media buyer (mprice in old system). */
+  mediaBuyerCommissionRate?: number;
   deleteCurrentImage?: boolean;
   deleteCurrentPictures?: boolean;
   /** @nullable */

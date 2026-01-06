@@ -23,4 +23,11 @@ export interface CreateWorkerConfigRequest {
    * @maximum 1000
    */
   autoAssignPriority?: number;
+  maxConcurrentAssignments?: number;
+  /**
+   * Comma-separated product GUIDs this worker can handle.
+Empty or null = can handle any product.
+   * @nullable
+   */
+  restrictedProductIds?: string | null;
 }

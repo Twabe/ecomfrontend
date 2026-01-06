@@ -12,6 +12,9 @@ export interface CreateInvoiceRequest {
    * @maxLength 100
    */
   code: string;
+  /** Invoice type: "delivery_company", "worker", "media_buyer", or "manual".
+Default is "manual" for backwards compatibility. */
+  invoiceType?: string;
   /**
    * @minimum 0
    * @exclusiveMinimum

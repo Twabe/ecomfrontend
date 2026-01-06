@@ -45,7 +45,7 @@ const close = () => {
     >
       <div
         v-if="notificationState.show"
-        class="fixed bottom-4 right-4 z-[100] max-w-md"
+        class="fixed bottom-4 right-4 z-[9999] max-w-md"
       >
         <div
           :class="[

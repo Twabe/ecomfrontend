@@ -383,12 +383,16 @@ const resetForm = () => {
   syncFormWithSettings()
 }
 
+// Notification composable
+const notification = useNotification()
+
 // Submit form
 const handleSubmit = async () => {
   try {
     await update(formData.value as any)
-  } catch {
-    // Error handled by service
+    notification.success(t('autoAssignment.saveSuccess'))
+  } catch (error: any) {
+    notification.error(error?.message || t('autoAssignment.saveError'))
   }
 }
 

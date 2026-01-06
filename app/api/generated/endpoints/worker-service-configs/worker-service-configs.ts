@@ -33,6 +33,7 @@ import type {
   ErrorResult,
   HttpValidationProblemDetails,
   SetOnlineStatusRequest,
+  SetOnlineStatusResponse,
   UpdateWorkerConfigRequest,
   WorkerServiceConfigDto,
   WorkerServiceConfigsGetAllParams,
@@ -314,6 +315,7 @@ export const useWorkerServiceConfigsUpdate = <TError = HttpValidationProblemDeta
       return useMutation(mutationOptions, queryClient);
     }
     /**
+ * Returns config and any auto-assigned orders.
  * @summary Set online status.
  */
 export const workerServiceConfigsSetOnline = (
@@ -322,7 +324,7 @@ export const workerServiceConfigsSetOnline = (
 ) => {
       setOnlineStatusRequest = unref(setOnlineStatusRequest);
       
-      return customInstance<WorkerServiceConfigDto>(
+      return customInstance<SetOnlineStatusResponse>(
       {url: `/api/v1/workerserviceconfigs/online`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: setOnlineStatusRequest, signal

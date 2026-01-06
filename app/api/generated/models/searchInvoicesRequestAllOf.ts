@@ -17,7 +17,10 @@ export type SearchInvoicesRequestAllOf = {
   workerId?: string | null;
   /** @nullable */
   mediaBuyerId?: string | null;
-  /** Filter by invoice type: "delivery_company", "worker", "media_buyer", or "manual". @nullable */
+  /**
+   * Filter by invoice type: "delivery_company", "worker", "media_buyer", or "manual".
+   * @nullable
+   */
   invoiceType?: string | null;
   /** @nullable */
   isValidated?: boolean | null;

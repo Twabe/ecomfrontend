@@ -1,5 +1,8 @@
 type NotificationType = 'success' | 'error' | 'warning' | 'info'
 
+// Global timeout ID to prevent race conditions
+let hideTimeoutId: ReturnType<typeof setTimeout> | null = null
+
 export const useNotification = () => {
   /**
    * Show notification toast
@@ -12,6 +15,12 @@ export const useNotification = () => {
       show: false
     }))
 
+    // Clear any existing timeout to prevent race conditions
+    if (hideTimeoutId) {
+      clearTimeout(hideTimeoutId)
+      hideTimeoutId = null
+    }
+
     // Update state to show notification
     notificationState.value = {
       message,
@@ -20,8 +29,9 @@ export const useNotification = () => {
     }
 
     // Auto-hide after 5 seconds
-    setTimeout(() => {
+    hideTimeoutId = setTimeout(() => {
       notificationState.value.show = false
+      hideTimeoutId = null
     }, 5000)
   }
 
