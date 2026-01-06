@@ -10,6 +10,11 @@
  * Worker self-assigns an unassigned order.
 Creates OrderAssignment with status "pending" and assigns to the current user.
 Requires "SelfAssign" permission on OrderAssignments.
+            
+CONCURRENCY PROTECTION:
+- Validates no existing assignment before creating
+- Uses database unique index (OrderId + ServiceType + Status) to prevent race conditions
+- Catches DbUpdateException for duplicate key violations (concurrent self-assigns)
  */
 export interface SelfAssignOrderRequest {
   /**

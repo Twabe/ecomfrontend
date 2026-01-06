@@ -10,6 +10,14 @@
  * Worker releases an assignment back to the queue.
 Changes assignment status to "released".
 Order can then be reassigned to another worker.
+            
+VALIDATIONS:
+- Worker must own the assignment
+- Assignment must not be in terminal state
+- Checks for dependent assignments (e.g., can't release confirmation if suivi is active)
+            
+CONCURRENCY PROTECTION:
+- Uses optimistic locking to detect concurrent modifications
  */
 export interface ReleaseAssignmentRequest {
   /**

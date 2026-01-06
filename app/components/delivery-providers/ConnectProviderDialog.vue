@@ -51,7 +51,7 @@
                     </select>
                   </div>
 
-                  <!-- Hub City Selector (from Provider Cities) -->
+                  <!-- Hub City Selector (from Provider Cities) - Searchable Autocomplete -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       <div class="flex items-center gap-2">
@@ -59,21 +59,12 @@
                         {{ $t('deliveryProviders.hubCity') }}
                       </div>
                     </label>
-                    <div v-if="isLoadingCities" class="flex items-center gap-2 py-2 text-sm text-gray-500">
-                      <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600" />
-                      {{ $t('common.loading') }}
-                    </div>
-                    <select
-                      v-else
+                    <UiSearchableSelect
                       v-model="formData.hubCityId"
-                      class="input w-full"
-                    >
-                      <option :value="null">{{ $t('deliveryProviders.selectHubCity') }}</option>
-                      <!-- Use city.cityId (linked local city) instead of city.id (provider city) -->
-                      <option v-for="city in linkedTemplateCities" :key="city.id" :value="city.cityId">
-                        {{ city.cityName || city.externalCityName || city.externalCityId }}
-                      </option>
-                    </select>
+                      :options="hubCityOptions"
+                      :placeholder="isLoadingCities ? $t('common.loading') : $t('deliveryProviders.searchHubCity', 'Rechercher une ville...')"
+                      :disabled="isLoadingCities"
+                    />
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       {{ $t('deliveryProviders.hubCityHelp') }}
                     </p>
@@ -246,9 +237,31 @@ const { data: templateCities, isLoading: isLoadingCities } = useDeliveryProvider
 )
 
 // Filter to only cities that have been linked to a local city (have cityId)
-// These are the only ones that can be used as hub cities
+// Show ALL provider cities (including zones/regions) - no deduplication
 const linkedTemplateCities = computed(() => {
   return (templateCities.value || []).filter(city => city.cityId)
+})
+
+// Map provider city ID -> local city ID for submission
+// Backend expects cityId (FK to City table), but we need unique IDs for the dropdown
+const providerCityToCityIdMap = computed(() => {
+  const map = new Map<string, string>()
+  linkedTemplateCities.value.forEach(city => {
+    if (city.id && city.cityId) {
+      map.set(city.id, city.cityId)
+    }
+  })
+  return map
+})
+
+// Convert to options format for UiSearchableSelect
+// Use provider city ID (unique) as option id for proper filtering/display
+// Display = externalCityName to show zones/regions for user clarity
+const hubCityOptions = computed(() => {
+  return linkedTemplateCities.value.map(city => ({
+    id: city.id || '',  // Provider city ID (unique per zone)
+    name: city.externalCityName || city.cityName || city.externalCityId || ''
+  }))
 })
 
 // Form data
@@ -316,6 +329,12 @@ const handleClose = () => {
 const handleSubmit = () => {
   if (!props.template?.id) return
 
+  // Map provider city ID (from dropdown) to local city ID (what backend expects)
+  // formData.hubCityId contains provider city ID, we need to convert to local cityId
+  const localCityId = formData.value.hubCityId
+    ? providerCityToCityIdMap.value.get(formData.value.hubCityId) || null
+    : null
+
   const data: ConnectDeliveryProviderRequest = {
     templateId: props.template.id,
     storeId: formData.value.storeId,
@@ -324,7 +343,7 @@ const handleSubmit = () => {
     mode: formData.value.mode,
     priority: formData.value.priority,
     notes: formData.value.notes,
-    hubCityId: formData.value.hubCityId,
+    hubCityId: localCityId,  // Send local city ID to backend
     copyDefaultFees: formData.value.copyDefaultFees,
   }
 

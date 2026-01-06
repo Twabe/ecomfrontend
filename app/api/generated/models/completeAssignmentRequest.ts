@@ -9,6 +9,15 @@
 /**
  * Worker completes an assignment.
 Changes assignment status from "taken" to "completed".
+            
+CONCURRENCY PROTECTION:
+- Uses optimistic locking to detect concurrent modifications
+- Validates state transitions before applying changes
+- Catches DbUpdateConcurrencyException for race conditions
+            
+STATE TRANSITION VALIDATION:
+- Validates that the result maps to a valid order state transition
+- Ensures phase/state compatibility
  */
 export interface CompleteAssignmentRequest {
   /**

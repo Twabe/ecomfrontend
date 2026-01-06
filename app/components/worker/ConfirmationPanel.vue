@@ -366,6 +366,25 @@ const handleTake = async (assignment: WorkerAssignmentDto) => {
   isTaking.value = true
   try {
     await orderAssignmentsService.take(assignment.id)
+    notification.success(t('worker.assignmentTaken'))
+  } catch (error: any) {
+    const status = error?.response?.status
+    const errorMessage = error?.response?.data?.exception || error?.response?.data?.message || ''
+
+    if (status === 404) {
+      // Assignment no longer exists
+      notification.warning(t('worker.assignmentNotFound'))
+    } else if (status === 409) {
+      // Assignment already taken, reassigned, or order was modified
+      notification.info(t('worker.assignmentAlreadyProcessed'))
+    } else if (status === 403) {
+      // Assignment belongs to another worker (was reassigned)
+      notification.warning(t('worker.assignmentReassigned'))
+    } else {
+      notification.error(errorMessage || t('common.errorOccurred'))
+    }
+    // Refresh to sync UI with backend state
+    await Promise.all([myPendingQuery.refetch(), myActiveQuery.refetch()])
   } finally {
     isTaking.value = false
   }

@@ -10,6 +10,11 @@
  * Worker completes a suivi (follow-up/tracking) assignment.
 Updates order tracking state, order state (triggers auto-SMS), creates audit history,
 and completes the assignment.
+            
+CONCURRENCY PROTECTION:
+- Uses optimistic locking to detect concurrent modifications
+- Validates terminal state before updating
+- Uses state transition validation
  */
 export interface CompleteSuiviAssignmentRequest {
   /**

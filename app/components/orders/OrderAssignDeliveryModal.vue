@@ -61,10 +61,11 @@ const deliveryCities = ref<ProviderCityDto[]>([])
 const isLoadingCities = ref(false)
 
 // Convert to options format for UiSearchableSelect
+// Priority: externalCityName (zone-specific) > cityName (local) > externalCityId
 const deliveryCitiesOptions = computed(() => {
   return deliveryCities.value.map(city => ({
     id: city.id || '',
-    name: city.cityName || city.externalCityName || city.externalCityId || ''
+    name: city.externalCityName || city.cityName || city.externalCityId || ''
   }))
 })
 
