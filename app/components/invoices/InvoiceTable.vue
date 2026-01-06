@@ -41,6 +41,29 @@ const formatDate = (date: string | null) => {
     year: 'numeric'
   })
 }
+
+// Invoice type badge colors
+const getInvoiceTypeBadge = (type: string | undefined) => {
+  const types: Record<string, { label: string; class: string }> = {
+    delivery_company: {
+      label: t('invoices.typeDeliveryCompany') || 'Delivery',
+      class: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+    },
+    worker: {
+      label: t('invoices.typeWorker') || 'Worker',
+      class: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+    },
+    media_buyer: {
+      label: t('invoices.typeMediaBuyer') || 'Media Buyer',
+      class: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400'
+    },
+    manual: {
+      label: t('invoices.typeManual') || 'Manual',
+      class: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+    }
+  }
+  return types[type || 'manual'] || types.manual
+}
 </script>
 
 <template>
@@ -51,6 +74,9 @@ const formatDate = (date: string | null) => {
           <tr>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {{ t('invoices.code') }}
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {{ t('invoices.type') || 'Type' }}
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {{ t('nav.deliveryCompanies') }}
@@ -77,12 +103,12 @@ const formatDate = (date: string | null) => {
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
           <tr v-if="isLoading">
-            <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+            <td colspan="9" class="px-4 py-8 text-center text-gray-500">
               {{ t('common.loading') }}
             </td>
           </tr>
           <tr v-else-if="invoices.length === 0">
-            <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+            <td colspan="9" class="px-4 py-8 text-center text-gray-500">
               {{ t('common.noData') }}
             </td>
           </tr>
@@ -98,6 +124,14 @@ const formatDate = (date: string | null) => {
               >
                 {{ invoice.code }}
               </button>
+            </td>
+            <td class="whitespace-nowrap px-4 py-3">
+              <span
+                class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                :class="getInvoiceTypeBadge(invoice.invoiceType).class"
+              >
+                {{ invoice.invoiceTypeName || getInvoiceTypeBadge(invoice.invoiceType).label }}
+              </span>
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
               {{ invoice.deliveryCompanyName || '-' }}

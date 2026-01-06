@@ -10,9 +10,19 @@ import type { Store } from '~/types/store'
 interface Filters {
   deliveryCompanyId: string
   storeId: string
+  invoiceType: string
   isValidated: string
   isReceived: string
 }
+
+// Invoice type options
+const invoiceTypeOptions = [
+  { value: '', label: 'All Types' },
+  { value: 'delivery_company', label: 'Delivery Company' },
+  { value: 'worker', label: 'Worker' },
+  { value: 'media_buyer', label: 'Media Buyer' },
+  { value: 'manual', label: 'Manual' }
+]
 
 defineProps<{
   deliveryCompanies: DeliveryCompany[]
@@ -24,6 +34,7 @@ const filters = defineModel<Filters>('filters', {
   default: () => ({
     deliveryCompanyId: '',
     storeId: '',
+    invoiceType: '',
     isValidated: '',
     isReceived: ''
   })
@@ -56,7 +67,17 @@ const showFilters = ref(false)
     </div>
 
     <!-- Filter Panel -->
-    <div v-if="showFilters" class="grid grid-cols-2 gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800 md:grid-cols-4">
+    <div v-if="showFilters" class="grid grid-cols-2 gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800 md:grid-cols-5">
+      <!-- Invoice Type Filter -->
+      <select
+        v-model="filters.invoiceType"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+      >
+        <option v-for="opt in invoiceTypeOptions" :key="opt.value" :value="opt.value">
+          {{ t('invoices.type' + opt.label.replace(/\s+/g, '')) || opt.label }}
+        </option>
+      </select>
+
       <select
         v-model="filters.deliveryCompanyId"
         class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"

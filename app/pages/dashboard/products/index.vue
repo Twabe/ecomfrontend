@@ -126,6 +126,47 @@
                       />
                     </div>
 
+                    <!-- Commission Settings Section -->
+                    <div class="md:col-span-2 mt-4 pt-4 border-t dark:border-gray-600">
+                      <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        {{ $t('products.commissionSettings') || 'Commission Settings' }}
+                      </h3>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Confirmation Commission (Worker) -->
+                        <div>
+                          <label class="label">{{ $t('products.confirmationCommission') || 'Confirmation Commission' }}</label>
+                          <input
+                            v-model.number="form.confirmationCommission"
+                            type="number"
+                            class="input"
+                            min="0"
+                            step="0.01"
+                            :placeholder="$t('products.confirmationCommissionHint') || 'Fixed amount per order'"
+                          />
+                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {{ $t('products.confirmationCommissionDesc') || 'Fixed commission for confirmation worker' }}
+                          </p>
+                        </div>
+
+                        <!-- Media Buyer Commission Rate -->
+                        <div>
+                          <label class="label">{{ $t('products.mediaBuyerCommissionRate') || 'Media Buyer Rate (%)' }}</label>
+                          <input
+                            v-model.number="form.mediaBuyerCommissionRate"
+                            type="number"
+                            class="input"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            :placeholder="$t('products.mediaBuyerCommissionRateHint') || 'Percentage of order total'"
+                          />
+                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {{ $t('products.mediaBuyerCommissionRateDesc') || 'Commission % for media buyer' }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
                     <!-- Link -->
                     <div>
                       <label class="label">{{ $t('products.link') }}</label>
@@ -498,6 +539,8 @@ const form = ref({
   shippingPrice: 0,
   marketingPrice: 0,
   charges: 0,
+  confirmationCommission: 0,
+  mediaBuyerCommissionRate: 0,
   link: '',
   description: '',
   trackStock: true,
@@ -570,6 +613,8 @@ const openCreateModal = () => {
     shippingPrice: 0,
     marketingPrice: 0,
     charges: 0,
+    confirmationCommission: 0,
+    mediaBuyerCommissionRate: 0,
     link: '',
     description: '',
     trackStock: true,
@@ -592,6 +637,8 @@ const openEditModal = (product: ProductDto) => {
     shippingPrice: product.shippingPrice || 0,
     marketingPrice: product.marketingPrice || 0,
     charges: product.charges || 0,
+    confirmationCommission: product.confirmationCommission || 0,
+    mediaBuyerCommissionRate: product.mediaBuyerCommissionRate || 0,
     link: product.link || '',
     description: product.description || '',
     trackStock: product.trackStock ?? true,
@@ -620,6 +667,8 @@ const handleSubmit = async () => {
       shippingPrice: form.value.shippingPrice || undefined,
       marketingPrice: form.value.marketingPrice || undefined,
       charges: form.value.charges || undefined,
+      confirmationCommission: form.value.confirmationCommission || undefined,
+      mediaBuyerCommissionRate: form.value.mediaBuyerCommissionRate || undefined,
       link: form.value.link || undefined,
       description: form.value.description || undefined,
       trackStock: form.value.trackStock

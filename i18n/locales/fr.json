@@ -436,7 +436,12 @@
     "variantRequired": "Veuillez sélectionner une variante",
     "variantsCreated": "{count} variantes créées avec succès",
     "variantsPartialSuccess": "{created} variantes créées, {skipped} ignorées",
-    "variantsFailed": "Échec de création des variantes"
+    "variantsFailed": "Échec de création des variantes",
+    "commissionSettings": "Paramètres des commissions",
+    "confirmationCommission": "Commission de confirmation",
+    "mediaBuyerCommissionRate": "Taux de commission Media Buyer",
+    "confirmationCommissionDesc": "Commission fixe pour l'agent de confirmation (par article)",
+    "mediaBuyerCommissionRateDesc": "Pourcentage de commission pour le Media Buyer"
   },
   "shippingFees": {
     "deliveredFees": "Livré",
@@ -642,6 +647,7 @@
   "invoices": {
     "title": "Factures",
     "code": "Code facture",
+    "type": "Type",
     "ordersCount": "Nb commandes",
     "totalPrice": "Montant total",
     "validation": "Validation",
@@ -664,7 +670,12 @@
     "noOrders": "Aucune commande dans cette facture",
     "noDeliveredOrders": "Aucune commande livrée disponible",
     "selectedOrders": "Commandes sélectionnées",
-    "confirmDeleteInvoice": "Êtes-vous sûr de vouloir supprimer cette facture ?"
+    "confirmDeleteInvoice": "Êtes-vous sûr de vouloir supprimer cette facture ?",
+    "typeAllTypes": "Tous les types",
+    "typeDeliveryCompany": "Société de livraison",
+    "typeWorker": "Agent",
+    "typeMediaBuyer": "Media Buyer",
+    "typeManual": "Manuel"
   },
   "deliveryNotes": {
     "title": "Bons de livraison",

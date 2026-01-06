@@ -420,7 +420,12 @@
     "variantRequired": "يرجى اختيار متغير",
     "variantsCreated": "تم إنشاء {count} متغيرات بنجاح",
     "variantsPartialSuccess": "تم إنشاء {created} متغيرات، تم تخطي {skipped}",
-    "variantsFailed": "فشل في إنشاء المتغيرات"
+    "variantsFailed": "فشل في إنشاء المتغيرات",
+    "commissionSettings": "إعدادات العمولات",
+    "confirmationCommission": "عمولة التأكيد",
+    "mediaBuyerCommissionRate": "نسبة عمولة المسوق",
+    "confirmationCommissionDesc": "عمولة ثابتة لموظف التأكيد (لكل قطعة)",
+    "mediaBuyerCommissionRateDesc": "نسبة العمولة للمسوق"
   },
   "shippingFees": {
     "deliveredFees": "مسلم",
@@ -612,6 +617,7 @@
   "invoices": {
     "title": "الفواتير",
     "code": "رمز الفاتورة",
+    "type": "النوع",
     "ordersCount": "عدد الطلبات",
     "totalPrice": "المبلغ الإجمالي",
     "validation": "التحقق",
@@ -634,7 +640,12 @@
     "noOrders": "لا توجد طلبات في هذه الفاتورة",
     "noDeliveredOrders": "لا توجد طلبات مسلمة متاحة",
     "selectedOrders": "الطلبات المحددة",
-    "confirmDeleteInvoice": "هل أنت متأكد من حذف هذه الفاتورة؟"
+    "confirmDeleteInvoice": "هل أنت متأكد من حذف هذه الفاتورة؟",
+    "typeAllTypes": "جميع الأنواع",
+    "typeDeliveryCompany": "شركة التوصيل",
+    "typeWorker": "الموظف",
+    "typeMediaBuyer": "المسوق",
+    "typeManual": "يدوي"
   },
   "deliveryNotes": {
     "title": "سندات التسليم",

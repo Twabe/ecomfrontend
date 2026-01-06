@@ -35,6 +35,10 @@ export interface InvoiceDto {
   dateCreated?: string | null;
   /** @nullable */
   dateReceived?: string | null;
+  /** Type of invoice: "delivery_company", "worker", "media_buyer", or "manual". */
+  invoiceType?: string;
+  /** Display name for invoice type (e.g., "Delivery Company", "Worker"). */
+  invoiceTypeName?: string | null;
   createdOn?: string;
   /** @nullable */
   lastModifiedOn?: string | null;
