@@ -32,8 +32,6 @@ export interface UpdateProductRequest {
   /** Whether to track stock for this product.
 If false, stock check and deduction will be skipped during order confirmation. */
   trackStock?: boolean;
-  /** Fixed commission for confirmation worker (fprice in old system). */
-  confirmationCommission?: number;
   /** Commission percentage for media buyer (mprice in old system). */
   mediaBuyerCommissionRate?: number;
   deleteCurrentImage?: boolean;

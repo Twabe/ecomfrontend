@@ -587,7 +587,7 @@ const notification = useNotification()
 const orderAssignmentsService = useOrderAssignmentsService()
 const workerConfigsService = useWorkerServiceConfigsService()
 const ordersWorkflow = useOrdersWorkflowService()
-const { update: updateOrder } = useOrdersService()
+const { update: updateOrder } = useOrdersService({ enabled: false })
 const deliveryCompaniesService = useDeliveryCompaniesService()
 const reasonsService = useReasonsService()
 const autoAssignmentSettingsService = useAutoAssignmentSettingsService()
@@ -796,14 +796,33 @@ const formatCurrency = (amount: number) => {
   }).format(amount)
 }
 
-// Refresh all data
+// Refresh all data and trigger auto-refill if worker is online
 const refreshAll = async () => {
+  // First refresh all data
   await Promise.all([
     myPendingQuery.refetch(),
     myActiveQuery.refetch(),
     myCallbacksQuery.refetch(),
     workerConfigsService.refetchMyConfig()
   ])
+
+  // Trigger auto-refill if worker is online (this will assign pending orders to this worker)
+  if (isOnline.value) {
+    try {
+      const result = await workerConfigsService.refillAssignments()
+      if (result.assignedCount > 0) {
+        notification.success(result.message)
+        // Refetch assignments to show newly assigned orders
+        await Promise.all([
+          myPendingQuery.refetch(),
+          myActiveQuery.refetch()
+        ])
+      }
+    } catch (error) {
+      // Silent fail - refill is best-effort, don't show error to user
+      console.warn('Auto-refill failed:', error)
+    }
+  }
 
   // Refresh active panel
   if (activeTab.value === 'available' && availablePanelRef.value) {

@@ -18,8 +18,6 @@ export interface ProductDto {
   shippingPrice?: number;
   marketingPrice?: number;
   charges?: number;
-  /** Fixed commission amount for confirmation worker (fprice in old system). */
-  confirmationCommission?: number;
   /** Commission percentage for media buyer (mprice in old system). */
   mediaBuyerCommissionRate?: number;
   /** @nullable */

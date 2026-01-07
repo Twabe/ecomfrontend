@@ -28,6 +28,8 @@ export interface WorkerServiceConfigDto {
   restrictedSourceIds?: string | null;
   /** @nullable */
   restrictedProductIds?: string | null;
+  confirmationCommissionType?: string;
+  confirmationCommissionValue?: number;
   createdOn?: string;
   /** @nullable */
   lastModifiedOn?: string | null;

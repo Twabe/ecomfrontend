@@ -313,6 +313,7 @@ export * from './reasonDto';
 export * from './reassignOrdersRequest';
 export * from './reassignOrdersResponse';
 export * from './receivePurchaseRequest';
+export * from './refillAssignmentsResponse';
 export * from './refreshTokenRequest';
 export * from './releaseAssignmentRequest';
 export * from './releaseAssignmentResponse';

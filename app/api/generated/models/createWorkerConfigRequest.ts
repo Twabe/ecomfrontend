@@ -30,4 +30,10 @@ Empty or null = can handle any product.
    * @nullable
    */
   restrictedProductIds?: string | null;
+  confirmationCommissionType?: string;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  confirmationCommissionValue?: number;
 }

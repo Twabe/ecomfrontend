@@ -40,4 +40,12 @@ Null = no change, empty string = clear restrictions (can handle any product).
    * @nullable
    */
   restrictedProductIds?: string | null;
+  /** @nullable */
+  confirmationCommissionType?: string | null;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  confirmationCommissionValue?: number | null;
 }

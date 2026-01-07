@@ -22,6 +22,14 @@ import type {
   WorkerServiceConfigsGetAllParams,
   WorkerServiceConfigsGetAvailableWorkersParams,
 } from '~/api/generated/models'
+import { customInstance } from '~/api/axios-instance'
+
+// Response type for refill endpoint
+export interface RefillAssignmentsResponse {
+  assignedCount: number
+  assignedOrderIds: string[]
+  message: string
+}
 
 export function useWorkerServiceConfigsService(options: { initialParams?: WorkerServiceConfigsGetAllParams, fetchAll?: boolean } = {}) {
   const queryClient = useQueryClient()
@@ -94,6 +102,18 @@ export function useWorkerServiceConfigsService(options: { initialParams?: Worker
     return result
   }
 
+  // Request auto-assignment of pending orders to current worker
+  // Called when worker clicks "Refresh" to fill their queue with new orders
+  const refillAssignments = async (): Promise<RefillAssignmentsResponse> => {
+    const result = await customInstance<RefillAssignmentsResponse>({
+      url: '/api/v1/workerserviceconfigs/refill',
+      method: 'POST',
+    })
+    // Invalidate order assignment queries to refresh the lists
+    queryClient.invalidateQueries({ queryKey: ['orderAssignments'] })
+    return result
+  }
+
   // Get available workers for a specific service type
   const getAvailableWorkers = (params: Ref<WorkerServiceConfigsGetAvailableWorkersParams>) => {
     return useQuery({
@@ -114,6 +134,7 @@ export function useWorkerServiceConfigsService(options: { initialParams?: Worker
     create,
     update,
     setOnline,
+    refillAssignments,
     getAvailableWorkers,
     invalidate,
     refetchAll: () => allConfigsQuery.refetch(),

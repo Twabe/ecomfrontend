@@ -32,6 +32,7 @@ import type {
   CreateWorkerConfigRequest,
   ErrorResult,
   HttpValidationProblemDetails,
+  RefillAssignmentsResponse,
   SetOnlineStatusRequest,
   SetOnlineStatusResponse,
   UpdateWorkerConfigRequest,
@@ -448,3 +449,67 @@ export function useWorkerServiceConfigsGetAvailableWorkers<TData = Awaited<Retur
 
 
 
+/**
+ * Assigns pending orders to current worker.
+ * @summary Refill worker assignments.
+ */
+export const workerServiceConfigsRefillAssignments = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<RefillAssignmentsResponse>(
+      {url: `/api/v1/workerserviceconfigs/refill`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getWorkerServiceConfigsRefillAssignmentsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof workerServiceConfigsRefillAssignments>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof workerServiceConfigsRefillAssignments>>, TError,void, TContext> => {
+
+const mutationKey = ['workerServiceConfigsRefillAssignments'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof workerServiceConfigsRefillAssignments>>, void> = () => {
+          
+
+          return  workerServiceConfigsRefillAssignments(requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type WorkerServiceConfigsRefillAssignmentsMutationResult = NonNullable<Awaited<ReturnType<typeof workerServiceConfigsRefillAssignments>>>
+    
+    export type WorkerServiceConfigsRefillAssignmentsMutationError = unknown
+
+    /**
+ * @summary Refill worker assignments.
+ */
+export const useWorkerServiceConfigsRefillAssignments = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof workerServiceConfigsRefillAssignments>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof workerServiceConfigsRefillAssignments>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getWorkerServiceConfigsRefillAssignmentsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    

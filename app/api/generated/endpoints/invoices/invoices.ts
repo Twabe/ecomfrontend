@@ -505,6 +505,68 @@ export const useInvoicesGenerate = <TError = HttpValidationProblemDetails | Erro
       return useMutation(mutationOptions, queryClient);
     }
     /**
+ * @summary Mark invoice as validated.
+ */
+export const invoicesValidate = (
+    id: MaybeRef<string>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+      
+      return customInstance<string>(
+      {url: `/api/v1/invoices/${id}/validate`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getInvoicesValidateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof invoicesValidate>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof invoicesValidate>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['invoicesValidate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof invoicesValidate>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  invoicesValidate(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InvoicesValidateMutationResult = NonNullable<Awaited<ReturnType<typeof invoicesValidate>>>
+    
+    export type InvoicesValidateMutationError = unknown
+
+    /**
+ * @summary Mark invoice as validated.
+ */
+export const useInvoicesValidate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof invoicesValidate>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof invoicesValidate>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getInvoicesValidateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Mark invoice as paid.
  */
 export const invoicesMarkAsPaid = (
