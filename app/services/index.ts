@@ -157,6 +157,23 @@ export {
   type PlatformROASDto,
 } from './roas/useROASService'
 export {
+  useCampaignAnalyticsService,
+  useCampaignFilters,
+  getRateColor,
+  getRateBgColor,
+  getConfirmationRateLevel,
+  getDeliveryRateLevel,
+  getReturnRateLevel,
+  type CampaignAnalyticsParams,
+  type CampaignStatsDto,
+  type CampaignSummaryDto,
+  type CampaignPerformanceDto,
+  type SourcePerformanceDto,
+  type DailyTrendDto,
+  type GetCampaignStatsRequest,
+  type RateLevel,
+} from './campaign-analytics/useCampaignAnalyticsService'
+export {
   useDeliveryReportsService,
   type DeliveryReportsParams,
   type DeliveryKpiData,

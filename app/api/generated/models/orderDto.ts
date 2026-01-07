@@ -105,6 +105,18 @@ export interface OrderDto {
   /** @nullable */
   utm2?: string | null;
   /** @nullable */
+  landingPageUrl?: string | null;
+  /** @nullable */
+  utmSource?: string | null;
+  /** @nullable */
+  utmMedium?: string | null;
+  /** @nullable */
+  utmCampaign?: string | null;
+  /** @nullable */
+  utmContent?: string | null;
+  /** @nullable */
+  utmTerm?: string | null;
+  /** @nullable */
   workers?: string | null;
   isInvoiced?: boolean;
   isInvoicedMediaBuyer?: boolean;

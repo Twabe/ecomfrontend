@@ -449,7 +449,7 @@
           <button
             @click="toggleSection('reports')"
             class="nav-link w-full justify-between"
-            :class="{ 'active': isActive('/dashboard/statistics') || isActive('/dashboard/roas') || isActive('/dashboard/reports') }"
+            :class="{ 'active': isActive('/dashboard/statistics') || isActive('/dashboard/roas') || isActive('/dashboard/campaigns') || isActive('/dashboard/reports') }"
           >
             <div class="flex items-center gap-3">
               <ChartBarIcon class="nav-link-icon" />
@@ -471,6 +471,11 @@
               <li v-if="canAccessRoas">
                 <NuxtLink to="/dashboard/roas" class="nav-link text-sm py-2">
                   {{ $t('nav.roasAnalysis') }}
+                </NuxtLink>
+              </li>
+              <li v-if="canAccessCampaignAnalytics">
+                <NuxtLink to="/dashboard/campaigns" class="nav-link text-sm py-2">
+                  {{ $t('nav.campaignAnalytics') }}
                 </NuxtLink>
               </li>
               <li v-if="canAccessDeliveryReports">
@@ -755,6 +760,9 @@ const canAccessStatistics = computed(() =>
 const canAccessRoas = computed(() =>
   hasPermission('Permissions.SpentAds.View')
 )
+const canAccessCampaignAnalytics = computed(() =>
+  hasPermission('Permissions.Dashboard.View')
+)
 const canAccessDeliveryReports = computed(() =>
   hasPermission('Permissions.Dashboard.View')
 )
@@ -768,7 +776,7 @@ const canAccessCustomerReports = computed(() =>
   hasPermission('Permissions.Customers.View')
 )
 const canAccessReportsSection = computed(() =>
-  canAccessStatistics.value || canAccessRoas.value || canAccessDeliveryReports.value || canAccessCodReports.value || canAccessFinancialReports.value || canAccessCustomerReports.value
+  canAccessStatistics.value || canAccessRoas.value || canAccessCampaignAnalytics.value || canAccessDeliveryReports.value || canAccessCodReports.value || canAccessFinancialReports.value || canAccessCustomerReports.value
 )
 // Config
 const canAccessSettings = computed(() =>
