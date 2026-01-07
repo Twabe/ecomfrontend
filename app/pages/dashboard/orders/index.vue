@@ -805,7 +805,7 @@ const handleBulkCancel = async (data: CancelOrderRequest) => {
       @close="showHistoryModal = false"
     />
 
-    <OrdersOrderAssignDeliveryModal
+    <OrdersUnifiedAssignDeliveryModal
       :show="showAssignDeliveryModal"
       :orders="ordersForAssignment"
       :delivery-companies="deliveryCompanies"

@@ -826,126 +826,20 @@
     />
 
     <!-- Reassign Modal (for other tabs) -->
-    <TransitionRoot :show="showReassignModal && activeTab !== 'new'" as="template">
-      <Dialog as="div" class="relative z-50" @close="closeReassignModal">
-        <TransitionChild
-          enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
-          leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-gray-900/50" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              enter="ease-out duration-300" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100"
-              leave="ease-in duration-200" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
-                <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  {{ $t('supervisor.reassignOrders') }}
-                </DialogTitle>
-
-                <form @submit.prevent="submitReassign">
-                  <!-- Order Count -->
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    {{ $t('supervisor.reassigningCount', { count: selectedOrders.length }) }}
-                  </p>
-
-                  <!-- Service Selection for existing assignments -->
-                  <div class="mb-4">
-                    <!-- Loading state -->
-                    <div v-if="isLoadingActiveServices" class="text-center py-4">
-                      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto"></div>
-                      <p class="text-sm text-gray-500 mt-2">{{ $t('common.loading') }}...</p>
-                    </div>
-
-                    <!-- Services to reassign -->
-                    <div v-else-if="activeServicesForReassign.length > 0">
-                      <label class="label">{{ $t('supervisor.servicesToReassign') }} *</label>
-                      <p class="text-xs text-gray-500 mb-2">{{ $t('supervisor.selectServicesToReassign') }}</p>
-                      <div class="space-y-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-                        <label
-                          v-for="service in activeServicesForReassign"
-                          :key="service.serviceType"
-                          class="flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600/50"
-                        >
-                          <input
-                            type="checkbox"
-                            :value="service.serviceType"
-                            v-model="selectedServicesToReassign"
-                            class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          <div class="flex-1">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
-                              {{ service.serviceType }}
-                            </span>
-                            <span
-                              v-if="service.workerName"
-                              class="ml-2 text-xs text-gray-500"
-                            >
-                              ({{ service.workerName }} - {{ getStatusLabel(service.status) }})
-                            </span>
-                          </div>
-                        </label>
-                      </div>
-                      <p class="text-xs text-gray-500 mt-1">
-                        {{ $t('supervisor.reassignHint') }}
-                      </p>
-                    </div>
-
-                    <!-- No active services -->
-                    <div v-else class="text-center py-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                      <ExclamationTriangleIcon class="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                      <p class="text-sm text-yellow-700 dark:text-yellow-300">{{ $t('supervisor.noActiveServices') }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Worker Selection -->
-                  <div class="mb-4">
-                    <label class="label">{{ $t('supervisor.selectWorker') }} *</label>
-                    <select v-model="reassignForm.workerId" class="input" required>
-                      <option value="">{{ $t('common.select') }}...</option>
-                      <option
-                        v-for="worker in workers"
-                        :key="worker.id"
-                        :value="worker.id"
-                      >
-                        {{ worker.firstName }} {{ worker.lastName }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- Notes -->
-                  <div class="mb-4">
-                    <label class="label">{{ $t('supervisor.notes') }}</label>
-                    <textarea v-model="reassignForm.notes" class="input" rows="2"></textarea>
-                  </div>
-
-                  <div class="flex justify-end gap-3">
-                    <button type="button" class="btn-secondary" @click="closeReassignModal">
-                      {{ $t('common.cancel') }}
-                    </button>
-                    <button
-                      type="submit"
-                      class="btn-primary"
-                      :disabled="isSubmitting || isSubmitDisabled"
-                    >
-                      {{ isSubmitting ? $t('common.loading') : $t('supervisor.reassign') }}
-                    </button>
-                  </div>
-                </form>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
+    <SupervisorReassignModal
+      :show="showReassignModal && activeTab !== 'new'"
+      :order-ids="selectedOrders"
+      :workers="workers"
+      :active-services="activeServicesForReassign"
+      :is-loading-services="isLoadingActiveServices"
+      :is-submitting="isSubmitting"
+      @close="closeReassignModal"
+      @confirm="handleReassignConfirm"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import {
   ArrowPathIcon,
   UserGroupIcon,
@@ -961,6 +855,7 @@ import {
   ClipboardDocumentListIcon
 } from '@heroicons/vue/24/outline'
 import SimpleAssignModal from '~/components/supervisor/SimpleAssignModal.vue'
+import SupervisorReassignModal from '~/components/supervisor/SupervisorReassignModal.vue'
 import {
   useOrdersWorkflowService,
   useOrderAssignmentsService,
@@ -1118,11 +1013,6 @@ const selectAllSuivi = computed(() =>
 
 // Modal
 const showReassignModal = ref(false)
-const reassignForm = ref({
-  workerId: '',
-  serviceTypes: [ServiceTypes.Confirmation] as ServiceType[],
-  notes: ''
-})
 
 // Reassign Mode: Service selection for existing assignments
 interface ActiveServiceInfo {
@@ -1132,14 +1022,7 @@ interface ActiveServiceInfo {
   orderId: string
 }
 const activeServicesForReassign = ref<ActiveServiceInfo[]>([])
-const selectedServicesToReassign = ref<string[]>([])
 const isLoadingActiveServices = ref(false)
-
-// Computed for submit validation (reassign modal only - new tab uses SimpleAssignModal)
-const isSubmitDisabled = computed(() => {
-  // Reassign mode: worker required + at least one service selected
-  return !reassignForm.value.workerId || selectedServicesToReassign.value.length === 0
-})
 
 // Format helpers
 const formatCurrency = (amount: number) => {
@@ -1354,12 +1237,10 @@ const toggleSelectAllSuivi = () => {
 // Reassign modal (for non-new tabs - new tab uses SimpleAssignModal)
 const openReassignModal = async () => {
   if (selectedOrders.value.length === 0) return
-  reassignForm.value = { workerId: '', serviceTypes: [ServiceTypes.Confirmation], notes: '' }
 
   // For reassign tabs: get active services from the correct data source
   if (activeTab.value !== 'new') {
     activeServicesForReassign.value = []
-    selectedServicesToReassign.value = []
 
     const servicesMap = new Map<string, ActiveServiceInfo>()
     const activeStatuses = [AssignmentStatus.Pending, AssignmentStatus.Taken]
@@ -1423,19 +1304,31 @@ const openReassignModal = async () => {
         const matchingOrders = qualityOrders.value.filter(o => o.orderId === orderId)
 
         for (const qualOrder of matchingOrders) {
-          const isActiveStatus = activeStatuses.includes(qualOrder.assignmentStatus || '')
-          if (qualOrder.serviceType && isActiveStatus) {
-            const key = qualOrder.serviceType
+          const status = qualOrder.assignmentStatus || 'unassigned'
+          const isActiveOrUnassigned = activeStatuses.includes(status) || status === 'unassigned'
+          if (isActiveOrUnassigned) {
+            const key = qualOrder.serviceType || ServiceTypes.Quality
             if (!servicesMap.has(key)) {
               servicesMap.set(key, {
-                serviceType: qualOrder.serviceType,
+                serviceType: key,
                 workerName: qualOrder.workerName || null,
-                status: qualOrder.assignmentStatus || 'unknown',
+                status: status,
                 orderId: qualOrder.orderId || ''
               })
             }
           }
         }
+
+        // Always add Quality option for this tab if not already present
+        if (!servicesMap.has(ServiceTypes.Quality)) {
+          servicesMap.set(ServiceTypes.Quality, {
+            serviceType: ServiceTypes.Quality,
+            workerName: null,
+            status: 'new',
+            orderId: orderId
+          })
+        }
+
         // Also show suivi as an option since quality → suivi is the next step
         if (!servicesMap.has(ServiceTypes.Suivi)) {
           servicesMap.set(ServiceTypes.Suivi, {
@@ -1468,13 +1361,24 @@ const openReassignModal = async () => {
             }
           }
         }
+
+        // Always add Suivi option for this tab if not already present
+        if (!servicesMap.has(ServiceTypes.Suivi)) {
+          servicesMap.set(ServiceTypes.Suivi, {
+            serviceType: ServiceTypes.Suivi,
+            workerName: null,
+            status: 'new',
+            orderId: orderId
+          })
+        }
       }
     }
 
     activeServicesForReassign.value = Array.from(servicesMap.values())
-    selectedServicesToReassign.value = activeServicesForReassign.value.map(s => s.serviceType)
+    console.log('[DEBUG] openReassignModal - activeServicesForReassign:', activeServicesForReassign.value)
   }
 
+  console.log('[DEBUG] openReassignModal - selectedOrders:', selectedOrders.value, 'activeTab:', activeTab.value)
   showReassignModal.value = true
 }
 
@@ -1510,8 +1414,6 @@ const openCallbackReassign = (callback: { orderId?: string }) => {
     status: ServiceTypes.Callback,
     orderId: callback.orderId
   }]
-  selectedServicesToReassign.value = [ServiceTypes.Callback]
-  reassignForm.value = { workerId: '', serviceTypes: [ServiceTypes.Callback], notes: '' }
   showReassignModal.value = true
 }
 
@@ -1564,26 +1466,39 @@ const handleSimpleAssignConfirm = async (data: {
   }
 }
 
-// Submit reassign (for non-new tabs only - new tab uses SimpleAssignModal)
-const submitReassign = async () => {
+// Handler for SupervisorReassignModal confirm (for non-new tabs only)
+const handleReassignConfirm = async (data: {
+  orderIds: string[]
+  workerId: string
+  serviceTypes: string[]
+  notes?: string
+}) => {
+  console.log('[DEBUG] handleReassignConfirm called with:', {
+    orderIds: JSON.parse(JSON.stringify(data.orderIds)),
+    workerId: data.workerId,
+    serviceTypes: JSON.parse(JSON.stringify(data.serviceTypes)),
+    serviceTypesLength: data.serviceTypes?.length,
+    notes: data.notes
+  })
+
   isSubmitting.value = true
   try {
-    if (!reassignForm.value.workerId) return
-    if (selectedServicesToReassign.value.length === 0) return
-
     // Bulk-reassign existing active assignments
-    await orderAssignments.bulkReassign({
-      orderIds: selectedOrders.value,
-      toWorkerId: reassignForm.value.workerId,
-      serviceTypes: selectedServicesToReassign.value,
-      notes: reassignForm.value.notes || undefined
+    console.log('[DEBUG] Calling bulkReassign API...')
+    const result = await orderAssignments.bulkReassign({
+      orderIds: data.orderIds,
+      toWorkerId: data.workerId,
+      serviceTypes: data.serviceTypes,
+      notes: data.notes
     })
+    console.log('[DEBUG] bulkReassign result:', result)
 
-    notification.success(t('supervisor.reassignSuccess', { count: selectedOrders.value.length }))
+    notification.success(t('supervisor.reassignSuccess', { count: data.orderIds.length }))
     closeReassignModal()
     selectedOrders.value = []
     await loadAllData()
   } catch (err: unknown) {
+    console.error('[DEBUG] bulkReassign error:', err)
     const errorMessage = err instanceof Error ? err.message : t('common.error')
     notification.error(errorMessage)
   } finally {

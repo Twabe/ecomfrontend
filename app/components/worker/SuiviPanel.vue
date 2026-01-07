@@ -357,14 +357,14 @@
       </div>
     </div>
 
-    <!-- Bulk Assign Delivery Modal -->
-    <OrdersBulkAssignDeliveryModal
+    <!-- Unified Delivery Modal (Bulk) -->
+    <OrdersUnifiedAssignDeliveryModal
       :show="showBulkAssignDeliveryModal"
-      :order-count="selectedOrders.size"
+      :orders="selectedOrdersForDelivery"
       :delivery-companies="deliveryCompanies"
       :is-submitting="isBulkProcessing"
       @close="showBulkAssignDeliveryModal = false"
-      @submit="handleBulkAssignDelivery"
+      @confirm="handleDeliveryConfirm"
     />
 
     <!-- Return to Confirmation Modal -->
@@ -649,6 +649,48 @@ const openBulkAssignDeliveryModal = () => {
   showBulkAssignDeliveryModal.value = true
 }
 
+// Computed for unified modal: map selected IDs to order-like objects
+const selectedOrdersForDelivery = computed(() => {
+  return orders.value
+    .filter(o => selectedOrders.value.has(o.orderId))
+    .map(o => ({
+      id: o.orderId,
+      code: o.orderCode,
+      fullName: o.customerName,
+      phone: o.phone,
+      cityName: o.cityName,
+      providerCityId: o.providerCityId,
+      providerCityName: o.providerCityName,
+      state: o.orderState
+    }))
+})
+
+// Handler for unified delivery modal
+const handleDeliveryConfirm = async (data: {
+  orderIds: string[]
+  deliveryCompanyId: string
+  providerCityId?: string
+}) => {
+  if (data.orderIds.length === 0) return
+
+  isBulkProcessing.value = true
+  try {
+    await ordersWorkflow.bulkAssignDeliveryCompany({
+      orderIds: data.orderIds,
+      deliveryCompanyId: data.deliveryCompanyId,
+      providerCityId: data.providerCityId
+    })
+    deselectAll()
+    refetch()
+  } catch (error) {
+    console.error('Bulk assign delivery error:', error)
+  } finally {
+    isBulkProcessing.value = false
+    showBulkAssignDeliveryModal.value = false
+  }
+}
+
+// Legacy handler (kept for compatibility)
 const handleBulkAssignDelivery = async (data: { deliveryCompanyId: string }) => {
   if (selectedOrders.value.size === 0) return
 

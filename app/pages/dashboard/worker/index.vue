@@ -502,13 +502,13 @@
     </TransitionRoot>
 
     <!-- Assign Delivery Company Modal -->
-    <OrdersAssignDeliveryModal
+    <OrdersUnifiedAssignDeliveryModal
       :show="showAssignDeliveryModal"
-      :order="assignDeliveryOrder"
+      :orders="ordersForDeliveryModal"
       :delivery-companies="deliveryCompanies"
       :is-submitting="isAssigningDelivery"
       @close="closeAssignDeliveryModal"
-      @submit="submitAssignDelivery"
+      @confirm="handleAssignDeliveryConfirm"
     />
 
     <!-- Edit Order Modal -->
@@ -778,6 +778,22 @@ const isViewingAvailableOrder = ref(false)
 const editFromConfirm = ref(false)
 const assignDeliveryOrder = ref<Order | null>(null)
 const isAssigningDelivery = ref(false)
+
+// Orders array for unified delivery modal
+const ordersForDeliveryModal = computed(() => {
+  if (!assignDeliveryOrder.value) return []
+  const order = assignDeliveryOrder.value
+  return [{
+    id: order.id,
+    code: order.code,
+    fullName: order.fullName,
+    phone: order.phone,
+    cityName: order.cityName,
+    providerCityId: order.providerCityId,
+    providerCityName: order.providerCityName,
+    state: order.state
+  }]
+})
 
 const confirmForm = ref({
   comment: ''
@@ -1197,11 +1213,17 @@ const closeAssignDeliveryModal = () => {
   assignDeliveryOrder.value = null
 }
 
-const submitAssignDelivery = async (data: AssignDeliveryCompanyRequest) => {
-  if (!data.orderId) return
+const handleAssignDeliveryConfirm = async (data: { orderIds: string[]; deliveryCompanyId: string; providerCityId?: string }) => {
+  if (!data.orderIds.length) return
   isAssigningDelivery.value = true
   try {
-    const result = await ordersWorkflow.assignDeliveryCompany(data)
+    // For single order assignment from unified modal
+    const orderId = data.orderIds[0]
+    const result = await ordersWorkflow.assignDeliveryCompany({
+      orderId,
+      deliveryCompanyId: data.deliveryCompanyId,
+      providerCityId: data.providerCityId
+    })
 
     // Show tracking code if provider API returned one
     if (result.sendToProviderSuccess && result.trackingCode) {

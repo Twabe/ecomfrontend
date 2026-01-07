@@ -97,6 +97,15 @@ const getWorkerName = (worker: Worker): string => {
 }
 
 const handleConfirm = () => {
+  console.log('[DEBUG] SupervisorReassignModal handleConfirm:', {
+    canSubmit: canSubmit.value,
+    orderIds: props.orderIds,
+    workerId: workerId.value,
+    selectedServicesToReassign: [...selectedServicesToReassign.value],
+    activeServices: props.activeServices,
+    canReassign: canReassign.value
+  })
+
   if (!canSubmit.value) return
 
   emit('confirm', {

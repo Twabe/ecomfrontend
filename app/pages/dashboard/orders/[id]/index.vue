@@ -63,9 +63,23 @@ const { data: history, isLoading: isHistoryLoading } = getByOrderId(orderId)
 const showAssignDeliveryModal = ref(false)
 const showCancelModal = ref(false)
 const showHistoryExpanded = ref(false)
-const selectedDeliveryCompanyId = ref('')
 const selectedReasonId = ref<string | undefined>(undefined)
 const cancelComment = ref('')
+
+// Orders array for unified modal (single order)
+const ordersForDeliveryModal = computed(() => {
+  if (!order.value) return []
+  return [{
+    id: order.value.id!,
+    code: order.value.code,
+    fullName: order.value.fullName,
+    phone: order.value.phone,
+    cityName: order.value.cityName,
+    providerCityId: order.value.providerCityId,
+    providerCityName: order.value.providerCityName,
+    state: order.value.state
+  }]
+})
 
 // Copy to clipboard helper
 const copyToClipboard = async (text: string, label: string) => {
@@ -168,16 +182,16 @@ const handleCancel = async () => {
   }
 }
 
-const handleAssignDelivery = async () => {
-  if (!order.value?.id || !selectedDeliveryCompanyId.value) return
+const handleAssignDelivery = async (data: { orderIds: string[]; deliveryCompanyId: string; providerCityId?: string }) => {
+  if (!order.value?.id) return
   try {
     await assignDeliveryCompany({
       orderId: order.value.id,
-      deliveryCompanyId: selectedDeliveryCompanyId.value
+      deliveryCompanyId: data.deliveryCompanyId,
+      providerCityId: data.providerCityId
     })
     notify({ type: 'success', message: 'Société de livraison assignée' })
     showAssignDeliveryModal.value = false
-    selectedDeliveryCompanyId.value = ''
     refetch()
   } catch (err: any) {
     notify({ type: 'error', message: err.message || 'Erreur lors de l\'assignation' })
@@ -665,45 +679,14 @@ const getActionColor = (actionType: string) => actionColors[actionType] ?? actio
     </div>
 
     <!-- Assign Delivery Modal -->
-    <Teleport to="body">
-      <div v-if="showAssignDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="fixed inset-0 bg-black/50" @click="showAssignDeliveryModal = false"></div>
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assigner société de livraison</h3>
-
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Société de livraison *
-              </label>
-              <select
-                v-model="selectedDeliveryCompanyId"
-                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-              >
-                <option value="">Sélectionner...</option>
-                <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">
-                  {{ dc.name }}
-                </option>
-              </select>
-            </div>
-
-          </div>
-
-          <div class="flex justify-end gap-3 mt-6">
-            <button @click="showAssignDeliveryModal = false" class="btn-secondary">
-              Annuler
-            </button>
-            <button
-              @click="handleAssignDelivery"
-              :disabled="!selectedDeliveryCompanyId || isMutating"
-              class="btn-primary"
-            >
-              Assigner
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <OrdersUnifiedAssignDeliveryModal
+      :show="showAssignDeliveryModal"
+      :orders="ordersForDeliveryModal"
+      :delivery-companies="deliveryCompanies"
+      :is-submitting="isMutating"
+      @close="showAssignDeliveryModal = false"
+      @confirm="handleAssignDelivery"
+    />
 
     <!-- Cancel Modal -->
     <Teleport to="body">

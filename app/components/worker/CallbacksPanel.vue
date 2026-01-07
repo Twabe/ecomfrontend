@@ -546,24 +546,14 @@
       @submit="handleCompleteSuivi"
     />
 
-    <!-- Assign Delivery Modal (Single) -->
-    <AssignDeliveryModal
-      :show="showAssignDeliveryModal"
-      :order="assignDeliveryOrder"
+    <!-- Unified Delivery Assignment Modal (Single & Bulk) -->
+    <UnifiedAssignDeliveryModal
+      :show="showAssignDeliveryModal || showBulkAssignDeliveryModal"
+      :orders="deliveryModalOrders"
       :delivery-companies="deliveryCompaniesService.items.value ?? []"
-      :is-submitting="isAssigningDelivery"
-      @close="closeAssignDeliveryModal"
-      @submit="handleAssignDelivery"
-    />
-
-    <!-- Bulk Assign Delivery Modal -->
-    <BulkAssignDeliveryModal
-      :show="showBulkAssignDeliveryModal"
-      :order-count="assignableSelectedCount"
-      :delivery-companies="deliveryCompaniesService.items.value ?? []"
-      :is-submitting="isBulkProcessing"
-      @close="closeBulkAssignDeliveryModal"
-      @submit="handleBulkAssignDelivery"
+      :is-submitting="isAssigningDelivery || isBulkProcessing"
+      @close="closeDeliveryModal"
+      @confirm="handleDeliveryConfirm"
     />
   </div>
 </template>
@@ -594,8 +584,7 @@ import {
   useOrdersWorkflowService,
   type WorkerAssignmentDto
 } from '~/services'
-import AssignDeliveryModal from '~/components/orders/AssignDeliveryModal.vue'
-import BulkAssignDeliveryModal from '~/components/orders/BulkAssignDeliveryModal.vue'
+import UnifiedAssignDeliveryModal from '~/components/orders/UnifiedAssignDeliveryModal.vue'
 import { ServiceTypes, OrderState, SuiviResult } from '~/constants/order'
 
 const emit = defineEmits<{
@@ -965,18 +954,38 @@ const handleQuickReturned = async (callback: WorkerAssignmentDto) => {
 }
 
 // Assign Delivery Modal
-const assignDeliveryOrder = computed(() => {
-  if (!selectedAssignDeliveryCallback.value) return null
-  // Map WorkerAssignmentDto to Order-like object for AssignDeliveryModal
-  const cb = selectedAssignDeliveryCallback.value
-  return {
-    id: cb.orderId,
-    code: cb.orderCode,
-    fullName: cb.customerName,
-    phone: cb.customerPhone,
-    cityName: cb.customerCity || cb.cityName,
-    deliveryCompanyId: cb.deliveryCompanyId
+// Combined orders for unified delivery modal (single or bulk)
+const deliveryModalOrders = computed(() => {
+  // Single mode: from selected callback
+  if (showAssignDeliveryModal.value && selectedAssignDeliveryCallback.value) {
+    const cb = selectedAssignDeliveryCallback.value
+    return [{
+      id: cb.orderId,
+      code: cb.orderCode,
+      fullName: cb.customerName,
+      phone: cb.customerPhone,
+      cityName: cb.customerCity || cb.cityName,
+      providerCityId: cb.providerCityId,
+      providerCityName: cb.providerCityName,
+      state: cb.orderState
+    }]
   }
+  // Bulk mode: from selected suivi callbacks
+  if (showBulkAssignDeliveryModal.value && selectedSuiviCallbacks.value.length > 0) {
+    return selectedSuiviCallbacks.value
+      .filter(cb => canAssignDelivery(cb))
+      .map(cb => ({
+        id: cb.orderId,
+        code: cb.orderCode,
+        fullName: cb.customerName,
+        phone: cb.customerPhone,
+        cityName: cb.customerCity || cb.cityName,
+        providerCityId: cb.providerCityId,
+        providerCityName: cb.providerCityName,
+        state: cb.orderState
+      }))
+  }
+  return []
 })
 
 const openAssignDeliveryModal = (callback: WorkerAssignmentDto) => {
@@ -989,6 +998,55 @@ const closeAssignDeliveryModal = () => {
   selectedAssignDeliveryCallback.value = null
 }
 
+// Unified modal close handler
+const closeDeliveryModal = () => {
+  showAssignDeliveryModal.value = false
+  showBulkAssignDeliveryModal.value = false
+  selectedAssignDeliveryCallback.value = null
+}
+
+// Unified modal confirm handler (handles both single and bulk)
+const handleDeliveryConfirm = async (data: {
+  orderIds: string[]
+  deliveryCompanyId: string
+  providerCityId?: string
+}) => {
+  const isBulk = data.orderIds.length > 1
+
+  if (isBulk) {
+    isBulkProcessing.value = true
+  } else {
+    isAssigningDelivery.value = true
+  }
+
+  try {
+    if (isBulk) {
+      // Bulk assignment
+      await ordersWorkflowService.bulkAssignDeliveryCompany({
+        orderIds: data.orderIds,
+        deliveryCompanyId: data.deliveryCompanyId,
+        providerCityId: data.providerCityId
+      })
+      clearSuiviSelection()
+    } else {
+      // Single assignment
+      await ordersWorkflowService.assignDeliveryCompany({
+        orderId: data.orderIds[0],
+        deliveryCompanyId: data.deliveryCompanyId,
+        providerCityId: data.providerCityId
+      })
+    }
+    closeDeliveryModal()
+    await myCallbacksQuery.refetch()
+  } catch {
+    // Error handled by service
+  } finally {
+    isAssigningDelivery.value = false
+    isBulkProcessing.value = false
+  }
+}
+
+// Legacy handler (kept for compatibility)
 const handleAssignDelivery = async (data: {
   orderId: string
   deliveryCompanyId: string
