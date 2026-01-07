@@ -78,6 +78,22 @@
           </select>
         </div>
 
+        <!-- Tracking State Filter -->
+        <div class="w-[180px]">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ $t('worker.trackingState') }}
+          </label>
+          <select
+            v-model="filters.trackingStateId"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          >
+            <option value="">{{ $t('common.all') }}</option>
+            <option v-for="state in trackingStates" :key="state.id" :value="state.id">
+              {{ state.name }}
+            </option>
+          </select>
+        </div>
+
         <!-- Date Filter -->
         <div class="w-[150px]">
           <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -431,7 +447,7 @@ import {
   type SuiviOrderDto,
   type SearchSuiviOrdersRequest,
 } from '~/services/orders/useOrdersService'
-import { useOrderAssignmentsService } from '~/services'
+import { useOrderAssignmentsService, useTrackingStatesService } from '~/services'
 import { deliveryCompaniesSearch } from '~/api/generated/endpoints/delivery-companies/delivery-companies'
 import { usersGetList } from '~/api/generated/endpoints/users/users'
 import type { DeliveryCompany } from '~/types/deliverycompany'
@@ -450,12 +466,14 @@ const user = useState<{ id: string } | null>('auth-user')
 // Services
 const ordersWorkflow = useOrdersWorkflowService()
 const orderAssignmentsService = useOrderAssignmentsService()
+const { items: trackingStates } = useTrackingStatesService()
 
 // Filter state
 const filters = reactive({
   keyword: '',
   confirmerId: '',
   deliveryCompanyId: '',
+  trackingStateId: '',
   confirmedFrom: '',
   confirmedTo: '',
 })
@@ -470,6 +488,7 @@ const searchParams = computed(() => ({
   confirmerId: filters.confirmerId || undefined,
   deliveryCompanyId: filters.deliveryCompanyId === 'none' ? undefined : (filters.deliveryCompanyId || undefined),
   needsDeliveryCompany: filters.deliveryCompanyId === 'none' ? true : undefined,
+  trackingStateId: filters.trackingStateId || undefined,
   confirmedFrom: filters.confirmedFrom || undefined,
   confirmedTo: filters.confirmedTo || undefined,
   suiviWorkerId: user.value?.id || undefined, // Filter by current worker's assigned orders
@@ -569,6 +588,7 @@ const resetFilters = () => {
   filters.keyword = ''
   filters.confirmerId = ''
   filters.deliveryCompanyId = ''
+  filters.trackingStateId = ''
   filters.confirmedFrom = ''
   filters.confirmedTo = ''
   currentPage.value = 1
