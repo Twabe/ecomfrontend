@@ -183,6 +183,7 @@ const showAssignDeliveryModal = ref(false)
 const showAssignWorkerModal = ref(false)
 const showBulkConfirmModal = ref(false)
 const showBulkCancelModal = ref(false)
+const showLegalInvoiceModal = ref(false)
 
 const selectedOrder = ref<OrderDto | null>(null)
 const selectedOrderForHistory = ref<{ id: string; code: string } | null>(null)
@@ -581,6 +582,20 @@ const openBulkCancelModal = () => {
   showBulkCancelModal.value = true
 }
 
+const openLegalInvoiceModal = () => {
+  if (selectedOrders.value.length === 0) return
+  showLegalInvoiceModal.value = true
+}
+
+const selectedOrdersForLegalInvoice = computed(() => {
+  return orders.value.filter((o) => selectedOrders.value.includes(o.id!))
+})
+
+const handleLegalInvoiceSuccess = () => {
+  showLegalInvoiceModal.value = false
+  selectedOrders.value = []
+}
+
 const handleBulkConfirm = async (data: ConfirmOrderRequest) => {
   if (selectedOrders.value.length === 0) return
 
@@ -694,6 +709,7 @@ const handleBulkCancel = async (data: CancelOrderRequest) => {
       @unarchive="handleBulkUnarchive"
       @bulk-confirm="openBulkConfirmModal"
       @bulk-cancel="openBulkCancelModal"
+      @create-legal-invoice="openLegalInvoiceModal"
     />
 
     <!-- Table -->
@@ -822,6 +838,14 @@ const handleBulkCancel = async (data: CancelOrderRequest) => {
       :reasons="reasons"
       @close="showBulkCancelModal = false"
       @cancel="handleBulkCancel"
+    />
+
+    <!-- Legal Invoice Modal -->
+    <LegalInvoicesLegalInvoiceOrdersModal
+      :show="showLegalInvoiceModal"
+      :orders="selectedOrdersForLegalInvoice"
+      @close="showLegalInvoiceModal = false"
+      @success="handleLegalInvoiceSuccess"
     />
   </div>
 </template>

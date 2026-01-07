@@ -7,7 +7,8 @@ import {
   ArchiveBoxIcon,
   ArchiveBoxXMarkIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  DocumentTextIcon
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps<{
@@ -26,6 +27,7 @@ const emit = defineEmits<{
   unarchive: []
   bulkConfirm: []
   bulkCancel: []
+  createLegalInvoice: []
 }>()
 
 const { t } = useI18n()
@@ -85,6 +87,14 @@ const { t } = useI18n()
           {{ t('orders.returnOrder') }}
         </button>
       </template>
+      <!-- Legal Invoice button -->
+      <button
+        class="inline-flex items-center gap-1 rounded-lg bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700"
+        @click="emit('createLegalInvoice')"
+      >
+        <DocumentTextIcon class="h-4 w-4" />
+        {{ t('legalInvoices.create') }}
+      </button>
       <!-- Archive/Unarchive buttons -->
       <button
         v-if="isArchivedFilter !== true"

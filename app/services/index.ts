@@ -103,7 +103,22 @@ export { useInvoicesService, type InvoiceDto, type InvoiceDetailsDto, type Updat
 export { useDeliveryNotesService, type DeliveryNoteDto, type CreateDeliveryNoteRequest, type UpdateDeliveryNoteRequest } from './delivery-notes/useDeliveryNotesService'
 export { usePaymentsService, type PaymentDto, type CreatePaymentRequest, type UpdatePaymentRequest } from './payments/usePaymentsService'
 export { useDropshippingsService, type DropshippingDto, type CreateDropshippingRequest, type UpdateDropshippingRequest } from './dropshippings/useDropshippingsService'
-export { useLegalInvoicesService, type LegalInvoiceDto, type CreateLegalInvoiceRequest, type UpdateLegalInvoiceRequest } from './legal-invoices/useLegalInvoicesService'
+export {
+  useLegalInvoicesService,
+  useLegalInvoicesGenerateFromOrders,
+  useLegalInvoicesFinalize,
+  useLegalInvoicesCancel,
+  useLegalInvoicesCreateManual,
+  type LegalInvoiceDto,
+  type CreateLegalInvoiceRequest,
+  type UpdateLegalInvoiceRequest,
+  type GenerateLegalInvoiceFromOrdersRequest,
+  type GenerateLegalInvoiceResponse,
+  type LegalInvoiceItemDto,
+  type ManualLegalInvoiceItemDto,
+  type CreateManualLegalInvoiceRequest,
+  type CreateManualLegalInvoiceResponse,
+} from './legal-invoices/useLegalInvoicesService'
 export { useShipmentsService, type ShipmentDto, type CreateShipmentRequest, type UpdateShipmentRequest } from './shipments/useShipmentsService'
 
 // ============================================
