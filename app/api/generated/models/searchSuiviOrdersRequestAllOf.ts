@@ -56,4 +56,10 @@ export type SearchSuiviOrdersRequestAllOf = {
    * @nullable
    */
   needsDeliveryCompany?: boolean | null;
+  /**
+   * Filter by suivi worker (worker who has active suivi assignment for the order).
+Used by worker dashboard to show only their assigned orders.
+   * @nullable
+   */
+  suiviWorkerId?: string | null;
 };

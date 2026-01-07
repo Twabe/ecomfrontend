@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 const { locale } = useI18n()
+const cookieLocale = useCookieLocale()
 
 // Sidebar state
 const isSidebarCollapsed = ref(false)
@@ -49,6 +50,13 @@ const isMobileMenuOpen = ref(false)
 
 // RTL direction based on locale
 const direction = computed(() => locale.value === 'ar' ? 'rtl' : 'ltr')
+
+// Watch locale changes to update document direction
+watch(locale, (newLocale) => {
+  if (import.meta.client) {
+    document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr'
+  }
+}, { immediate: true })
 
 // Close mobile menu on route change
 const route = useRoute()
@@ -64,6 +72,10 @@ const handleResize = () => {
 }
 
 onMounted(() => {
+  // Set initial direction based on cookie locale or current locale
+  const currentLocale = cookieLocale.value || locale.value
+  document.documentElement.dir = currentLocale === 'ar' ? 'rtl' : 'ltr'
+
   handleResize()
   window.addEventListener('resize', handleResize)
 })

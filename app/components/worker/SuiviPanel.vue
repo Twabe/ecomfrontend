@@ -444,6 +444,9 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const notification = useNotification()
 
+// Get current user for worker filtering
+const user = useState<{ id: string } | null>('auth-user')
+
 // Services
 const ordersWorkflow = useOrdersWorkflowService()
 const orderAssignmentsService = useOrderAssignmentsService()
@@ -461,17 +464,18 @@ const filters = reactive({
 const currentPage = ref(1)
 const pageSize = ref(20)
 
-// Build search params
-const searchParams = computed<SearchSuiviOrdersRequest>(() => ({
+// Build search params - filter by current worker's suivi assignments
+const searchParams = computed(() => ({
   keyword: filters.keyword || undefined,
   confirmerId: filters.confirmerId || undefined,
   deliveryCompanyId: filters.deliveryCompanyId === 'none' ? undefined : (filters.deliveryCompanyId || undefined),
   needsDeliveryCompany: filters.deliveryCompanyId === 'none' ? true : undefined,
   confirmedFrom: filters.confirmedFrom || undefined,
   confirmedTo: filters.confirmedTo || undefined,
+  suiviWorkerId: user.value?.id || undefined, // Filter by current worker's assigned orders
   pageNumber: currentPage.value,
   pageSize: pageSize.value,
-}))
+} as SearchSuiviOrdersRequest & { suiviWorkerId?: string }))
 
 // Query
 const { data: searchResult, isLoading, refetch } = ordersWorkflow.useSearchSuiviOrders(searchParams)

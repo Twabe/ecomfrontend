@@ -312,8 +312,11 @@ const isLoading = computed(() => myPendingQuery.isLoading.value || myActiveQuery
 const isTaking = ref(false)
 const showCallbackModal = ref(false)
 const selectedAssignment = ref<WorkerAssignmentDto | null>(null)
-const completedTodayCount = ref(0)
 const settings = ref<{ maxCallbackAttempts?: number } | null>(null)
+
+// Stats query - fetch real stats from API
+const statsServiceType = ref(ServiceTypes.Confirmation)
+const myStatsQuery = orderAssignmentsService.useMyStats(statsServiceType)
 
 // Filtered assignments - exclude those with scheduled callbacks (they show in Callbacks tab)
 const pendingAssignments = computed(() =>
@@ -323,12 +326,14 @@ const activeAssignments = computed(() =>
   myActiveAssignments.value.filter(a => !a.callbackScheduledAt)
 )
 
-// Counts
+// Counts - use API stats for completedTodayCount, calculate others from local data
 const pendingCount = computed(() => pendingAssignments.value.length)
 const activeCount = computed(() => activeAssignments.value.length)
+// FIXED: Count callbacks from myActiveAssignments (before filtering), not activeAssignments (after filtering)
 const callbackCount = computed(() =>
-  activeAssignments.value.filter(a => a.callbackScheduledAt).length
+  myActiveAssignments.value.filter(a => a.callbackScheduledAt).length
 )
+const completedTodayCount = computed(() => myStatsQuery.data.value?.completedTodayCount ?? 0)
 
 // Format helpers
 const formatCurrency = (amount: number) => {
@@ -443,7 +448,8 @@ defineExpose({
   refresh: async () => {
     await Promise.all([
       myPendingQuery.refetch(),
-      myActiveQuery.refetch()
+      myActiveQuery.refetch(),
+      myStatsQuery.refetch()
     ])
   }
 })

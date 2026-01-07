@@ -714,30 +714,38 @@ const availableTabs = computed(() => {
   //    a) EnableQualityCheck is true AND worker canDoQuality, OR
   //    b) Worker has any pending/active Quality assignments (even if setting was disabled)
   //    This ensures workers can complete their existing Quality work even after setting changes
-  const qualityPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Quality).length
-  const qualityActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Quality).length
-  const hasQualityAssignments = qualityPending + qualityActive > 0
+  // Count unique orders (not raw assignments) to match the panel display
+  const qualityAssignments = [
+    ...myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Quality),
+    ...myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Quality)
+  ]
+  const uniqueQualityOrderIds = new Set(qualityAssignments.map(a => a.orderId))
+  const hasQualityAssignments = uniqueQualityOrderIds.size > 0
 
   if ((isQualityEnabled.value && myConfig.value?.canDoQuality) || hasQualityAssignments) {
     tabs.push({
       key: ServiceTypes.Quality,
       label: t('worker.quality'),
       icon: ShieldCheckIcon,
-      count: qualityPending + qualityActive
+      count: uniqueQualityOrderIds.size
     })
   }
 
   // 3. Suivi tab - show if worker canDoSuivi OR has existing suivi assignments
-  const suiviPending = myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi).length
-  const suiviActive = myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi).length
-  const hasSuiviAssignments = suiviPending + suiviActive > 0
+  // Count unique orders (not raw assignments) to match the panel display
+  const suiviAssignments = [
+    ...myPendingAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi),
+    ...myActiveAssignments.value.filter(a => a.serviceType === ServiceTypes.Suivi)
+  ]
+  const uniqueSuiviOrderIds = new Set(suiviAssignments.map(a => a.orderId))
+  const hasSuiviAssignments = uniqueSuiviOrderIds.size > 0
 
   if (myConfig.value?.canDoSuivi || hasSuiviAssignments) {
     tabs.push({
       key: ServiceTypes.Suivi,
       label: t('worker.suivi'),
       icon: TruckIcon,
-      count: suiviPending + suiviActive
+      count: uniqueSuiviOrderIds.size
     })
   }
 

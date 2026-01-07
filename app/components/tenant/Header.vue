@@ -159,9 +159,10 @@ defineEmits<{
   'toggle-sidebar': []
 }>()
 
-const { t, locale, setLocale } = useI18n()
+const { t, locale, setLocale, setLocaleCookie } = useI18n()
 const { user, logout } = useAuth()
 const route = useRoute()
+const cookieLocale = useCookieLocale()
 
 // Languages config
 const languages = [
@@ -175,8 +176,11 @@ const currentLanguage = computed(() => {
 })
 
 const switchLanguage = async (code: string) => {
+  // setLocale automatically updates the cookie when detectBrowserLanguage.useCookie is true
   await setLocale(code)
-  localStorage.setItem('locale', code)
+
+  // Also explicitly set the cookie to ensure persistence
+  setLocaleCookie(code)
 
   // Update document direction for RTL
   document.documentElement.dir = code === 'ar' ? 'rtl' : 'ltr'
@@ -196,17 +200,34 @@ const toggleDarkMode = () => {
   }
 }
 
-// Initialize dark mode from localStorage
-onMounted(() => {
+// Initialize dark mode and locale from storage
+onMounted(async () => {
+  // === LOCALE RESTORATION ===
+  // 1. Migrate from old localStorage to cookie (for existing users)
+  const oldLocalStorageLocale = localStorage.getItem('locale')
+  if (oldLocalStorageLocale && ['fr', 'en', 'ar'].includes(oldLocalStorageLocale)) {
+    // If cookie doesn't have a value yet, migrate from localStorage
+    if (!cookieLocale.value || cookieLocale.value !== oldLocalStorageLocale) {
+      await setLocale(oldLocalStorageLocale)
+      setLocaleCookie(oldLocalStorageLocale)
+    }
+    // Clean up old localStorage
+    localStorage.removeItem('locale')
+  }
+
+  // 2. Restore from cookie if different from current locale
+  if (cookieLocale.value && cookieLocale.value !== locale.value) {
+    await setLocale(cookieLocale.value)
+  }
+
+  // 3. Set RTL direction based on current locale
+  document.documentElement.dir = locale.value === 'ar' ? 'rtl' : 'ltr'
+
+  // === DARK MODE ===
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     isDark.value = true
     document.documentElement.classList.add('dark')
-  }
-
-  // Initialize locale direction
-  if (locale.value === 'ar') {
-    document.documentElement.dir = 'rtl'
   }
 })
 
