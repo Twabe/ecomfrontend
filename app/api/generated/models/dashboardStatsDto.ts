@@ -13,6 +13,7 @@ import type { OrderStatsByStateDto } from './orderStatsByStateDto';
 import type { TopProductDto } from './topProductDto';
 import type { TopCustomerDto } from './topCustomerDto';
 import type { DeliveryCompanyPerformanceDto } from './deliveryCompanyPerformanceDto';
+import type { DailyStatsDto } from './dailyStatsDto';
 
 export interface DashboardStatsDto {
   orderStatistics?: OrderStatisticsDto;
@@ -23,4 +24,6 @@ export interface DashboardStatsDto {
   topProducts?: TopProductDto[];
   topCustomers?: TopCustomerDto[];
   deliveryCompanyPerformance?: DeliveryCompanyPerformanceDto[];
+  /** Daily breakdown of orders and revenue for trend charts. */
+  dailyStats?: DailyStatsDto[];
 }

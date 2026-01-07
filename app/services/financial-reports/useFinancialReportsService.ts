@@ -212,30 +212,17 @@ export function useFinancialReportsService(params: Ref<FinancialReportsParams>) 
     }
   })
 
-  // Revenue trend data (mock based on totals)
+  // Revenue trend data - REAL DATA from dailyStats API
   const revenueTrendData = computed(() => {
-    const start = new Date(params.value.startDate)
-    const end = new Date(params.value.endDate)
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const dailyStats = rawDashboardData.value?.dailyStats ?? []
 
-    const categories: string[] = []
-    const revenue: number[] = []
-    const profit: number[] = []
-
-    const totalRevenue = kpiData.value.totalRevenue
-    const totalProfit = kpiData.value.netProfit
-
-    for (let i = 0; i < Math.min(days, 30); i++) {
-      const date = new Date(start)
-      date.setDate(start.getDate() + i)
-      categories.push(date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }))
-
-      const variation = 0.7 + Math.random() * 0.6
-      revenue.push(Math.round((totalRevenue / days) * variation))
-      profit.push(Math.round((totalProfit / days) * variation))
+    return {
+      categories: dailyStats.map(d =>
+        new Date(d.date!).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+      ),
+      revenue: dailyStats.map(d => d.revenue ?? 0),
+      profit: dailyStats.map(d => d.profit ?? 0),
     }
-
-    return { categories, revenue, profit }
   })
 
   // Loading state

@@ -114,7 +114,7 @@ export function useReportsService(params: Ref<ReportsParams>) {
 
   // Orders by State (for Donut Chart)
   const ordersByStateData = computed<OrdersByStateData>(() => {
-    const data = rawData.value?.orderStatsByState ?? []
+    const data = rawData.value?.ordersByState ?? []
     return {
       labels: data.map(s => s.state ?? ''),
       values: data.map(s => s.count ?? 0),
@@ -147,64 +147,31 @@ export function useReportsService(params: Ref<ReportsParams>) {
     return rawData.value?.topCustomers ?? []
   })
 
-  // Generate mock trend data based on date range
-  // In production, this would come from a dedicated API endpoint
+  // Orders trend data - REAL DATA from dailyStats API
   const ordersTrendData = computed<OrdersTrendData>(() => {
-    const start = new Date(params.value.dateRange.startDate)
-    const end = new Date(params.value.dateRange.endDate)
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const dailyStats = rawData.value?.dailyStats ?? []
 
-    const categories: string[] = []
-    const delivered: number[] = []
-    const cancelled: number[] = []
-    const returned: number[] = []
-
-    // Use order stats to generate proportional daily data
-    const orderStats = rawData.value?.orderStatistics
-    const totalDelivered = orderStats?.delivered ?? 0
-    const totalCancelled = orderStats?.cancelled ?? 0
-    const totalReturned = orderStats?.returned ?? 0
-
-    for (let i = 0; i < Math.min(days, 30); i++) {
-      const date = new Date(start)
-      date.setDate(start.getDate() + i)
-      categories.push(date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }))
-
-      // Distribute values across days with some variation
-      const variation = 0.7 + Math.random() * 0.6 // 0.7 to 1.3
-      delivered.push(Math.round((totalDelivered / days) * variation))
-      cancelled.push(Math.round((totalCancelled / days) * variation))
-      returned.push(Math.round((totalReturned / days) * variation))
+    return {
+      categories: dailyStats.map(d =>
+        new Date(d.date!).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+      ),
+      delivered: dailyStats.map(d => d.deliveredOrders ?? 0),
+      cancelled: dailyStats.map(d => d.cancelledOrders ?? 0),
+      returned: dailyStats.map(d => d.returnedOrders ?? 0)
     }
-
-    return { categories, delivered, cancelled, returned }
   })
 
-  // Revenue trend data
+  // Revenue trend data - REAL DATA from dailyStats API
   const revenueTrendData = computed(() => {
-    const start = new Date(params.value.dateRange.startDate)
-    const end = new Date(params.value.dateRange.endDate)
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const dailyStats = rawData.value?.dailyStats ?? []
 
-    const categories: string[] = []
-    const revenue: number[] = []
-    const profit: number[] = []
-
-    const revenueStats = rawData.value?.revenueStats
-    const totalRevenue = revenueStats?.totalRevenue ?? 0
-    const totalProfit = revenueStats?.totalProfit ?? 0
-
-    for (let i = 0; i < Math.min(days, 30); i++) {
-      const date = new Date(start)
-      date.setDate(start.getDate() + i)
-      categories.push(date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }))
-
-      const variation = 0.7 + Math.random() * 0.6
-      revenue.push(Math.round((totalRevenue / days) * variation))
-      profit.push(Math.round((totalProfit / days) * variation))
+    return {
+      categories: dailyStats.map(d =>
+        new Date(d.date!).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+      ),
+      revenue: dailyStats.map(d => d.revenue ?? 0),
+      profit: dailyStats.map(d => d.profit ?? 0)
     }
-
-    return { categories, revenue, profit }
   })
 
   // Loading state
