@@ -177,6 +177,12 @@ export {
   type ExpenseByProductData,
   type ProfitLossData,
 } from './financial-reports/useFinancialReportsService'
+export {
+  useCustomerReportsService,
+  type CustomerReportsParams,
+  type CustomerKpiData,
+  type CustomerData,
+} from './customer-reports/useCustomerReportsService'
 
 // ============================================
 // CONFIGURATION SERVICES

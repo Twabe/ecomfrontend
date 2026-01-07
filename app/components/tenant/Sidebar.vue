@@ -488,6 +488,11 @@
                   {{ $t('nav.financialReports') }}
                 </NuxtLink>
               </li>
+              <li v-if="canAccessCustomerReports">
+                <NuxtLink to="/dashboard/reports/customers" class="nav-link text-sm py-2">
+                  {{ $t('nav.customerReports') }}
+                </NuxtLink>
+              </li>
             </ul>
           </Transition>
         </li>
@@ -759,8 +764,11 @@ const canAccessCodReports = computed(() =>
 const canAccessFinancialReports = computed(() =>
   hasPermission('Permissions.Dashboard.View')
 )
+const canAccessCustomerReports = computed(() =>
+  hasPermission('Permissions.Customers.View')
+)
 const canAccessReportsSection = computed(() =>
-  canAccessStatistics.value || canAccessRoas.value || canAccessDeliveryReports.value || canAccessCodReports.value || canAccessFinancialReports.value
+  canAccessStatistics.value || canAccessRoas.value || canAccessDeliveryReports.value || canAccessCodReports.value || canAccessFinancialReports.value || canAccessCustomerReports.value
 )
 // Config
 const canAccessSettings = computed(() =>
