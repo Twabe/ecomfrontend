@@ -444,12 +444,52 @@
           </Transition>
         </li>
 
-        <!-- Reports/Statistics -->
-        <li v-if="canAccessStatistics">
-          <NuxtLink to="/dashboard/statistics" class="nav-link" :class="{ 'active': isActive('/dashboard/statistics') }">
-            <ChartBarIcon class="nav-link-icon" />
-            <span v-if="!isCollapsed">{{ $t('nav.reports') }}</span>
-          </NuxtLink>
+        <!-- Reports Section -->
+        <li v-if="canAccessReportsSection">
+          <button
+            @click="toggleSection('reports')"
+            class="nav-link w-full justify-between"
+            :class="{ 'active': isActive('/dashboard/statistics') || isActive('/dashboard/roas') || isActive('/dashboard/reports') }"
+          >
+            <div class="flex items-center gap-3">
+              <ChartBarIcon class="nav-link-icon" />
+              <span v-if="!isCollapsed">{{ $t('nav.reports') }}</span>
+            </div>
+            <ChevronDownIcon
+              v-if="!isCollapsed"
+              class="w-4 h-4 transition-transform"
+              :class="{ 'rotate-180': expandedSections.reports }"
+            />
+          </button>
+          <Transition name="slide">
+            <ul v-if="expandedSections.reports && !isCollapsed" class="mt-1 ml-8 space-y-1">
+              <li v-if="canAccessStatistics">
+                <NuxtLink to="/dashboard/statistics" class="nav-link text-sm py-2">
+                  {{ $t('nav.statistics') }}
+                </NuxtLink>
+              </li>
+              <li v-if="canAccessRoas">
+                <NuxtLink to="/dashboard/roas" class="nav-link text-sm py-2">
+                  {{ $t('nav.roasAnalysis') }}
+                </NuxtLink>
+              </li>
+              <li v-if="canAccessDeliveryReports">
+                <NuxtLink to="/dashboard/reports/delivery" class="nav-link text-sm py-2">
+                  {{ $t('nav.deliveryReports') }}
+                </NuxtLink>
+              </li>
+              <li v-if="canAccessCodReports">
+                <NuxtLink to="/dashboard/reports/cod" class="nav-link text-sm py-2">
+                  {{ $t('nav.codReports') }}
+                </NuxtLink>
+              </li>
+              <li v-if="canAccessFinancialReports">
+                <NuxtLink to="/dashboard/reports/financial" class="nav-link text-sm py-2">
+                  {{ $t('nav.financialReports') }}
+                </NuxtLink>
+              </li>
+            </ul>
+          </Transition>
         </li>
 
         <!-- Divider -->
@@ -703,10 +743,26 @@ const canAccessMasterDataSection = computed(() =>
   canAccessCities.value || canAccessBrands.value || canAccessSources.value || canAccessReasons.value ||
   canAccessExtraTags.value || canAccessTrackingStates.value || canAccessExpenseTypes.value || canAccessSuppliers.value || canAccessStores.value
 )
-// Reports & Config
+// Reports Section
 const canAccessStatistics = computed(() =>
   hasPermission('Permissions.Statistics.View')
 )
+const canAccessRoas = computed(() =>
+  hasPermission('Permissions.SpentAds.View')
+)
+const canAccessDeliveryReports = computed(() =>
+  hasPermission('Permissions.Dashboard.View')
+)
+const canAccessCodReports = computed(() =>
+  hasPermission('Permissions.Payments.View')
+)
+const canAccessFinancialReports = computed(() =>
+  hasPermission('Permissions.Dashboard.View')
+)
+const canAccessReportsSection = computed(() =>
+  canAccessStatistics.value || canAccessRoas.value || canAccessDeliveryReports.value || canAccessCodReports.value || canAccessFinancialReports.value
+)
+// Config
 const canAccessSettings = computed(() =>
   hasPermission('Permissions.Settings.View')
 )
@@ -739,6 +795,7 @@ const expandedSections = ref({
   finance: false,
   marketing: false,
   masterData: true,
+  reports: true,
   config: false
 })
 
