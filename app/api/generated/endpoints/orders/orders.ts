@@ -73,12 +73,16 @@ import type {
   OrdersGetQualityOrdersParams,
   OrdersGetSuiviOrdersParams,
   PaginationResponseOfOrderDto,
+  PaginationResponseOfSuiviOrderDto,
   ReadyForDeliveryOrderDto,
   ReassignOrdersRequest,
   ReassignOrdersResponse,
   ReleaseOrderRequest,
   RemoveOrderItemRequest,
+  ReturnToConfirmationRequest,
+  ReturnToConfirmationResponse,
   SearchOrdersRequest,
+  SearchSuiviOrdersRequest,
   SendOrderToProviderResponse,
   Stream,
   UnarchiveOrdersRequest,
@@ -1784,6 +1788,70 @@ export function useOrdersGetSuiviOrders<TData = Awaited<ReturnType<typeof orders
 
 
 /**
+ * @summary Search suivi orders with filters and pagination.
+ */
+export const ordersSearchSuiviOrders = (
+    searchSuiviOrdersRequest: MaybeRef<SearchSuiviOrdersRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      searchSuiviOrdersRequest = unref(searchSuiviOrdersRequest);
+      
+      return customInstance<PaginationResponseOfSuiviOrderDto>(
+      {url: `/api/v1/orders/search-suivi`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: searchSuiviOrdersRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getOrdersSearchSuiviOrdersMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersSearchSuiviOrders>>, TError,{data: SearchSuiviOrdersRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersSearchSuiviOrders>>, TError,{data: SearchSuiviOrdersRequest}, TContext> => {
+
+const mutationKey = ['ordersSearchSuiviOrders'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersSearchSuiviOrders>>, {data: SearchSuiviOrdersRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersSearchSuiviOrders(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersSearchSuiviOrdersMutationResult = NonNullable<Awaited<ReturnType<typeof ordersSearchSuiviOrders>>>
+    export type OrdersSearchSuiviOrdersMutationBody = SearchSuiviOrdersRequest
+    export type OrdersSearchSuiviOrdersMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Search suivi orders with filters and pagination.
+ */
+export const useOrdersSearchSuiviOrders = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersSearchSuiviOrders>>, TError,{data: SearchSuiviOrdersRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof ordersSearchSuiviOrders>>,
+        TError,
+        {data: SearchSuiviOrdersRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersSearchSuiviOrdersMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Get orders ready for delivery.
  */
 export const ordersGetReadyForDelivery = (
@@ -2036,6 +2104,70 @@ export const useOrdersBulkAssignDeliveryCompany = <TError = unknown,
       > => {
 
       const mutationOptions = getOrdersBulkAssignDeliveryCompanyMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Return order to confirmation phase.
+ */
+export const ordersReturnToConfirmation = (
+    returnToConfirmationRequest: MaybeRef<ReturnToConfirmationRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      returnToConfirmationRequest = unref(returnToConfirmationRequest);
+      
+      return customInstance<ReturnToConfirmationResponse>(
+      {url: `/api/v1/orders/return-to-confirmation`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: returnToConfirmationRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getOrdersReturnToConfirmationMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersReturnToConfirmation>>, TError,{data: ReturnToConfirmationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersReturnToConfirmation>>, TError,{data: ReturnToConfirmationRequest}, TContext> => {
+
+const mutationKey = ['ordersReturnToConfirmation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersReturnToConfirmation>>, {data: ReturnToConfirmationRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersReturnToConfirmation(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersReturnToConfirmationMutationResult = NonNullable<Awaited<ReturnType<typeof ordersReturnToConfirmation>>>
+    export type OrdersReturnToConfirmationMutationBody = ReturnToConfirmationRequest
+    export type OrdersReturnToConfirmationMutationError = unknown
+
+    /**
+ * @summary Return order to confirmation phase.
+ */
+export const useOrdersReturnToConfirmation = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersReturnToConfirmation>>, TError,{data: ReturnToConfirmationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof ordersReturnToConfirmation>>,
+        TError,
+        {data: ReturnToConfirmationRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersReturnToConfirmationMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

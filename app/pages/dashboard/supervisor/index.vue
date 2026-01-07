@@ -1370,18 +1370,31 @@ const openReassignModal = async () => {
         const matchingOrders = confirmationOrders.value.filter(o => o.orderId === orderId)
 
         for (const confOrder of matchingOrders) {
-          const isActiveStatus = activeStatuses.includes(confOrder.assignmentStatus || '')
-          if (confOrder.serviceType && isActiveStatus) {
-            const key = confOrder.serviceType
+          const status = confOrder.assignmentStatus || 'unassigned'
+          const isActiveOrUnassigned = activeStatuses.includes(status) || status === 'unassigned'
+
+          if (isActiveOrUnassigned) {
+            // For confirmation tab, service type should be "confirmation" even if not set
+            const key = confOrder.serviceType || ServiceTypes.Confirmation
             if (!servicesMap.has(key)) {
               servicesMap.set(key, {
-                serviceType: confOrder.serviceType,
+                serviceType: key,
                 workerName: confOrder.workerName || null,
-                status: confOrder.assignmentStatus || 'unknown',
+                status: status,
                 orderId: confOrder.orderId || ''
               })
             }
           }
+        }
+
+        // Always add Confirmation option for this tab if not already present
+        if (!servicesMap.has(ServiceTypes.Confirmation)) {
+          servicesMap.set(ServiceTypes.Confirmation, {
+            serviceType: ServiceTypes.Confirmation,
+            workerName: null,
+            status: 'new',
+            orderId: orderId
+          })
         }
 
         // Add Quality option if enabled and not already assigned

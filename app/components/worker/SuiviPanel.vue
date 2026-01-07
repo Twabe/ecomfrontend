@@ -4,21 +4,21 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <WorkerStatCard
         :label="$t('worker.toFollow')"
-        :count="pendingCount"
-        color="yellow"
+        :count="totalCount"
+        color="blue"
         icon-type="pending"
       />
       <WorkerStatCard
-        :label="$t('worker.active')"
-        :count="activeCount"
-        color="blue"
-        icon-type="active"
+        :label="$t('worker.needsDelivery')"
+        :count="needsDeliveryCount"
+        color="orange"
+        icon-type="delivery"
       />
       <WorkerStatCard
         :label="$t('worker.delivered')"
         :count="deliveredTodayCount"
         color="green"
-        icon-type="delivery"
+        icon-type="active"
       />
       <WorkerStatCard
         :label="$t('worker.issues')"
@@ -28,522 +28,505 @@
       />
     </div>
 
-    <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Pending Queue -->
-      <div class="card">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <ClockIcon class="w-5 h-5 text-yellow-500" />
-            {{ $t('worker.toFollow') }}
-          </h2>
-          <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded">
-            {{ pendingCount }}
-          </span>
+    <!-- Filters Section -->
+    <div class="card mb-6">
+      <div class="flex flex-wrap gap-3 items-end">
+        <!-- Search -->
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ $t('common.search') }}
+          </label>
+          <input
+            v-model="filters.keyword"
+            type="text"
+            :placeholder="$t('worker.searchOrderCodeOrCustomer')"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+            @keyup.enter="applyFilters"
+          />
         </div>
 
-        <div v-if="isLoading" class="text-center py-8">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-        </div>
-
-        <div v-else-if="pendingAssignments.length === 0" class="text-center py-8">
-          <InboxIcon class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p class="text-gray-500 dark:text-gray-400">{{ $t('worker.noSuiviAssignments') }}</p>
-        </div>
-
-        <div v-else class="space-y-2 max-h-[600px] overflow-y-auto">
-          <div
-            v-for="assignment in pendingAssignments"
-            :key="assignment.id"
-            class="p-3 border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
+        <!-- Confirmer Filter -->
+        <div class="w-[180px]">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ $t('worker.confirmer') }}
+          </label>
+          <select
+            v-model="filters.confirmerId"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            <!-- Header: Code + Price -->
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-mono font-semibold text-primary-600 dark:text-primary-400 text-sm">
-                {{ assignment.orderCode }}
-              </span>
-              <span class="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                {{ formatCurrency(assignment.totalPrice || assignment.orderPrice) }}
-              </span>
-            </div>
-            <!-- Customer + City Row -->
-            <div class="flex items-center justify-between gap-2">
-              <p class="font-medium text-gray-900 dark:text-white text-sm truncate flex-1">
-                {{ assignment.customerName }}
-              </p>
-              <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 shrink-0">
-                <TruckIcon class="w-3 h-3" />
-                {{ assignment.customerCity || assignment.cityName }}
-              </span>
-            </div>
-
-            <!-- Attempt Badge -->
-            <div class="flex items-center gap-2 mt-1.5">
-              <span
-                v-if="!assignment.attemptCount || assignment.attemptCount === 0"
-                class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-              >
-                <SparklesIcon class="w-3 h-3" />
-                {{ $t('worker.newOrder') }}
-              </span>
-              <template v-else>
-                <span
-                  class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full"
-                  :class="getAttemptBadgeClass(assignment.attemptCount)"
-                >
-                  <ArrowPathIcon class="w-3 h-3" />
-                  {{ $t('worker.attempt') }} #{{ assignment.attemptCount }}
-                </span>
-                <span v-if="assignment.lastAttemptResult" class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ formatLastAttemptResult(assignment.lastAttemptResult) }}
-                </span>
-                <span v-if="assignment.lastAttemptAt" class="text-xs text-gray-400 dark:text-gray-500">
-                  · {{ formatTimeAgo(assignment.lastAttemptAt) }}
-                </span>
-              </template>
-            </div>
-
-            <!-- Notes History (if any) -->
-            <div
-              v-if="assignment.notes"
-              class="mt-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded text-xs text-gray-600 dark:text-gray-400 max-h-20 overflow-y-auto"
-            >
-              <div class="flex items-start gap-1">
-                <ChatBubbleLeftIcon class="w-3 h-3 mt-0.5 shrink-0" />
-                <pre class="whitespace-pre-wrap font-sans text-xs">{{ assignment.notes }}</pre>
-              </div>
-            </div>
-
-            <!-- Take Button -->
-            <div class="mt-2 pt-2 border-t border-yellow-200 dark:border-yellow-800">
-              <button
-                @click="handleTake(assignment)"
-                class="w-full btn-primary py-1.5 text-sm font-semibold"
-                :disabled="isTaking"
-              >
-                <HandRaisedIcon class="w-4 h-4 mr-1" />
-                {{ $t('worker.take') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Active Tracking -->
-      <div class="card">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <TruckIcon class="w-5 h-5 text-blue-500" />
-            {{ $t('worker.activeTracking') }}
-            <!-- Select All checkbox -->
-            <label v-if="activeAssignments.length > 0" class="ml-2 flex items-center gap-1.5 text-sm font-normal cursor-pointer">
-              <input
-                type="checkbox"
-                :checked="isAllSelected"
-                @change="isAllSelected ? deselectAll() : selectAll()"
-                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded"
-              />
-              <span class="text-gray-500 dark:text-gray-400">{{ $t('common.selectAll') }}</span>
-            </label>
-          </h2>
-          <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
-            {{ activeCount }}
-          </span>
+            <option value="">{{ $t('common.all') }}</option>
+            <option v-for="user in confirmers" :key="user.id" :value="user.id">
+              {{ user.name }}
+            </option>
+          </select>
         </div>
 
-        <!-- Bulk Actions Bar -->
-        <div
-          v-if="selectedAssignments.size > 0"
-          class="mb-4 p-3 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800 rounded-lg"
-        >
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-sm font-medium text-primary-700 dark:text-primary-300">
-              {{ selectedAssignments.size }} {{ $t('common.selected') }}
-            </span>
-            <div class="flex-1"></div>
-            <button
-              @click="handleBulkComplete(SuiviResult.Delivered)"
-              :disabled="isBulkProcessing || isBulkAssignDeliveryProcessing"
-              class="btn-primary text-sm py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
-            >
-              <CheckCircleIcon class="w-4 h-4 mr-1" />
-              {{ $t('worker.markAllDelivered') }}
-            </button>
-            <button
-              @click="handleBulkComplete(SuiviResult.Returned)"
-              :disabled="isBulkProcessing || isBulkAssignDeliveryProcessing"
-              class="btn-secondary text-sm py-1.5 px-3 text-orange-600 dark:text-orange-400 disabled:opacity-50"
-            >
-              <ArrowUturnLeftIcon class="w-4 h-4 mr-1" />
-              {{ $t('worker.markAllReturned') }}
-            </button>
-            <button
-              @click="openBulkAssignDeliveryModal"
-              :disabled="isBulkProcessing || isBulkAssignDeliveryProcessing"
-              class="btn-secondary text-sm py-1.5 px-3 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700 disabled:opacity-50"
-            >
-              <TruckIcon class="w-4 h-4 mr-1" />
-              {{ $t('worker.assignAllDelivery') }}
-            </button>
-            <button
-              @click="deselectAll"
-              class="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              :title="$t('common.cancel')"
-            >
-              <XMarkIcon class="w-4 h-4" />
-            </button>
-          </div>
-
-          <!-- Bulk processing indicator -->
-          <div v-if="isBulkProcessing || isBulkAssignDeliveryProcessing" class="mt-2 flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400">
-            <div class="animate-spin rounded-full h-4 w-4 border-2 border-primary-600 border-t-transparent"></div>
-            {{ $t('worker.processingBulk') }}
-          </div>
-        </div>
-
-        <!-- Bulk Result Banner -->
-        <div
-          v-if="bulkResult"
-          class="mb-4 p-3 rounded-lg"
-          :class="bulkResult.failed > 0 ? 'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800' : 'bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800'"
-        >
-          <div class="flex items-center justify-between">
-            <div class="text-sm">
-              <span class="font-medium" :class="bulkResult.failed > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-emerald-700 dark:text-emerald-300'">
-                {{ $t('worker.bulkCompleted', { count: bulkResult.successfullyCompleted }) }}
-              </span>
-              <span v-if="bulkResult.failed > 0" class="ml-2 text-red-600 dark:text-red-400">
-                {{ $t('worker.bulkFailed', { count: bulkResult.failed }) }}
-              </span>
-              <span v-if="bulkResult.totalCodCollected > 0" class="ml-2 text-emerald-600 dark:text-emerald-400">
-                COD: {{ formatCurrency(bulkResult.totalCodCollected) }}
-              </span>
-            </div>
-            <button @click="dismissBulkResult" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400">
-              <XMarkIcon class="w-4 h-4" />
-            </button>
-          </div>
-          <!-- Show errors if any -->
-          <div v-if="bulkResult.errors.length > 0" class="mt-2 text-xs text-red-600 dark:text-red-400">
-            <div v-for="(error, idx) in bulkResult.errors.slice(0, 3)" :key="idx">
-              {{ error }}
-            </div>
-            <div v-if="bulkResult.errors.length > 3" class="text-gray-500">
-              {{ $t('common.andMore', { count: bulkResult.errors.length - 3 }) }}
-            </div>
-          </div>
-        </div>
-
-        <!-- Bulk Delivery Assignment Result Banner -->
-        <div
-          v-if="bulkDeliveryResult"
-          class="mb-4 p-3 rounded-lg"
-          :class="bulkDeliveryResult.failed > 0 ? 'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800' : 'bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800'"
-        >
-          <div class="flex items-center justify-between">
-            <div class="text-sm flex items-center gap-2">
-              <TruckIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
-              <span class="font-medium" :class="bulkDeliveryResult.failed > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-orange-700 dark:text-orange-300'">
-                {{ $t('worker.deliveryAssignedBulk', { count: bulkDeliveryResult.successfullyAssigned }) }}
-              </span>
-              <span v-if="bulkDeliveryResult.failed > 0" class="text-red-600 dark:text-red-400">
-                {{ $t('worker.bulkFailed', { count: bulkDeliveryResult.failed }) }}
-              </span>
-            </div>
-            <button @click="dismissBulkDeliveryResult" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400">
-              <XMarkIcon class="w-4 h-4" />
-            </button>
-          </div>
-          <!-- Show errors if any -->
-          <div v-if="bulkDeliveryResult.errors.length > 0" class="mt-2 text-xs text-red-600 dark:text-red-400">
-            <div v-for="(error, idx) in bulkDeliveryResult.errors.slice(0, 3)" :key="idx">
-              {{ error }}
-            </div>
-            <div v-if="bulkDeliveryResult.errors.length > 3" class="text-gray-500">
-              {{ $t('common.andMore', { count: bulkDeliveryResult.errors.length - 3 }) }}
-            </div>
-          </div>
-        </div>
-
-        <div v-if="isLoading" class="text-center py-8">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-        </div>
-
-        <div v-else-if="activeAssignments.length === 0" class="text-center py-8">
-          <TruckIcon class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p class="text-gray-500 dark:text-gray-400">{{ $t('worker.noActiveSuivi') }}</p>
-        </div>
-
-        <div v-else class="space-y-2 max-h-[600px] overflow-y-auto">
-          <div
-            v-for="assignment in activeAssignments"
-            :key="assignment.id"
-            class="p-3 border rounded-lg transition-colors"
-            :class="isSelected(assignment.id)
-              ? 'border-primary-400 dark:border-primary-600 bg-primary-50 dark:bg-primary-900/30 ring-1 ring-primary-400 dark:ring-primary-600'
-              : 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20'"
+        <!-- Delivery Company Filter -->
+        <div class="w-[180px]">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ $t('worker.deliveryCompany') }}
+          </label>
+          <select
+            v-model="filters.deliveryCompanyId"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            <!-- Header: Checkbox + Code + Price + View -->
-            <div class="flex items-center justify-between mb-1">
-              <div class="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  :checked="isSelected(assignment.id)"
-                  @change="toggleSelection(assignment.id)"
-                  class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer"
-                />
-                <span class="font-mono font-semibold text-primary-600 dark:text-primary-400 text-sm">
-                  {{ assignment.orderCode }}
-                </span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                  {{ formatCurrency(assignment.totalPrice || assignment.orderPrice) }}
-                </span>
-                <button
-                  @click="emit('view-order', assignment)"
-                  class="p-1 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 bg-gray-100 dark:bg-gray-700 rounded"
-                  :title="$t('common.view')"
-                >
-                  <EyeIcon class="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+            <option value="">{{ $t('common.all') }}</option>
+            <option value="none">{{ $t('worker.noDeliveryCompany') }}</option>
+            <option v-for="dc in deliveryCompanies" :key="dc.id" :value="dc.id">
+              {{ dc.name }}
+            </option>
+          </select>
+        </div>
 
-            <!-- Customer Info Row -->
-            <div class="flex items-center justify-between gap-2">
-              <p class="font-medium text-gray-900 dark:text-white text-sm truncate flex-1">
-                {{ assignment.customerName }}
-              </p>
-              <a
-                :href="'tel:' + assignment.customerPhone"
-                class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 shrink-0"
-              >
-                <PhoneIcon class="w-3 h-3" />
-                {{ assignment.customerPhone }}
-              </a>
-            </div>
+        <!-- Date Filter -->
+        <div class="w-[150px]">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ $t('common.dateFrom') }}
+          </label>
+          <input
+            v-model="filters.confirmedFrom"
+            type="date"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          />
+        </div>
 
-            <!-- Delivery Company (compact inline) or Needs Assignment badge -->
-            <div v-if="assignment.deliveryCompanyName" class="flex items-center gap-2 mt-1 text-xs text-orange-600 dark:text-orange-400">
-              <TruckIcon class="w-3 h-3 shrink-0" />
-              <span class="truncate">
-                {{ assignment.deliveryCompanyName }}
-              </span>
-              <a
-                v-if="assignment.deliveryCompanyPhone"
-                :href="'tel:' + assignment.deliveryCompanyPhone"
-                class="hover:underline shrink-0"
-              >
-                {{ assignment.deliveryCompanyPhone }}
-              </a>
-            </div>
-            <!-- Needs Delivery Company badge + Assign button -->
-            <div v-else class="flex items-center gap-2 mt-1">
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 rounded-full">
-                <ExclamationTriangleIcon class="w-3 h-3" />
-                {{ $t('worker.needsDelivery') }}
-              </span>
-              <button
-                @click="emit('assign-delivery', assignment)"
-                class="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300 rounded hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors"
-              >
-                {{ $t('worker.assignDelivery') }}
-              </button>
-            </div>
+        <div class="w-[150px]">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ $t('common.dateTo') }}
+          </label>
+          <input
+            v-model="filters.confirmedTo"
+            type="date"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          />
+        </div>
 
-            <!-- Previous notes (from confirmation agent) -->
-            <div v-if="assignment.notes" class="mt-1.5 p-2 bg-gray-100 dark:bg-gray-700/50 rounded text-xs text-gray-600 dark:text-gray-400 italic">
-              <ChatBubbleLeftIcon class="w-3 h-3 inline mr-1" />
-              {{ assignment.notes }}
-            </div>
-
-            <!-- Actions Row 1: Contact buttons -->
-            <div class="flex gap-1.5 mt-2 pt-2 border-t border-blue-200 dark:border-blue-800">
-              <a
-                :href="'tel:' + assignment.customerPhone"
-                class="btn-secondary flex-1 text-xs py-1.5 flex items-center justify-center"
-              >
-                <PhoneIcon class="w-3.5 h-3.5 mr-1" />
-                {{ $t('worker.call') }}
-              </a>
-              <a
-                v-if="enableWhatsApp"
-                :href="getWhatsAppLink(assignment.customerPhone)"
-                target="_blank"
-                class="btn-secondary flex-1 text-xs py-1.5 flex items-center justify-center text-green-600 dark:text-green-400"
-              >
-                <ChatBubbleLeftRightIcon class="w-3.5 h-3.5 mr-1" />
-                WA
-              </a>
-              <a
-                v-if="assignment.deliveryCompanyPhone"
-                :href="'tel:' + assignment.deliveryCompanyPhone"
-                class="btn-secondary flex-1 text-xs py-1.5 flex items-center justify-center text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700"
-              >
-                <TruckIcon class="w-3.5 h-3.5 mr-1" />
-                Livreur
-              </a>
-            </div>
-
-            <!-- Actions Row 2: Complete buttons -->
-            <div class="flex gap-1.5 mt-1.5">
-              <button
-                @click="quickComplete(assignment, SuiviResult.Delivered)"
-                class="btn-primary flex-1 text-xs py-1.5 bg-emerald-600 hover:bg-emerald-700"
-              >
-                <CheckCircleIcon class="w-3.5 h-3.5 mr-1" />
-                {{ $t('worker.delivered') }}
-              </button>
-              <button
-                @click="quickComplete(assignment, SuiviResult.Returned)"
-                class="btn-secondary flex-1 text-xs py-1.5 text-orange-600 dark:text-orange-400"
-              >
-                <ArrowUturnLeftIcon class="w-3.5 h-3.5 mr-1" />
-                {{ $t('orders.returned') }}
-              </button>
-              <button
-                @click="openCompleteModal(assignment)"
-                class="btn-secondary text-xs py-1.5 px-2"
-                :title="$t('worker.moreOptions')"
-              >
-                <EllipsisHorizontalIcon class="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+        <!-- Filter Actions -->
+        <div class="flex gap-2">
+          <button
+            @click="applyFilters"
+            class="btn-primary px-4 py-2 text-sm"
+          >
+            <FunnelIcon class="w-4 h-4 mr-1" />
+            {{ $t('common.filter') }}
+          </button>
+          <button
+            @click="resetFilters"
+            class="btn-secondary px-4 py-2 text-sm"
+          >
+            <XMarkIcon class="w-4 h-4 mr-1" />
+            {{ $t('common.reset') }}
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Complete Suivi Modal -->
-    <WorkerCompleteSuiviModal
-      v-model="showCompleteModal"
-      :assignment="selectedAssignment"
-      :tracking-states="shippingTrackingStates"
-      @submit="handleCompleteSuivi"
-    />
+    <!-- Bulk Actions Bar -->
+    <div
+      v-if="selectedOrders.size > 0"
+      class="mb-4 p-3 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800 rounded-lg"
+    >
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium text-primary-700 dark:text-primary-300">
+          {{ selectedOrders.size }} {{ $t('common.selected') }}
+        </span>
+        <div class="flex-1"></div>
+        <button
+          @click="handleBulkMarkDelivered"
+          :disabled="isBulkProcessing"
+          class="btn-primary text-sm py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
+        >
+          <CheckCircleIcon class="w-4 h-4 mr-1" />
+          {{ $t('worker.markAllDelivered') }}
+        </button>
+        <button
+          @click="openBulkAssignDeliveryModal"
+          :disabled="isBulkProcessing"
+          class="btn-secondary text-sm py-1.5 px-3 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700 disabled:opacity-50"
+        >
+          <TruckIcon class="w-4 h-4 mr-1" />
+          {{ $t('worker.assignAllDelivery') }}
+        </button>
+        <button
+          @click="deselectAll"
+          class="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          :title="$t('common.cancel')"
+        >
+          <XMarkIcon class="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <TruckIcon class="w-5 h-5 text-blue-500" />
+          {{ $t('worker.ordersInTracking') }}
+          <label v-if="orders.length > 0" class="ml-2 flex items-center gap-1.5 text-sm font-normal cursor-pointer">
+            <input
+              type="checkbox"
+              :checked="isAllSelected"
+              @change="isAllSelected ? deselectAll() : selectAll()"
+              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded"
+            />
+            <span class="text-gray-500 dark:text-gray-400">{{ $t('common.selectAll') }}</span>
+          </label>
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
+          {{ totalCount }}
+        </span>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="isLoading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="orders.length === 0" class="text-center py-8">
+        <TruckIcon class="w-12 h-12 text-gray-400 mx-auto mb-3" />
+        <p class="text-gray-500 dark:text-gray-400">{{ $t('worker.noSuiviOrders') }}</p>
+      </div>
+
+      <!-- Orders Grid -->
+      <div v-else class="space-y-3">
+        <div
+          v-for="order in orders"
+          :key="order.orderId"
+          class="p-4 border rounded-lg transition-colors"
+          :class="isSelected(order.orderId)
+            ? 'border-primary-400 dark:border-primary-600 bg-primary-50 dark:bg-primary-900/30 ring-1 ring-primary-400 dark:ring-primary-600'
+            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'"
+        >
+          <!-- Header Row: Checkbox + Code + Price + View -->
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <input
+                type="checkbox"
+                :checked="isSelected(order.orderId)"
+                @change="toggleSelection(order.orderId)"
+                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer"
+              />
+              <span class="font-mono font-semibold text-primary-600 dark:text-primary-400">
+                {{ order.orderCode }}
+              </span>
+              <span
+                v-if="!order.deliveryCompanyId"
+                class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 rounded-full"
+              >
+                <ExclamationTriangleIcon class="w-3 h-3" />
+                {{ $t('worker.needsDelivery') }}
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                {{ formatCurrency(order.totalPrice) }}
+              </span>
+              <button
+                @click="emit('view-order', order)"
+                class="p-1.5 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 bg-gray-100 dark:bg-gray-700 rounded"
+                :title="$t('common.view')"
+              >
+                <EyeIcon class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Customer Info Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <UserIcon class="w-4 h-4 text-gray-400" />
+              <span class="font-medium text-gray-900 dark:text-white">{{ order.customerName }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <a
+                :href="'tel:' + order.customerPhone"
+                class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              >
+                <PhoneIcon class="w-4 h-4" />
+                {{ order.customerPhone }}
+              </a>
+            </div>
+          </div>
+
+          <!-- Location & Confirmer Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2 text-sm text-gray-600 dark:text-gray-400">
+            <div class="flex items-center gap-2">
+              <MapPinIcon class="w-4 h-4" />
+              <span>{{ order.cityName || '-' }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <UserCircleIcon class="w-4 h-4" />
+              <span>{{ $t('worker.confirmedBy') }}: {{ order.confirmerName || '-' }}</span>
+              <span v-if="order.confirmedAt" class="text-xs text-gray-400">
+                ({{ formatDate(order.confirmedAt) }})
+              </span>
+            </div>
+          </div>
+
+          <!-- Delivery Company Row -->
+          <div v-if="order.deliveryCompanyName" class="flex items-center gap-2 mb-2 text-sm text-orange-600 dark:text-orange-400">
+            <TruckIcon class="w-4 h-4" />
+            <span>{{ order.deliveryCompanyName }}</span>
+            <a
+              v-if="order.deliveryCompanyPhone"
+              :href="'tel:' + order.deliveryCompanyPhone"
+              class="hover:underline"
+            >
+              {{ order.deliveryCompanyPhone }}
+            </a>
+          </div>
+
+          <!-- Tracking State -->
+          <div v-if="order.trackingStateName" class="mb-3">
+            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 rounded">
+              {{ order.trackingStateName }}
+            </span>
+          </div>
+
+          <!-- Actions Row -->
+          <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <!-- Contact Actions -->
+            <a
+              :href="'tel:' + order.customerPhone"
+              class="btn-secondary text-xs py-1.5 px-3"
+            >
+              <PhoneIcon class="w-3.5 h-3.5 mr-1" />
+              {{ $t('worker.call') }}
+            </a>
+            <a
+              :href="getWhatsAppLink(order.customerPhone)"
+              target="_blank"
+              class="btn-secondary text-xs py-1.5 px-3 text-green-600 dark:text-green-400"
+            >
+              <ChatBubbleLeftRightIcon class="w-3.5 h-3.5 mr-1" />
+              WA
+            </a>
+
+            <div class="flex-1"></div>
+
+            <!-- Action Buttons -->
+            <button
+              v-if="!order.deliveryCompanyId"
+              @click="emit('assign-delivery', order)"
+              class="btn-secondary text-xs py-1.5 px-3 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700"
+            >
+              <TruckIcon class="w-3.5 h-3.5 mr-1" />
+              {{ $t('worker.assignDelivery') }}
+            </button>
+            <button
+              @click="handleMarkDelivered(order)"
+              class="btn-primary text-xs py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700"
+            >
+              <CheckCircleIcon class="w-3.5 h-3.5 mr-1" />
+              {{ $t('worker.delivered') }}
+            </button>
+            <button
+              @click="handleReturnToConfirmation(order)"
+              class="btn-secondary text-xs py-1.5 px-3 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+            >
+              <ArrowUturnLeftIcon class="w-3.5 h-3.5 mr-1" />
+              {{ $t('worker.returnToConfirmation') }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="btn-secondary text-sm py-1.5 px-3 disabled:opacity-50"
+        >
+          <ChevronLeftIcon class="w-4 h-4 mr-1" />
+          {{ $t('common.previous') }}
+        </button>
+        <span class="text-sm text-gray-600 dark:text-gray-400">
+          {{ $t('common.page') }} {{ currentPage }} / {{ totalPages }}
+        </span>
+        <button
+          @click="nextPage"
+          :disabled="currentPage >= totalPages"
+          class="btn-secondary text-sm py-1.5 px-3 disabled:opacity-50"
+        >
+          {{ $t('common.next') }}
+          <ChevronRightIcon class="w-4 h-4 ml-1" />
+        </button>
+      </div>
+    </div>
 
     <!-- Bulk Assign Delivery Modal -->
     <OrdersBulkAssignDeliveryModal
       :show="showBulkAssignDeliveryModal"
-      :order-count="selectedAssignments.size"
+      :order-count="selectedOrders.size"
       :delivery-companies="deliveryCompanies"
-      :is-submitting="isBulkAssignDeliveryProcessing"
+      :is-submitting="isBulkProcessing"
       @close="showBulkAssignDeliveryModal = false"
       @submit="handleBulkAssignDelivery"
     />
+
+    <!-- Return to Confirmation Modal -->
+    <BaseModal
+      :show="showReturnModal"
+      :title="$t('worker.returnToConfirmationTitle')"
+      @close="showReturnModal = false"
+    >
+      <div class="space-y-4">
+        <p class="text-gray-600 dark:text-gray-400">
+          {{ $t('worker.returnToConfirmationMessage', { code: selectedOrderForReturn?.orderCode }) }}
+        </p>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ $t('common.reason') }} ({{ $t('common.optional') }})
+          </label>
+          <textarea
+            v-model="returnReason"
+            rows="3"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            :placeholder="$t('worker.returnReasonPlaceholder')"
+          ></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button
+            @click="showReturnModal = false"
+            class="btn-secondary px-4 py-2"
+          >
+            {{ $t('common.cancel') }}
+          </button>
+          <button
+            @click="confirmReturnToConfirmation"
+            :disabled="isReturning"
+            class="btn-primary px-4 py-2 bg-amber-600 hover:bg-amber-700"
+          >
+            <ArrowUturnLeftIcon class="w-4 h-4 mr-1" />
+            {{ $t('worker.returnToConfirmation') }}
+          </button>
+        </div>
+      </div>
+    </BaseModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import {
-  ClockIcon,
   TruckIcon,
-  InboxIcon,
-  HandRaisedIcon,
   PhoneIcon,
   CheckCircleIcon,
   ArrowUturnLeftIcon,
   ChatBubbleLeftRightIcon,
-  ChatBubbleLeftIcon,
-  EllipsisHorizontalIcon,
   ExclamationTriangleIcon,
   EyeIcon,
-  SparklesIcon,
-  ArrowPathIcon,
-  XMarkIcon
+  XMarkIcon,
+  FunnelIcon,
+  UserIcon,
+  UserCircleIcon,
+  MapPinIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/vue/24/outline'
-import { useOrderAssignmentsService, type WorkerAssignmentDto, type BulkCompleteSuiviAssignmentsResponse } from '~/services'
-import { useOrdersWorkflowService, type BulkAssignDeliveryCompanyResponse } from '~/services/orders/useOrdersService'
-import { trackingStatesSearch } from '~/api/generated/endpoints/tracking-states/tracking-states'
+import {
+  useOrdersWorkflowService,
+  type SuiviOrderDto,
+  type SearchSuiviOrdersRequest,
+} from '~/services/orders/useOrdersService'
+import { useOrderAssignmentsService } from '~/services'
 import { deliveryCompaniesSearch } from '~/api/generated/endpoints/delivery-companies/delivery-companies'
-import { ServiceTypes, SuiviResult } from '~/constants/order'
-import type { SuiviResultType } from '~/constants/order'
+import { usersGetList } from '~/api/generated/endpoints/users/users'
 import type { DeliveryCompany } from '~/types/deliverycompany'
 
 const emit = defineEmits<{
-  (e: 'assign-delivery', assignment: WorkerAssignmentDto): void
-  (e: 'view-order', assignment: WorkerAssignmentDto): void
+  (e: 'assign-delivery', order: SuiviOrderDto): void
+  (e: 'view-order', order: SuiviOrderDto): void
 }>()
 
 const { t } = useI18n()
 const notification = useNotification()
 
 // Services
-const orderAssignmentsService = useOrderAssignmentsService()
 const ordersWorkflow = useOrdersWorkflowService()
+const orderAssignmentsService = useOrderAssignmentsService()
 
-// Query params for filtering by service type
-const pendingParams = ref({ serviceType: ServiceTypes.Suivi })
-const activeParams = ref({ serviceType: ServiceTypes.Suivi })
+// Filter state
+const filters = reactive({
+  keyword: '',
+  confirmerId: '',
+  deliveryCompanyId: '',
+  confirmedFrom: '',
+  confirmedTo: '',
+})
 
-// Vue Query hooks
-const myPendingQuery = orderAssignmentsService.useMyPendingAssignments(pendingParams)
-const myActiveQuery = orderAssignmentsService.useMyActiveAssignments(activeParams)
+// Pagination
+const currentPage = ref(1)
+const pageSize = ref(20)
 
-// Computed from queries
-const myPendingAssignments = computed(() => myPendingQuery.data.value ?? [])
-const myActiveAssignments = computed(() => myActiveQuery.data.value ?? [])
-const isLoading = computed(() => myPendingQuery.isLoading.value || myActiveQuery.isLoading.value)
+// Build search params
+const searchParams = computed<SearchSuiviOrdersRequest>(() => ({
+  keyword: filters.keyword || undefined,
+  confirmerId: filters.confirmerId || undefined,
+  deliveryCompanyId: filters.deliveryCompanyId === 'none' ? undefined : (filters.deliveryCompanyId || undefined),
+  needsDeliveryCompany: filters.deliveryCompanyId === 'none' ? true : undefined,
+  confirmedFrom: filters.confirmedFrom || undefined,
+  confirmedTo: filters.confirmedTo || undefined,
+  pageNumber: currentPage.value,
+  pageSize: pageSize.value,
+}))
 
-// Stats query for delivered/issues counters
-const statsServiceType = ref(ServiceTypes.Suivi)
-const myStatsQuery = orderAssignmentsService.useMyStats(statsServiceType)
-const deliveredTodayCount = computed(() => myStatsQuery.data.value?.deliveredTodayCount ?? 0)
-const issuesCount = computed(() => myStatsQuery.data.value?.issuesCount ?? 0)
+// Query
+const { data: searchResult, isLoading, refetch } = ordersWorkflow.useSearchSuiviOrders(searchParams)
 
-// State
-const isTaking = ref(false)
-const showCompleteModal = ref(false)
-const selectedAssignment = ref<WorkerAssignmentDto | null>(null)
-const shippingTrackingStates = ref<{ id: string; state: string }[]>([])
-const enableWhatsApp = ref(true)
+// Computed from query
+const orders = computed(() => searchResult.value?.data ?? [])
+const totalCount = computed(() => searchResult.value?.totalCount ?? 0)
+const totalPages = computed(() => searchResult.value?.totalPages ?? 1)
 
-// Bulk selection state
-const selectedAssignments = ref<Set<string>>(new Set())
+// Stats - need separate calculation
+const needsDeliveryCount = computed(() =>
+  orders.value.filter(o => !o.deliveryCompanyId).length
+)
+const deliveredTodayCount = ref(0)
+const issuesCount = ref(0)
+
+// Selection state
+const selectedOrders = ref<Set<string>>(new Set())
 const isBulkProcessing = ref(false)
-const bulkResult = ref<BulkCompleteSuiviAssignmentsResponse | null>(null)
-const bulkDeliveryResult = ref<BulkAssignDeliveryCompanyResponse | null>(null)
 
-// Bulk Assign Delivery modal state
+// Modal state
 const showBulkAssignDeliveryModal = ref(false)
+const showReturnModal = ref(false)
+const selectedOrderForReturn = ref<SuiviOrderDto | null>(null)
+const returnReason = ref('')
+const isReturning = ref(false)
+
+// Dropdown data
 const deliveryCompanies = ref<DeliveryCompany[]>([])
-const isBulkAssignDeliveryProcessing = ref(false)
+const confirmers = ref<{ id: string; name: string }[]>([])
 
 // Selection helpers
-const isSelected = (id: string) => selectedAssignments.value.has(id)
+const isSelected = (id: string) => selectedOrders.value.has(id)
 
 const toggleSelection = (id: string) => {
-  const newSet = new Set(selectedAssignments.value)
+  const newSet = new Set(selectedOrders.value)
   if (newSet.has(id)) {
     newSet.delete(id)
   } else {
     newSet.add(id)
   }
-  selectedAssignments.value = newSet
+  selectedOrders.value = newSet
 }
 
 const selectAll = () => {
-  const allIds = activeAssignments.value.map(a => a.id)
-  selectedAssignments.value = new Set(allIds)
+  selectedOrders.value = new Set(orders.value.map(o => o.orderId))
 }
 
 const deselectAll = () => {
-  selectedAssignments.value = new Set()
+  selectedOrders.value = new Set()
 }
 
-const isAllSelected = computed(() => {
-  return activeAssignments.value.length > 0 &&
-    selectedAssignments.value.size === activeAssignments.value.length
-})
-
-// Filtered assignments (already filtered by service type via params)
-const pendingAssignments = computed(() => myPendingAssignments.value)
-const activeAssignments = computed(() => myActiveAssignments.value)
-
-// Counts
-const pendingCount = computed(() => pendingAssignments.value.length)
-const activeCount = computed(() => activeAssignments.value.length)
+const isAllSelected = computed(() =>
+  orders.value.length > 0 && selectedOrders.value.size === orders.value.length
+)
 
 // Format helpers
 const formatCurrency = (amount: number) => {
@@ -553,8 +536,18 @@ const formatCurrency = (amount: number) => {
   }).format(amount)
 }
 
+const formatDate = (date: string | undefined) => {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
 const getWhatsAppLink = (phone: string) => {
-  // Format Moroccan phone for WhatsApp
   let formattedPhone = phone.replace(/\s/g, '').replace(/^0/, '212')
   if (!formattedPhone.startsWith('+')) {
     formattedPhone = '+' + formattedPhone
@@ -562,274 +555,156 @@ const getWhatsAppLink = (phone: string) => {
   return `https://wa.me/${formattedPhone}`
 }
 
-// Attempt tracking helpers
-const formatLastAttemptResult = (result: string) => {
-  const resultMap: Record<string, string> = {
-    no_response: t('worker.noResponse'),
-    in_progress: t('worker.inProgress'),
-    postponed: t('worker.postponed'),
-    refused: t('worker.refused')
-  }
-  return resultMap[result] || result
+// Filter actions
+const applyFilters = () => {
+  currentPage.value = 1
+  refetch()
 }
 
-const getAttemptBadgeClass = (attemptCount: number) => {
-  if (attemptCount === 0) {
-    return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-  } else if (attemptCount <= 2) {
-    return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-  } else {
-    return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+const resetFilters = () => {
+  filters.keyword = ''
+  filters.confirmerId = ''
+  filters.deliveryCompanyId = ''
+  filters.confirmedFrom = ''
+  filters.confirmedTo = ''
+  currentPage.value = 1
+  refetch()
+}
+
+// Pagination
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
   }
 }
 
-const formatTimeAgo = (date: string | null | undefined) => {
-  if (!date) return ''
-  const now = new Date()
-  const past = new Date(date)
-  const diffMs = now.getTime() - past.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMins / 60)
-  const diffDays = Math.floor(diffHours / 24)
-
-  if (diffDays > 0) return `${diffDays}j`
-  if (diffHours > 0) return `${diffHours}h`
-  if (diffMins > 0) return `${diffMins}min`
-  return t('worker.justNow')
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
 }
 
 // Actions
-const handleTake = async (assignment: WorkerAssignmentDto) => {
-  isTaking.value = true
+const handleMarkDelivered = async (order: SuiviOrderDto) => {
   try {
-    await orderAssignmentsService.take(assignment.id)
+    await ordersWorkflow.markAsDelivered({
+      orderIds: [order.orderId],
+      codAmountCollected: order.totalPrice
+    })
+    refetch()
+  } catch (error) {
+    console.error('Mark delivered error:', error)
+  }
+}
+
+const handleReturnToConfirmation = (order: SuiviOrderDto) => {
+  selectedOrderForReturn.value = order
+  returnReason.value = ''
+  showReturnModal.value = true
+}
+
+const confirmReturnToConfirmation = async () => {
+  if (!selectedOrderForReturn.value) return
+
+  isReturning.value = true
+  try {
+    await ordersWorkflow.returnToConfirmation({
+      orderId: selectedOrderForReturn.value.orderId,
+      reason: returnReason.value || undefined
+    })
+    showReturnModal.value = false
+    selectedOrderForReturn.value = null
+    refetch()
+  } catch (error) {
+    console.error('Return to confirmation error:', error)
+    notification.error(t('worker.returnToConfirmationError'))
   } finally {
-    isTaking.value = false
+    isReturning.value = false
   }
 }
 
-const openCompleteModal = (assignment: WorkerAssignmentDto) => {
-  selectedAssignment.value = assignment
-  showCompleteModal.value = true
-}
-
-const quickComplete = async (assignment: WorkerAssignmentDto, result: typeof SuiviResult.Delivered | typeof SuiviResult.Returned) => {
-  // Find appropriate tracking state
-  const trackingState = shippingTrackingStates.value.find(s => {
-    const stateLower = s.state.toLowerCase()
-    if (result === SuiviResult.Delivered) {
-      return stateLower.includes('livré') || stateLower.includes(SuiviResult.Delivered)
-    } else {
-      return stateLower.includes('retour') || stateLower.includes('return')
-    }
-  })
-
-  if (!trackingState) {
-    // Open modal if no matching state found
-    selectedAssignment.value = assignment
-    showCompleteModal.value = true
-    return
-  }
-
-  try {
-    const requestData = {
-      trackingStateId: trackingState.id,
-      result,
-      codAmountCollected: result === SuiviResult.Delivered ? (assignment.totalPrice || assignment.orderPrice) : undefined
-    }
-    console.log('[SuiviPanel] completeSuivi request:', { assignmentId: assignment.id, ...requestData })
-    console.log('[SuiviPanel] shippingTrackingStates:', shippingTrackingStates.value)
-    await orderAssignmentsService.completeSuivi(assignment.id, requestData)
-  } catch (error: any) {
-    console.error('[SuiviPanel] completeSuivi error:', error)
-    console.error('[SuiviPanel] error response:', error?.response?.data || error?.message)
-    // Handle reassigned assignment error (HTTP 409)
-    if (error?.response?.status === 409) {
-      notification.warning(t('worker.orderReassigned'))
-    }
-  }
-}
-
-const handleCompleteSuivi = async (data: {
-  trackingStateId: string
-  result: SuiviResultType
-  notes?: string
-  codAmountCollected?: number
-  postponedUntil?: string
-}) => {
-  if (!selectedAssignment.value) return
-  console.log('[SuiviPanel] handleCompleteSuivi - data from modal:', data)
-  console.log('[SuiviPanel] handleCompleteSuivi - trackingStateId is empty?', !data.trackingStateId)
-  console.log('[SuiviPanel] handleCompleteSuivi - available tracking states:', shippingTrackingStates.value)
-  try {
-    await orderAssignmentsService.completeSuivi(selectedAssignment.value.id, data)
-    showCompleteModal.value = false
-    selectedAssignment.value = null
-  } catch (error: any) {
-    console.error('[SuiviPanel] handleCompleteSuivi error:', error?.response?.data || error)
-    // Handle reassigned assignment error (HTTP 409)
-    if (error?.response?.status === 409) {
-      notification.warning(t('worker.orderReassigned'))
-      showCompleteModal.value = false
-      selectedAssignment.value = null
-    }
-  }
-}
-
-// Bulk complete suivi
-const handleBulkComplete = async (result: typeof SuiviResult.Delivered | typeof SuiviResult.Returned) => {
-  if (selectedAssignments.value.size === 0) return
-
-  // Find appropriate tracking state
-  const trackingState = shippingTrackingStates.value.find(s => {
-    const stateLower = s.state.toLowerCase()
-    if (result === SuiviResult.Delivered) {
-      return stateLower.includes('livré') || stateLower.includes(SuiviResult.Delivered)
-    } else {
-      return stateLower.includes('retour') || stateLower.includes('return')
-    }
-  })
-
-  if (!trackingState) {
-    console.error('[SuiviPanel] No matching tracking state found for result:', result)
-    return
-  }
+// Bulk actions
+const handleBulkMarkDelivered = async () => {
+  if (selectedOrders.value.size === 0) return
 
   isBulkProcessing.value = true
-  bulkResult.value = null
-
   try {
-    const response = await orderAssignmentsService.bulkCompleteSuivi({
-      assignmentIds: Array.from(selectedAssignments.value),
-      trackingStateId: trackingState.id,
-      result
+    const selectedOrdersList = orders.value.filter(o => selectedOrders.value.has(o.orderId))
+    const totalCod = selectedOrdersList.reduce((sum, o) => sum + o.totalPrice, 0)
+
+    await ordersWorkflow.markAsDelivered({
+      orderIds: Array.from(selectedOrders.value),
+      codAmountCollected: totalCod
     })
-
-    bulkResult.value = response
-    console.log('[SuiviPanel] Bulk complete result:', response)
-
-    // Clear selection after successful bulk operation
-    if (response.successfullyCompleted > 0) {
-      deselectAll()
-    }
-
-    // Auto-hide result after 5 seconds if all successful
-    if (response.failed === 0) {
-      setTimeout(() => {
-        bulkResult.value = null
-      }, 5000)
-    }
-  } catch (error: any) {
-    console.error('[SuiviPanel] Bulk complete error:', error?.response?.data || error)
+    deselectAll()
+    refetch()
+  } catch (error) {
+    console.error('Bulk mark delivered error:', error)
   } finally {
     isBulkProcessing.value = false
   }
 }
 
-const dismissBulkResult = () => {
-  bulkResult.value = null
-}
-
-const dismissBulkDeliveryResult = () => {
-  bulkDeliveryResult.value = null
-}
-
-// Open bulk assign delivery modal
 const openBulkAssignDeliveryModal = () => {
   showBulkAssignDeliveryModal.value = true
 }
 
-// Handle bulk assign delivery company submission
 const handleBulkAssignDelivery = async (data: { deliveryCompanyId: string }) => {
-  if (selectedAssignments.value.size === 0) return
+  if (selectedOrders.value.size === 0) return
 
-  isBulkAssignDeliveryProcessing.value = true
-  bulkDeliveryResult.value = null
-
+  isBulkProcessing.value = true
   try {
-    // Get ORDER IDs from selected assignments (not assignment IDs)
-    const orderIds = activeAssignments.value
-      .filter(a => selectedAssignments.value.has(a.id))
-      .map(a => a.orderId)
-
-    const response = await ordersWorkflow.bulkAssignDeliveryCompany({
-      orderIds,
+    await ordersWorkflow.bulkAssignDeliveryCompany({
+      orderIds: Array.from(selectedOrders.value),
       deliveryCompanyId: data.deliveryCompanyId
     })
-
-    bulkDeliveryResult.value = response
-    console.log('[SuiviPanel] Bulk assign delivery result:', response)
-
-    // Clear selection after successful bulk operation
-    if (response.successfullyAssigned > 0) {
-      deselectAll()
-    }
-
-    // Auto-hide result after 5 seconds if all successful
-    if (response.failed === 0) {
-      setTimeout(() => {
-        bulkDeliveryResult.value = null
-      }, 5000)
-    }
-  } catch (error: any) {
-    console.error('[SuiviPanel] Bulk assign delivery error:', error?.response?.data || error)
+    deselectAll()
+    refetch()
+  } catch (error) {
+    console.error('Bulk assign delivery error:', error)
   } finally {
-    isBulkAssignDeliveryProcessing.value = false
+    isBulkProcessing.value = false
     showBulkAssignDeliveryModal.value = false
   }
 }
 
-// Load tracking states filtered by shipping phase
-const loadTrackingStates = async () => {
+// Load dropdown data
+const loadDropdownData = async () => {
   try {
-    const response = await trackingStatesSearch({ pageNumber: 1, pageSize: 100 })
-    const allStates = response.data || []
-
-    // Try to filter for shipping phase states first
-    let filteredStates = allStates.filter((s: any) => s.phases?.toLowerCase().includes('shipping'))
-
-    // If no shipping states found, use all states as fallback
-    if (filteredStates.length === 0) {
-      console.warn('[SuiviPanel] No shipping phase tracking states found, using all states')
-      filteredStates = allStates
-    }
-
-    shippingTrackingStates.value = filteredStates.map((s: any) => ({ id: s.id, state: s.state }))
-    console.log('[SuiviPanel] Loaded tracking states:', shippingTrackingStates.value)
-  } catch (error) {
-    console.error('[SuiviPanel] Failed to load tracking states:', error)
-    shippingTrackingStates.value = []
-  }
-}
-
-// Load delivery companies for bulk assign modal
-const loadDeliveryCompanies = async () => {
-  try {
+    // Load delivery companies
     const dcResponse = await deliveryCompaniesSearch({ pageNumber: 1, pageSize: 100 })
     deliveryCompanies.value = (dcResponse.data || []) as unknown as DeliveryCompany[]
-    console.log('[SuiviPanel] Loaded delivery companies:', deliveryCompanies.value.length)
+
+    // Load users (for confirmer filter)
+    const usersResponse = await usersGetList()
+    confirmers.value = (usersResponse || []).map((u: any) => ({
+      id: u.id,
+      name: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.userName
+    }))
   } catch (error) {
-    console.error('[SuiviPanel] Failed to load delivery companies:', error)
-    deliveryCompanies.value = []
+    console.error('Failed to load dropdown data:', error)
   }
 }
 
-// Load tracking states on mount (Vue Query handles assignment loading)
-onMounted(async () => {
-  await Promise.all([
-    loadTrackingStates(),
-    loadDeliveryCompanies()
-  ])
+// Stats query
+const statsServiceType = ref('suivi')
+const myStatsQuery = orderAssignmentsService.useMyStats(statsServiceType)
+watch(() => myStatsQuery.data.value, (stats) => {
+  if (stats) {
+    deliveredTodayCount.value = stats.deliveredTodayCount ?? 0
+    issuesCount.value = stats.issuesCount ?? 0
+  }
+}, { immediate: true })
+
+onMounted(() => {
+  loadDropdownData()
 })
 
 // Expose refresh method
 defineExpose({
-  refresh: async () => {
-    await Promise.all([
-      myPendingQuery.refetch(),
-      myActiveQuery.refetch(),
-      myStatsQuery.refetch()
-    ])
+  refresh: () => {
+    refetch()
+    myStatsQuery.refetch()
   }
 })
 </script>

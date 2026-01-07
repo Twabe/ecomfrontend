@@ -10,9 +10,21 @@ import {
   useAutoAssignmentSettingsUpdate,
 } from '~/api/generated/endpoints/auto-assignment-settings/auto-assignment-settings'
 import type {
-  AutoAssignmentSettingsDto,
-  UpdateAutoAssignmentSettingsRequest,
+  AutoAssignmentSettingsDto as BaseAutoAssignmentSettingsDto,
+  UpdateAutoAssignmentSettingsRequest as BaseUpdateAutoAssignmentSettingsRequest,
 } from '~/api/generated/models'
+
+// Extended types with new ReturnToConfirmationMode field
+// TODO: Remove these extensions after regenerating API types
+export interface AutoAssignmentSettingsDto extends BaseAutoAssignmentSettingsDto {
+  /** What happens when an order is returned from Suivi to Confirmation: "same_worker", "open", or "choose" */
+  returnToConfirmationMode?: 'same_worker' | 'open' | 'choose'
+}
+
+export interface UpdateAutoAssignmentSettingsRequest extends BaseUpdateAutoAssignmentSettingsRequest {
+  /** What happens when an order is returned from Suivi to Confirmation: "same_worker", "open", or "choose" */
+  returnToConfirmationMode?: 'same_worker' | 'open' | 'choose' | null
+}
 
 export function useAutoAssignmentSettingsService() {
   const queryClient = useQueryClient()
@@ -58,4 +70,4 @@ export function useAutoAssignmentSettingsService() {
   }
 }
 
-export type { AutoAssignmentSettingsDto, UpdateAutoAssignmentSettingsRequest }
+// Types are already exported above via interface extension

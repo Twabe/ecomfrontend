@@ -36,6 +36,9 @@ export interface AutoAssignmentSettingsDto {
   callbackReminderMinutes?: number;
   /** Auto-cancel orders that exceed MaxCallbackAttempts? */
   autoCancelUnreachable?: boolean;
+  /** What happens when an order is returned from Suivi to Confirmation:
+"same_worker", "open", or "choose" */
+  returnToConfirmationMode?: string;
   /** Auto-assign suivi to worker immediately after confirmation? */
   autoAssignSuiviAfterConfirm?: boolean;
   /** Assign suivi to the same worker who confirmed the order? */

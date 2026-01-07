@@ -228,6 +228,53 @@
           show-border
         />
 
+        <!-- Return to Confirmation Mode -->
+        <div class="py-4 border-b border-gray-200 dark:border-gray-700">
+          <label class="label">{{ $t('autoAssignment.returnToConfirmationMode') }}</label>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ $t('autoAssignment.returnToConfirmationModeDescription') }}</p>
+          <div class="space-y-3">
+            <!-- Same Worker Option -->
+            <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" :class="{ 'ring-2 ring-primary-500 border-primary-500': formData.returnToConfirmationMode === 'same_worker' }">
+              <input
+                v-model="formData.returnToConfirmationMode"
+                type="radio"
+                value="same_worker"
+                class="mt-1"
+              />
+              <div>
+                <span class="font-medium text-gray-900 dark:text-white">{{ $t('autoAssignment.returnToConfirmationSameWorker') }}</span>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('autoAssignment.returnToConfirmationSameWorkerDescription') }}</p>
+              </div>
+            </label>
+            <!-- Open (Queue) Option -->
+            <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" :class="{ 'ring-2 ring-primary-500 border-primary-500': formData.returnToConfirmationMode === 'open' }">
+              <input
+                v-model="formData.returnToConfirmationMode"
+                type="radio"
+                value="open"
+                class="mt-1"
+              />
+              <div>
+                <span class="font-medium text-gray-900 dark:text-white">{{ $t('autoAssignment.returnToConfirmationOpen') }}</span>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('autoAssignment.returnToConfirmationOpenDescription') }}</p>
+              </div>
+            </label>
+            <!-- Choose Option -->
+            <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" :class="{ 'ring-2 ring-primary-500 border-primary-500': formData.returnToConfirmationMode === 'choose' }">
+              <input
+                v-model="formData.returnToConfirmationMode"
+                type="radio"
+                value="choose"
+                class="mt-1"
+              />
+              <div>
+                <span class="font-medium text-gray-900 dark:text-white">{{ $t('autoAssignment.returnToConfirmationChoose') }}</span>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('autoAssignment.returnToConfirmationChooseDescription') }}</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <!-- Default Suivi Priority -->
         <div class="py-4">
           <label class="label">{{ $t('autoAssignment.defaultSuiviPriority') }}</label>
@@ -302,6 +349,9 @@ definePageMeta({
 const { t } = useI18n()
 const { settings, isLoading, update, isUpdating } = useAutoAssignmentSettingsService()
 
+// Return to confirmation mode type
+type ReturnToConfirmationMode = 'same_worker' | 'open' | 'choose'
+
 // Form state with all settings fields
 const formData = ref({
   // General
@@ -327,6 +377,7 @@ const formData = ref({
   autoAssignSuiviAfterConfirm: true,
   suiviToSameWorker: true,
   defaultSuiviPriority: 5,
+  returnToConfirmationMode: 'same_worker' as ReturnToConfirmationMode,
   // Integrations
   enableWhatsAppIntegration: true
 })
@@ -369,6 +420,7 @@ const syncFormWithSettings = () => {
       autoAssignSuiviAfterConfirm: settings.value.autoAssignSuiviAfterConfirm ?? true,
       suiviToSameWorker: settings.value.suiviToSameWorker ?? true,
       defaultSuiviPriority: settings.value.defaultSuiviPriority ?? 5,
+      returnToConfirmationMode: (settings.value.returnToConfirmationMode as ReturnToConfirmationMode) ?? 'same_worker',
       // Integrations
       enableWhatsAppIntegration: settings.value.enableWhatsAppIntegration ?? true
     }

@@ -81,11 +81,78 @@ export interface GetQualityOrdersParams {
   Limit?: number
 }
 
-// Types for suivi orders query
+// Types for suivi orders query (legacy)
 export interface GetSuiviOrdersParams {
   AssignmentStatus?: string
   WorkerId?: string
   Limit?: number
+}
+
+// Types for new Suivi page with filters and pagination
+export interface SearchSuiviOrdersRequest {
+  confirmerId?: string
+  deliveryCompanyId?: string
+  cityId?: string
+  trackingStateId?: string
+  orderState?: string
+  confirmedFrom?: string
+  confirmedTo?: string
+  keyword?: string
+  needsDeliveryCompany?: boolean
+  pageNumber: number
+  pageSize: number
+}
+
+export interface SuiviOrderDto {
+  orderId: string
+  orderCode: string
+  customerName: string
+  customerPhone: string
+  customerAddress?: string
+  cityName?: string
+  cityId?: string
+  orderPrice: number
+  totalPrice: number
+  sourceName?: string
+  state: string
+  phase: string
+  trackingStateName?: string
+  trackingStateId?: string
+  confirmerId?: string
+  confirmerName?: string
+  confirmedAt?: string
+  confirmationNotes?: string
+  deliveryCompanyId?: string
+  deliveryCompanyName?: string
+  deliveryCompanyPhone?: string
+  deliveryTrackingNumber?: string
+  orderCreatedOn: string
+  dateValidated?: string
+}
+
+export interface SearchSuiviOrdersResponse {
+  data: SuiviOrderDto[]
+  currentPage: number
+  totalPages: number
+  totalCount: number
+  pageSize: number
+  hasPreviousPage: boolean
+  hasNextPage: boolean
+}
+
+// Types for return to confirmation
+export interface ReturnToConfirmationRequest {
+  orderId: string
+  reason?: string
+  targetWorkerId?: string // Only used when mode is "choose"
+}
+
+export interface ReturnToConfirmationResponse {
+  orderId: string
+  orderCode: string
+  mode: 'same_worker' | 'open' | 'choose'
+  assignedToWorkerId?: string
+  assignedToWorkerName?: string
 }
 
 // Types for bulk assign delivery company
@@ -428,7 +495,7 @@ export function useOrdersWorkflowService() {
   }
 
   /**
-   * Get suivi orders (non-reactive, for one-time fetch)
+   * Get suivi orders (non-reactive, for one-time fetch) - Legacy
    */
   const getSuiviOrders = async (params: GetSuiviOrdersParams = {}): Promise<ConfirmationOrderDto[]> => {
     const api = useApi()
@@ -438,6 +505,41 @@ export function useOrdersWorkflowService() {
     if (params.Limit) queryParams.set('Limit', params.Limit.toString())
     const url = `/api/v1/orders/suivi-orders${queryParams.toString() ? '?' + queryParams.toString() : ''}`
     return api.get<ConfirmationOrderDto[]>(url)
+  }
+
+  /**
+   * Search suivi orders with pagination and filters
+   * Used by new Suivi management page
+   */
+  const searchSuiviOrders = async (params: SearchSuiviOrdersRequest): Promise<SearchSuiviOrdersResponse> => {
+    const api = useApi()
+    return api.post<SearchSuiviOrdersResponse>('/api/v1/orders/search-suivi', params)
+  }
+
+  /**
+   * Hook for searching suivi orders with pagination and filters
+   */
+  const useSearchSuiviOrders = (params: Ref<SearchSuiviOrdersRequest>) => {
+    const api = useApi()
+    return useQuery({
+      queryKey: computed(() => ['orders', 'search-suivi', params.value]),
+      queryFn: () => api.post<SearchSuiviOrdersResponse>('/api/v1/orders/search-suivi', params.value),
+      staleTime: 10 * 1000,
+      refetchInterval: 30 * 1000,
+    })
+  }
+
+  /**
+   * Return an order from suivi (shipping phase) back to confirmation
+   * Used when an order needs to be re-verified
+   * Response includes mode used and assignment info
+   */
+  const returnToConfirmation = async (data: ReturnToConfirmationRequest): Promise<ReturnToConfirmationResponse> => {
+    const api = useApi()
+    const result = await api.post<ReturnToConfirmationResponse>('/api/v1/orders/return-to-confirmation', data)
+    success('Order returned to confirmation')
+    invalidateAll()
+    return result
   }
 
   /**
@@ -844,6 +946,8 @@ export function useOrdersWorkflowService() {
     getConfirmationOrders,
     getQualityOrders,
     getSuiviOrders,
+    searchSuiviOrders,
+    useSearchSuiviOrders,
     getReadyForDelivery,
     getOrdersByCodes,
     getOrder,
@@ -856,6 +960,7 @@ export function useOrdersWorkflowService() {
     bulkUpdateState,
     bulkDelete,
     bulkMoveToShipping,
+    returnToConfirmation,
 
     // Worker operations
     grabOrder,
@@ -907,6 +1012,10 @@ export type {
   OrdersGetConfirmationOrdersParams,
   GetQualityOrdersParams,
   GetSuiviOrdersParams,
+  SearchSuiviOrdersRequest,
+  SearchSuiviOrdersResponse,
+  SuiviOrderDto,
+  ReturnToConfirmationRequest,
   AddOrderItemRequest,
   UpdateOrderItemRequest,
   RemoveOrderItemRequest,

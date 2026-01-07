@@ -57,6 +57,8 @@ export interface UpdateAutoAssignmentSettingsRequest {
   /** @nullable */
   autoCancelUnreachable?: boolean | null;
   /** @nullable */
+  returnToConfirmationMode?: string | null;
+  /** @nullable */
   autoAssignSuiviAfterConfirm?: boolean | null;
   /** @nullable */
   suiviToSameWorker?: boolean | null;
