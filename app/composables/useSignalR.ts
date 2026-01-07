@@ -7,6 +7,19 @@ interface BasicNotification {
   label: number | string
 }
 
+interface UserNotificationMessage {
+  id: string
+  title: string
+  message: string
+  type: string
+  relatedEntityId?: string
+  relatedEntityType?: string
+  createdOn: string
+}
+
+// Callback type for notification listeners
+type NotificationCallback = (notification: UserNotificationMessage) => void
+
 export const useSignalR = () => {
   const config = useRuntimeConfig()
   const { authToken, tenantId } = useAuthState()
@@ -16,6 +29,9 @@ export const useSignalR = () => {
   const connection = useState<signalR.HubConnection | null>('signalr-connection', () => null)
   const isConnected = useState<boolean>('signalr-connected', () => false)
   const connectionError = useState<string | null>('signalr-error', () => null)
+
+  // User notification listeners
+  const notificationListeners = useState<Set<NotificationCallback>>('signalr-notification-listeners', () => new Set())
 
   /**
    * Build the SignalR hub URL with tenant header
@@ -84,6 +100,11 @@ export const useSignalR = () => {
       if (type === 'FSH.WebApi.Shared.Notifications.BasicNotification') {
         handleBasicNotification(payload as BasicNotification)
       }
+
+      // Handle UserNotificationMessage (persistent notifications)
+      if (type === 'FSH.WebApi.Shared.Notifications.UserNotificationMessage') {
+        handleUserNotification(payload as UserNotificationMessage)
+      }
     })
 
     // Handle reconnection
@@ -102,6 +123,69 @@ export const useSignalR = () => {
       isConnected.value = false
       connection.value = null
     })
+  }
+
+  /**
+   * Play notification sound
+   */
+  const playNotificationSound = () => {
+    try {
+      // Create an audio context for the notification beep
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+
+      // Configure the beep sound
+      oscillator.frequency.value = 800 // Hz - pleasant notification tone
+      oscillator.type = 'sine'
+      gainNode.gain.value = 0.3 // Volume (0-1)
+
+      // Play for 150ms
+      oscillator.start()
+      setTimeout(() => {
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1)
+        setTimeout(() => {
+          oscillator.stop()
+          audioContext.close()
+        }, 100)
+      }, 150)
+    } catch (err) {
+      console.warn('[SignalR] Could not play notification sound:', err)
+    }
+  }
+
+  /**
+   * Handle UserNotificationMessage from server (persistent notifications)
+   * Shows toast and notifies listeners to update badge
+   */
+  const handleUserNotification = (notif: UserNotificationMessage) => {
+    console.log('[SignalR] User notification received:', notif)
+
+    // Play notification sound
+    playNotificationSound()
+
+    // Show toast notification
+    notification.info(notif.title, notif.message)
+
+    // Notify all listeners (e.g., notification dropdown to update badge)
+    notificationListeners.value.forEach(callback => {
+      try {
+        callback(notif)
+      } catch (err) {
+        console.error('[SignalR] Error in notification listener:', err)
+      }
+    })
+  }
+
+  /**
+   * Subscribe to user notification events
+   */
+  const onUserNotification = (callback: NotificationCallback) => {
+    notificationListeners.value.add(callback)
+    return () => notificationListeners.value.delete(callback)
   }
 
   /**
@@ -192,6 +276,10 @@ export const useSignalR = () => {
     connect,
     disconnect,
     on,
-    off
+    off,
+    onUserNotification,
+    playNotificationSound
   }
 }
+
+export type { UserNotificationMessage }

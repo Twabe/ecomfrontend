@@ -6,20 +6,20 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Create an empty legal invoice (Draft status).
+Note: For creating from orders, use GenerateLegalInvoiceFromOrdersRequest instead.
+ */
 export interface CreateLegalInvoiceRequest {
   /**
    * @minLength 1
-   * @maxLength 100
-   */
-  code: string;
-  /**
-   * @minLength 1
-   * @maxLength 200
+   * @maxLength 255
    */
   companyName: string;
   /**
    * @minLength 1
-   * @maxLength 50
+   * @maxLength 15
+   * @pattern ^\d{15}$
    */
   iceNumber: string;
   /**
@@ -27,10 +27,4 @@ export interface CreateLegalInvoiceRequest {
    * @maxLength 500
    */
   address: string;
-  /** @nullable */
-  products?: string | null;
-  /** @nullable */
-  quantities?: string | null;
-  /** @nullable */
-  prices?: string | null;
 }

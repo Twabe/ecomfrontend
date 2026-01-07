@@ -30,8 +30,13 @@ import type {
 } from 'vue';
 
 import type {
+  CancelLegalInvoiceBody,
   CreateLegalInvoiceRequest,
+  CreateManualLegalInvoiceRequest,
+  CreateManualLegalInvoiceResponse,
   ErrorResult,
+  GenerateLegalInvoiceFromOrdersRequest,
+  GenerateLegalInvoiceResponse,
   HttpValidationProblemDetails,
   LegalInvoiceDto,
   PaginationResponseOfLegalInvoiceDto,
@@ -179,7 +184,7 @@ export function useLegalInvoicesGet<TData = Awaited<ReturnType<typeof legalInvoi
 
 
 /**
- * @summary Update an existing legal invoice.
+ * @summary Update an existing legal invoice (draft only).
  */
 export const legalInvoicesUpdate = (
     id: MaybeRef<string>,
@@ -228,7 +233,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type LegalInvoicesUpdateMutationError = HttpValidationProblemDetails | ErrorResult
 
     /**
- * @summary Update an existing legal invoice.
+ * @summary Update an existing legal invoice (draft only).
  */
 export const useLegalInvoicesUpdate = <TError = HttpValidationProblemDetails | ErrorResult,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesUpdate>>, TError,{id: string;data: UpdateLegalInvoiceRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
@@ -244,7 +249,7 @@ export const useLegalInvoicesUpdate = <TError = HttpValidationProblemDetails | E
       return useMutation(mutationOptions, queryClient);
     }
     /**
- * @summary Delete a legal invoice.
+ * @summary Delete a legal invoice (draft only).
  */
 export const legalInvoicesDelete = (
     id: MaybeRef<string>,
@@ -289,7 +294,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type LegalInvoicesDeleteMutationError = HttpValidationProblemDetails | ErrorResult
 
     /**
- * @summary Delete a legal invoice.
+ * @summary Delete a legal invoice (draft only).
  */
 export const useLegalInvoicesDelete = <TError = HttpValidationProblemDetails | ErrorResult,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesDelete>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
@@ -305,7 +310,7 @@ export const useLegalInvoicesDelete = <TError = HttpValidationProblemDetails | E
       return useMutation(mutationOptions, queryClient);
     }
     /**
- * @summary Create a new legal invoice.
+ * @summary Create a new empty legal invoice in draft status.
  */
 export const legalInvoicesCreate = (
     createLegalInvoiceRequest: MaybeRef<CreateLegalInvoiceRequest>,
@@ -353,7 +358,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type LegalInvoicesCreateMutationError = HttpValidationProblemDetails | ErrorResult
 
     /**
- * @summary Create a new legal invoice.
+ * @summary Create a new empty legal invoice in draft status.
  */
 export const useLegalInvoicesCreate = <TError = HttpValidationProblemDetails | ErrorResult,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesCreate>>, TError,{data: CreateLegalInvoiceRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
@@ -365,6 +370,262 @@ export const useLegalInvoicesCreate = <TError = HttpValidationProblemDetails | E
       > => {
 
       const mutationOptions = getLegalInvoicesCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Generate a legal invoice from selected orders.
+ */
+export const legalInvoicesGenerateFromOrders = (
+    generateLegalInvoiceFromOrdersRequest: MaybeRef<GenerateLegalInvoiceFromOrdersRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      generateLegalInvoiceFromOrdersRequest = unref(generateLegalInvoiceFromOrdersRequest);
+      
+      return customInstance<GenerateLegalInvoiceResponse>(
+      {url: `/api/v1/legalinvoices/generate-from-orders`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: generateLegalInvoiceFromOrdersRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getLegalInvoicesGenerateFromOrdersMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesGenerateFromOrders>>, TError,{data: GenerateLegalInvoiceFromOrdersRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesGenerateFromOrders>>, TError,{data: GenerateLegalInvoiceFromOrdersRequest}, TContext> => {
+
+const mutationKey = ['legalInvoicesGenerateFromOrders'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof legalInvoicesGenerateFromOrders>>, {data: GenerateLegalInvoiceFromOrdersRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  legalInvoicesGenerateFromOrders(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LegalInvoicesGenerateFromOrdersMutationResult = NonNullable<Awaited<ReturnType<typeof legalInvoicesGenerateFromOrders>>>
+    export type LegalInvoicesGenerateFromOrdersMutationBody = GenerateLegalInvoiceFromOrdersRequest
+    export type LegalInvoicesGenerateFromOrdersMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Generate a legal invoice from selected orders.
+ */
+export const useLegalInvoicesGenerateFromOrders = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesGenerateFromOrders>>, TError,{data: GenerateLegalInvoiceFromOrdersRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof legalInvoicesGenerateFromOrders>>,
+        TError,
+        {data: GenerateLegalInvoiceFromOrdersRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getLegalInvoicesGenerateFromOrdersMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Create a manual legal invoice with items.
+ */
+export const legalInvoicesCreateManual = (
+    createManualLegalInvoiceRequest: MaybeRef<CreateManualLegalInvoiceRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      createManualLegalInvoiceRequest = unref(createManualLegalInvoiceRequest);
+      
+      return customInstance<CreateManualLegalInvoiceResponse>(
+      {url: `/api/v1/legalinvoices/create-manual`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createManualLegalInvoiceRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getLegalInvoicesCreateManualMutationOptions = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesCreateManual>>, TError,{data: CreateManualLegalInvoiceRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesCreateManual>>, TError,{data: CreateManualLegalInvoiceRequest}, TContext> => {
+
+const mutationKey = ['legalInvoicesCreateManual'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof legalInvoicesCreateManual>>, {data: CreateManualLegalInvoiceRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  legalInvoicesCreateManual(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LegalInvoicesCreateManualMutationResult = NonNullable<Awaited<ReturnType<typeof legalInvoicesCreateManual>>>
+    export type LegalInvoicesCreateManualMutationBody = CreateManualLegalInvoiceRequest
+    export type LegalInvoicesCreateManualMutationError = HttpValidationProblemDetails | ErrorResult
+
+    /**
+ * @summary Create a manual legal invoice with items.
+ */
+export const useLegalInvoicesCreateManual = <TError = HttpValidationProblemDetails | ErrorResult,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesCreateManual>>, TError,{data: CreateManualLegalInvoiceRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof legalInvoicesCreateManual>>,
+        TError,
+        {data: CreateManualLegalInvoiceRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getLegalInvoicesCreateManualMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Finalize a legal invoice (lock for editing).
+ */
+export const legalInvoicesFinalize = (
+    id: MaybeRef<string>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+      
+      return customInstance<string>(
+      {url: `/api/v1/legalinvoices/${id}/finalize`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getLegalInvoicesFinalizeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesFinalize>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesFinalize>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['legalInvoicesFinalize'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof legalInvoicesFinalize>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  legalInvoicesFinalize(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LegalInvoicesFinalizeMutationResult = NonNullable<Awaited<ReturnType<typeof legalInvoicesFinalize>>>
+    
+    export type LegalInvoicesFinalizeMutationError = unknown
+
+    /**
+ * @summary Finalize a legal invoice (lock for editing).
+ */
+export const useLegalInvoicesFinalize = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesFinalize>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof legalInvoicesFinalize>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getLegalInvoicesFinalizeMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Cancel a legal invoice and unlink associated orders.
+ */
+export const legalInvoicesCancel = (
+    id: MaybeRef<string>,
+    cancelLegalInvoiceBody: MaybeRef<CancelLegalInvoiceBody>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      id = unref(id);
+cancelLegalInvoiceBody = unref(cancelLegalInvoiceBody);
+      
+      return customInstance<string>(
+      {url: `/api/v1/legalinvoices/${id}/cancel`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: cancelLegalInvoiceBody, signal
+    },
+      options);
+    }
+  
+
+
+export const getLegalInvoicesCancelMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesCancel>>, TError,{id: string;data: CancelLegalInvoiceBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesCancel>>, TError,{id: string;data: CancelLegalInvoiceBody}, TContext> => {
+
+const mutationKey = ['legalInvoicesCancel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof legalInvoicesCancel>>, {id: string;data: CancelLegalInvoiceBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  legalInvoicesCancel(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LegalInvoicesCancelMutationResult = NonNullable<Awaited<ReturnType<typeof legalInvoicesCancel>>>
+    export type LegalInvoicesCancelMutationBody = CancelLegalInvoiceBody
+    export type LegalInvoicesCancelMutationError = unknown
+
+    /**
+ * @summary Cancel a legal invoice and unlink associated orders.
+ */
+export const useLegalInvoicesCancel = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof legalInvoicesCancel>>, TError,{id: string;data: CancelLegalInvoiceBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof legalInvoicesCancel>>,
+        TError,
+        {id: string;data: CancelLegalInvoiceBody},
+        TContext
+      > => {
+
+      const mutationOptions = getLegalInvoicesCancelMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

@@ -3,6 +3,7 @@ import { XMarkIcon, CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleI
 
 const notificationState = useState('notification', () => ({
   message: '',
+  title: '' as string | undefined,
   type: 'info' as 'success' | 'error' | 'warning' | 'info',
   show: false
 }))
@@ -58,7 +59,10 @@ const close = () => {
             :class="['h-6 w-6 flex-shrink-0', iconColors[notificationState.type]]"
           />
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium break-words">
+            <p v-if="notificationState.title" class="text-sm font-semibold mb-0.5">
+              {{ notificationState.title }}
+            </p>
+            <p class="text-sm break-words" :class="notificationState.title ? 'opacity-90' : 'font-medium'">
               {{ notificationState.message }}
             </p>
           </div>

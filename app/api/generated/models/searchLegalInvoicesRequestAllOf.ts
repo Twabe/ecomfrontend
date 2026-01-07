@@ -13,4 +13,6 @@ export type SearchLegalInvoicesRequestAllOf = {
   companyName?: string | null;
   /** @nullable */
   iceNumber?: string | null;
+  /** @nullable */
+  status?: string | null;
 };

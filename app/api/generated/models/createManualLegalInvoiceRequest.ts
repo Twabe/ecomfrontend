@@ -5,33 +5,30 @@
  * Clean Architecture Template for .NET 7 WebApi built with Multitenancy Support.
  * OpenAPI spec version: 1.0.0
  */
+import type { ManualLegalInvoiceItemDto } from './manualLegalInvoiceItemDto';
 
 /**
- * Update company information on a legal invoice.
-Only allowed when invoice is in Draft status.
+ * Create a manual legal invoice with items (not linked to orders).
  */
-export interface UpdateLegalInvoiceRequest {
+export interface CreateManualLegalInvoiceRequest {
+  /**
+   * @minLength 1
+   * @maxLength 255
+   */
+  companyName: string;
+  /**
+   * @minLength 1
+   * @maxLength 15
+   * @pattern ^\d{15}$
+   */
+  iceNumber: string;
+  /**
+   * @minLength 1
+   * @maxLength 500
+   */
+  address: string;
   /**
    * @minLength 1
    */
-  id: string;
-  /**
-   * @minLength 0
-   * @maxLength 255
-   * @nullable
-   */
-  companyName?: string | null;
-  /**
-   * @minLength 15
-   * @maxLength 15
-   * @nullable
-   * @pattern ^\d{15}$
-   */
-  iceNumber?: string | null;
-  /**
-   * @minLength 0
-   * @maxLength 500
-   * @nullable
-   */
-  address?: string | null;
+  items: ManualLegalInvoiceItemDto[];
 }

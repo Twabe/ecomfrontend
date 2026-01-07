@@ -1526,5 +1526,20 @@
     "syncSuccess": "تم إنشاء {created} مدينة(مدن)، تم تحديث {updated}",
     "syncResultFrom": "نتيجة المزامنة من {source}",
     "notLinked": "غير مرتبطة"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات",
+    "markAllRead": "تحديد الكل كمقروء",
+    "viewAll": "عرض جميع الإشعارات",
+    "new": "إشعار جديد",
+    "unread": "غير مقروء",
+    "read": "مقروء"
+  },
+  "time": {
+    "justNow": "الآن",
+    "minutesAgo": "منذ {count} دقيقة",
+    "hoursAgo": "منذ {count} ساعة",
+    "daysAgo": "منذ {count} يوم"
   }
 }

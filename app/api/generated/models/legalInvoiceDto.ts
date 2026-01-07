@@ -5,6 +5,7 @@
  * Clean Architecture Template for .NET 7 WebApi built with Multitenancy Support.
  * OpenAPI spec version: 1.0.0
  */
+import type { LegalInvoiceItemDto } from './legalInvoiceItemDto';
 
 export interface LegalInvoiceDto {
   id?: string;
@@ -12,11 +13,13 @@ export interface LegalInvoiceDto {
   companyName?: string;
   iceNumber?: string;
   address?: string;
-  /** @nullable */
-  products?: string | null;
-  /** @nullable */
-  quantities?: string | null;
-  /** @nullable */
-  prices?: string | null;
+  status?: string;
+  ordersCount?: number;
+  totalAmount?: number;
   dateAdded?: string;
+  /** @nullable */
+  dateFinalized?: string | null;
+  /** @nullable */
+  dateCancelled?: string | null;
+  items?: LegalInvoiceItemDto[];
 }

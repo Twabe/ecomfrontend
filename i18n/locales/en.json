@@ -1618,5 +1618,20 @@
     "syncSuccess": "{created} city(ies) created, {updated} updated",
     "syncResultFrom": "Sync result from {source}",
     "notLinked": "Not linked"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAllRead": "Mark all as read",
+    "viewAll": "View all notifications",
+    "new": "New notification",
+    "unread": "Unread",
+    "read": "Read"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{count} min ago",
+    "hoursAgo": "{count} h ago",
+    "daysAgo": "{count} d ago"
   }
 }

@@ -7,10 +7,11 @@ export const useNotification = () => {
   /**
    * Show notification toast
    */
-  const show = (message: string, type: NotificationType = 'info') => {
+  const show = (message: string, type: NotificationType = 'info', title?: string) => {
     // Get or create the notification state
     const notificationState = useState('notification', () => ({
       message: '',
+      title: '' as string | undefined,
       type: 'info' as NotificationType,
       show: false
     }))
@@ -24,6 +25,7 @@ export const useNotification = () => {
     // Update state to show notification
     notificationState.value = {
       message,
+      title,
       type,
       show: true
     }
@@ -35,10 +37,10 @@ export const useNotification = () => {
     }, 5000)
   }
 
-  const success = (message: string) => show(message, 'success')
-  const error = (message: string) => show(message, 'error')
-  const warning = (message: string) => show(message, 'warning')
-  const info = (message: string) => show(message, 'info')
+  const success = (message: string, title?: string) => show(message, 'success', title)
+  const error = (message: string, title?: string) => show(message, 'error', title)
+  const warning = (message: string, title?: string) => show(message, 'warning', title)
+  const info = (message: string, title?: string) => show(message, 'info', title)
 
   /**
    * Generic notify function that accepts an object with type and message

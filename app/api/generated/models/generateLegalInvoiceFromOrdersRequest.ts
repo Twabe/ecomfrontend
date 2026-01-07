@@ -7,31 +7,27 @@
  */
 
 /**
- * Update company information on a legal invoice.
-Only allowed when invoice is in Draft status.
+ * Generate a legal invoice from selected orders.
  */
-export interface UpdateLegalInvoiceRequest {
+export interface GenerateLegalInvoiceFromOrdersRequest {
   /**
    * @minLength 1
    */
-  id: string;
+  orderIds: string[];
   /**
-   * @minLength 0
+   * @minLength 1
    * @maxLength 255
-   * @nullable
    */
-  companyName?: string | null;
+  companyName: string;
   /**
-   * @minLength 15
+   * @minLength 1
    * @maxLength 15
-   * @nullable
    * @pattern ^\d{15}$
    */
-  iceNumber?: string | null;
+  iceNumber: string;
   /**
-   * @minLength 0
+   * @minLength 1
    * @maxLength 500
-   * @nullable
    */
-  address?: string | null;
+  address: string;
 }

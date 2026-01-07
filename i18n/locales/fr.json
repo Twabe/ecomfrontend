@@ -1695,5 +1695,20 @@
     "syncSuccess": "{created} ville(s) créée(s), {updated} mise(s) à jour",
     "syncResultFrom": "Résultat de la synchronisation depuis {source}",
     "notLinked": "Non liée"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune notification",
+    "markAllRead": "Tout marquer comme lu",
+    "viewAll": "Voir toutes les notifications",
+    "new": "Nouvelle notification",
+    "unread": "Non lue",
+    "read": "Lue"
+  },
+  "time": {
+    "justNow": "À l'instant",
+    "minutesAgo": "Il y a {count} min",
+    "hoursAgo": "Il y a {count} h",
+    "daysAgo": "Il y a {count} j"
   }
 }
