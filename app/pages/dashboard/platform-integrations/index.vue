@@ -136,6 +136,119 @@
       </Dialog>
     </TransitionRoot>
 
+    <!-- Shopify Shop Domain Modal -->
+    <TransitionRoot :show="showShopifyModal" as="template">
+      <Dialog as="div" class="relative z-50" @close="showShopifyModal = false">
+        <TransitionChild
+          enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
+          leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-gray-900/50" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4">
+            <TransitionChild
+              enter="ease-out duration-300" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100"
+              leave="ease-in duration-200" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
+                <DialogTitle class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+                  <ShoppingCartIcon class="w-6 h-6 text-green-600" />
+                  {{ $t('integrations.shopify.connectTitle') }}
+                </DialogTitle>
+
+                <div class="space-y-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ $t('integrations.shopify.enterShopDomain') }}
+                  </p>
+
+                  <div>
+                    <label class="label">{{ $t('integrations.shopify.shopDomain') }}</label>
+                    <div class="flex">
+                      <input
+                        v-model="shopifyShopDomain"
+                        type="text"
+                        class="input flex-1 rounded-r-none"
+                        placeholder="mystore"
+                        @keyup.enter="confirmShopifyConnect"
+                      />
+                      <span class="inline-flex items-center px-3 bg-gray-100 dark:bg-gray-700 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-lg text-sm text-gray-500 dark:text-gray-400">
+                        .myshopify.com
+                      </span>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                      {{ $t('integrations.shopify.shopDomainHint') }}
+                    </p>
+                  </div>
+
+                  <!-- Setup Guide (Collapsible) -->
+                  <details class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <summary class="px-4 py-3 cursor-pointer text-sm font-medium text-amber-800 dark:text-amber-200 flex items-center gap-2">
+                      <InformationCircleIcon class="w-5 h-5" />
+                      {{ $t('integrations.shopify.setupGuide') }}
+                    </summary>
+                    <div class="px-4 pb-4 space-y-3 text-sm">
+                      <p class="text-amber-700 dark:text-amber-300">
+                        {{ $t('integrations.shopify.setupRequiredDesc') }}
+                      </p>
+                      <ol class="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li>
+                          <span class="font-medium text-gray-900 dark:text-white">{{ $t('integrations.shopify.setupStep1') }}</span>
+                          <p class="text-xs mt-0.5">{{ $t('integrations.shopify.setupStep1Desc') }}</p>
+                        </li>
+                        <li>
+                          <span class="font-medium text-gray-900 dark:text-white">{{ $t('integrations.shopify.setupStep2') }}</span>
+                          <p class="text-xs mt-0.5">{{ $t('integrations.shopify.setupStep2Desc') }}</p>
+                        </li>
+                        <li>
+                          <span class="font-medium text-gray-900 dark:text-white">{{ $t('integrations.shopify.setupStep3') }}</span>
+                          <p class="text-xs mt-0.5">{{ $t('integrations.shopify.setupStep3Desc') }}</p>
+                        </li>
+                        <li>
+                          <span class="font-medium text-gray-900 dark:text-white">{{ $t('integrations.shopify.setupStep4') }}</span>
+                          <p class="text-xs mt-0.5">{{ $t('integrations.shopify.setupStep4Desc') }}</p>
+                        </li>
+                        <li>
+                          <span class="font-medium text-gray-900 dark:text-white">{{ $t('integrations.shopify.setupStep5') }}</span>
+                          <p class="text-xs mt-0.5">{{ $t('integrations.shopify.setupStep5Desc') }}</p>
+                        </li>
+                      </ol>
+                      <p class="text-xs text-amber-600 dark:text-amber-400 pt-2 border-t border-amber-200 dark:border-amber-700">
+                        {{ $t('integrations.shopify.contactAdmin') }}
+                      </p>
+                    </div>
+                  </details>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                  <button
+                    type="button"
+                    class="btn-secondary flex-1"
+                    @click="showShopifyModal = false"
+                  >
+                    {{ $t('common.cancel') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-primary flex-1"
+                    :disabled="!shopifyShopDomain || isConnectingShopify"
+                    @click="confirmShopifyConnect"
+                  >
+                    <span v-if="isConnectingShopify" class="flex items-center gap-2">
+                      <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      {{ $t('common.loading') }}
+                    </span>
+                    <span v-else>{{ $t('integrations.shopify.connect') }}</span>
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
+
     <!-- Delete Confirmation Modal -->
     <TransitionRoot :show="showDeleteModal" as="template">
       <Dialog as="div" class="relative z-50" @close="showDeleteModal = false">
@@ -216,6 +329,7 @@ import {
   useStoresService,
   useUsersService,
   useYouCanIntegrationService,
+  useShopifyIntegrationService,
   type PlatformIntegrationDto
 } from '~/services'
 import { PlatformType } from '~/types/platformintegration'
@@ -241,6 +355,7 @@ const {
 const { items: stores } = useStoresService()
 const { users } = useUsersService()
 const youCanService = useYouCanIntegrationService()
+const shopifyService = useShopifyIntegrationService()
 
 // Get all available platforms
 const allPlatforms = computed(() => getAllPlatforms())
@@ -250,6 +365,11 @@ const showWizard = ref(false)
 const showSheetsWizard = ref(false)
 const showWebhookModal = ref(false)
 const showDeleteModal = ref(false)
+const showShopifyModal = ref(false)
+
+// Shopify specific state
+const shopifyShopDomain = ref('')
+const isConnectingShopify = ref(false)
 
 // Current data
 const selectedPlatform = ref<PlatformConfig | null>(null)
@@ -275,14 +395,8 @@ const handlePlatformSelect = (platform: PlatformConfig) => {
   }
 }
 
-// Handle OAuth connect for platforms like YouCan
+// Handle OAuth connect for platforms like YouCan and Shopify
 const handleOAuthConnect = async (platform: PlatformConfig) => {
-  if (platform.type !== PlatformType.YouCan) {
-    // Fallback to regular wizard for non-OAuth platforms
-    handlePlatformSelect(platform)
-    return
-  }
-
   // Get the first store as default (user can choose if they have multiple stores)
   const defaultStoreId = stores.value?.[0]?.id
   if (!defaultStoreId) {
@@ -290,26 +404,80 @@ const handleOAuthConnect = async (platform: PlatformConfig) => {
     return
   }
 
-  connectingPlatform.value = platform.type
+  if (platform.type === PlatformType.Shopify) {
+    // Shopify requires shop domain - show modal to get it
+    shopifyShopDomain.value = ''
+    showShopifyModal.value = true
+    return
+  }
+
+  connectingPlatform.value = platform.type as string
   try {
     // Get the runtime config for API base URL
     const config = useRuntimeConfig()
-    // Use production URL as fallback since runtime config may not be available at build time
     const apiBase = config.public.apiBaseUrl || 'http://ecombackend.ecom.astracaisse.com'
 
-    // Build the OAuth connect URL with proper redirect
-    const callbackUrl = `${window.location.origin}/oauth/youcan/callback`
-    const connectUrl = `${apiBase}/api/integrations/youcan/connect?storeId=${defaultStoreId}&redirectUrl=${encodeURIComponent(callbackUrl)}`
+    let callbackUrl: string
+    let connectUrl: string
 
-    console.log('[YouCan OAuth] API Base:', apiBase)
-    console.log('[YouCan OAuth] Connect URL:', connectUrl)
+    if (platform.type === PlatformType.YouCan) {
+      // YouCan OAuth
+      callbackUrl = `${window.location.origin}/oauth/youcan/callback`
+      connectUrl = `${apiBase}/api/integrations/youcan/connect?storeId=${defaultStoreId}&redirectUrl=${encodeURIComponent(callbackUrl)}`
+      console.log('[YouCan OAuth] Connect URL:', connectUrl)
+    } else {
+      // Fallback to regular wizard for non-OAuth platforms
+      handlePlatformSelect(platform)
+      connectingPlatform.value = null
+      return
+    }
 
-    // Redirect to YouCan OAuth page
+    // Redirect to OAuth page
     window.location.href = connectUrl
   } catch (error) {
     console.error('Failed to initiate OAuth:', error)
     showError(t('integrations.oauthCallback.error'))
     connectingPlatform.value = null
+  }
+}
+
+// Confirm Shopify connect with shop domain
+const confirmShopifyConnect = async () => {
+  if (!shopifyShopDomain.value) {
+    showError(t('integrations.shopify.shopDomainRequired'))
+    return
+  }
+
+  const defaultStoreId = stores.value?.[0]?.id
+  if (!defaultStoreId) {
+    showError(t('integrations.oauthCallback.noStoreError'))
+    return
+  }
+
+  isConnectingShopify.value = true
+  try {
+    const config = useRuntimeConfig()
+    const apiBase = config.public.apiBaseUrl || 'http://ecombackend.ecom.astracaisse.com'
+
+    // Normalize shop domain (add .myshopify.com if not present)
+    let shop = shopifyShopDomain.value.trim().toLowerCase()
+    if (!shop.includes('.')) {
+      shop = `${shop}.myshopify.com`
+    }
+
+    const callbackUrl = `${window.location.origin}/oauth/shopify/callback`
+    const connectUrl = `${apiBase}/api/integrations/shopify/connect?shop=${encodeURIComponent(shop)}&redirectUrl=${encodeURIComponent(callbackUrl)}`
+
+    console.log('[Shopify OAuth] Shop:', shop)
+    console.log('[Shopify OAuth] Connect URL:', connectUrl)
+
+    // Close modal and redirect
+    showShopifyModal.value = false
+    window.location.href = connectUrl
+  } catch (error) {
+    console.error('Failed to initiate Shopify OAuth:', error)
+    showError(t('integrations.oauthCallback.error'))
+    isConnectingShopify.value = false
   }
 }
 

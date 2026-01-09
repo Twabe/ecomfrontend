@@ -75,6 +75,7 @@ const platformConfigs: Record<string, PlatformConfig> = {
     bgColor: '#F0FDF4',
     darkBgColor: '#1A3D1A',
     icon: 'shopify',
+    // Webhook-based (no OAuth) - user manually adds webhook in Shopify admin
     adminUrl: 'https://admin.shopify.com',
     webhookPath: 'Settings → Notifications → Webhooks',
     instructions: [
@@ -261,12 +262,12 @@ export function usePlatformConfig() {
   }
 
   const generateWebhookUrl = (integrationId: string): string => {
-    const apiBase = config.public.apiBase || 'https://api.example.com'
+    const apiBase = config.public.apiBaseUrl || 'http://ecombackend.ecom.astracaisse.com'
     return `${apiBase}/api/v1/webhooks/${integrationId}`
   }
 
   const generateGoogleSheetsScript = (integrationId: string): string => {
-    const apiBase = config.public.apiBase || 'https://api.example.com'
+    const apiBase = config.public.apiBaseUrl || 'http://ecombackend.ecom.astracaisse.com'
     return `// Google Sheets Integration Script
 // Generated for Integration ID: ${integrationId}
 

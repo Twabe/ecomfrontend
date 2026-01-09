@@ -1162,16 +1162,16 @@
         "step5Desc": "Check 'Order creation' and save"
       },
       "shopify": {
-        "step1": "Login to Shopify Admin",
-        "step1Desc": "Access your Shopify admin panel",
-        "step2": "Go to Settings",
-        "step2Desc": "Click Settings at the bottom of the sidebar",
-        "step3": "Open Notifications",
-        "step3Desc": "Click Notifications, then Webhooks",
-        "step4": "Create a webhook",
-        "step4Desc": "Click 'Create webhook' and paste the URL",
-        "step5": "Select event",
-        "step5Desc": "Choose 'Order creation' and save"
+        "step1": "Login to Shopify",
+        "step1Desc": "Go to admin.shopify.com and login to your store",
+        "step2": "Open Settings",
+        "step2Desc": "At bottom left, click 'Settings' (gear icon)",
+        "step3": "Go to Notifications",
+        "step3Desc": "In the menu, click 'Notifications', then scroll down to 'Webhooks'",
+        "step4": "Create a new webhook",
+        "step4Desc": "Click 'Create webhook', paste the copied URL, select 'Order creation' and format 'JSON'",
+        "step5": "Save",
+        "step5Desc": "Click 'Save' - your orders will sync automatically!"
       },
       "woocommerce": {
         "step1": "Login to WordPress",
@@ -1243,6 +1243,29 @@
       "invalidCallback": "Invalid callback link",
       "backToIntegrations": "Back to Integrations",
       "noStoreError": "Please create a store first"
+    },
+    "shopify": {
+      "connectTitle": "Connect Shopify Store",
+      "enterShopDomain": "Enter your Shopify store domain to connect your account.",
+      "shopDomain": "Store Domain",
+      "shopDomainHint": "Enter just the store name (e.g., mystore)",
+      "shopDomainRequired": "Please enter your store domain",
+      "connect": "Connect Store",
+      "setupRequired": "Setup Required",
+      "setupRequiredDesc": "Before connecting your store, you need to create an app in Shopify.",
+      "setupGuide": "Setup Guide",
+      "setupStep1": "1. Open Shopify Settings",
+      "setupStep1Desc": "Go to admin.shopify.com → Settings → Apps and sales channels → Develop apps",
+      "setupStep2": "2. Create an App",
+      "setupStep2Desc": "Click 'Create an app' and name it 'RapidaGO'",
+      "setupStep3": "3. Configure Permissions",
+      "setupStep3Desc": "Click 'Configure Admin API scopes' and enable: read_orders, write_orders, read_products, read_customers",
+      "setupStep4": "4. Install the App",
+      "setupStep4Desc": "Go to 'API credentials' and click 'Install app'",
+      "setupStep5": "5. Copy the Keys",
+      "setupStep5Desc": "Copy the 'API key' and 'API secret key' and send them to the administrator",
+      "needHelp": "Need Help?",
+      "contactAdmin": "Contact the administrator to configure Shopify API keys"
     }
   },
   "worker": {

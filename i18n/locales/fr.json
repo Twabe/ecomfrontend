@@ -1235,16 +1235,16 @@
         "step5Desc": "Cochez 'Création de commande' et enregistrez"
       },
       "shopify": {
-        "step1": "Connectez-vous à Shopify Admin",
-        "step1Desc": "Accédez à votre panneau d'administration Shopify",
-        "step2": "Allez dans Paramètres",
-        "step2Desc": "Cliquez sur Paramètres en bas du menu latéral",
-        "step3": "Ouvrez Notifications",
-        "step3Desc": "Cliquez sur Notifications, puis sur Webhooks",
-        "step4": "Créez un webhook",
-        "step4Desc": "Cliquez sur 'Créer un webhook' et collez l'URL",
-        "step5": "Sélectionnez l'événement",
-        "step5Desc": "Choisissez 'Création de commande' et enregistrez"
+        "step1": "Connectez-vous à Shopify",
+        "step1Desc": "Allez sur admin.shopify.com et connectez-vous à votre boutique",
+        "step2": "Ouvrez les Paramètres",
+        "step2Desc": "En bas à gauche, cliquez sur 'Paramètres' (icône engrenage)",
+        "step3": "Allez dans Notifications",
+        "step3Desc": "Dans le menu, cliquez sur 'Notifications', puis descendez jusqu'à 'Webhooks'",
+        "step4": "Créez un nouveau webhook",
+        "step4Desc": "Cliquez 'Créer un webhook', collez l'URL copiée, choisissez 'Création de commande' et format 'JSON'",
+        "step5": "Enregistrez",
+        "step5Desc": "Cliquez sur 'Enregistrer' - vos commandes seront synchronisées automatiquement!"
       },
       "woocommerce": {
         "step1": "Connectez-vous à WordPress",
@@ -1316,6 +1316,29 @@
       "invalidCallback": "Lien de retour invalide",
       "backToIntegrations": "Retour aux intégrations",
       "noStoreError": "Veuillez d'abord créer un magasin"
+    },
+    "shopify": {
+      "connectTitle": "Connecter la boutique Shopify",
+      "enterShopDomain": "Entrez le domaine de votre boutique Shopify pour connecter votre compte.",
+      "shopDomain": "Domaine de la boutique",
+      "shopDomainHint": "Entrez seulement le nom de la boutique (ex: maboutique)",
+      "shopDomainRequired": "Veuillez entrer le domaine de votre boutique",
+      "connect": "Connecter la boutique",
+      "setupRequired": "Configuration requise",
+      "setupRequiredDesc": "Avant de connecter votre boutique, vous devez créer une application dans Shopify.",
+      "setupGuide": "Guide de configuration",
+      "setupStep1": "1. Ouvrir les paramètres Shopify",
+      "setupStep1Desc": "Allez sur admin.shopify.com → Paramètres → Applications et canaux de vente → Développer des applications",
+      "setupStep2": "2. Créer une application",
+      "setupStep2Desc": "Cliquez sur 'Créer une application' et nommez-la 'RapidaGO'",
+      "setupStep3": "3. Configurer les permissions",
+      "setupStep3Desc": "Cliquez sur 'Configurer les scopes de l'API Admin' et activez: read_orders, write_orders, read_products, read_customers",
+      "setupStep4": "4. Installer l'application",
+      "setupStep4Desc": "Allez dans 'Identifiants API' et cliquez sur 'Installer l'application'",
+      "setupStep5": "5. Copier les clés",
+      "setupStep5Desc": "Copiez la 'Clé API' et le 'Secret API' et envoyez-les à l'administrateur",
+      "needHelp": "Besoin d'aide?",
+      "contactAdmin": "Contactez l'administrateur pour configurer les clés API Shopify"
     }
   },
   "expenses": {

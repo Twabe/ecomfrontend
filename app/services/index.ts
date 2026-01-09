@@ -218,6 +218,7 @@ export { useWebhooksService, type WebhookPayload } from './webhooks/useWebhooksS
 export { useDeliveryWebhooksService, type DeliveryWebhookPayload } from './delivery-webhooks/useDeliveryWebhooksService'
 export { usePlatformIntegrationsService, type PlatformIntegrationDto, type CreatePlatformIntegrationRequest, type UpdatePlatformIntegrationRequest } from './platform-integrations/usePlatformIntegrationsService'
 export { useYouCanIntegrationService, type YouCanIntegrationStatusDto, type YouCanIntegrationConnectParams, type YouCanIntegrationCallbackParams } from './you-can-integration/useYouCanIntegrationService'
+export { useShopifyIntegrationService, type ShopifyIntegrationConnectParams, type ShopifyIntegrationCallbackParams } from './shopify-integration/useShopifyIntegrationService'
 
 // ============================================
 // DELIVERY PROVIDER SERVICES

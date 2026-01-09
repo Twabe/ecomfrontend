@@ -1159,15 +1159,15 @@
       },
       "shopify": {
         "step1": "سجل الدخول إلى شوبيفاي",
-        "step1Desc": "ادخل إلى لوحة تحكم شوبيفاي",
-        "step2": "اذهب إلى الإعدادات",
-        "step2Desc": "اضغط على Settings أسفل القائمة",
-        "step3": "افتح الإشعارات",
-        "step3Desc": "اضغط على Notifications ثم Webhooks",
-        "step4": "أنشئ webhook",
-        "step4Desc": "اضغط على 'Create webhook' والصق الرابط",
-        "step5": "اختر الحدث",
-        "step5Desc": "اختر 'Order creation' واحفظ"
+        "step1Desc": "اذهب إلى admin.shopify.com وسجل دخولك إلى متجرك",
+        "step2": "افتح الإعدادات",
+        "step2Desc": "أسفل يسار الشاشة، اضغط على 'Settings' (أيقونة الترس)",
+        "step3": "اذهب إلى الإشعارات",
+        "step3Desc": "في القائمة، اضغط 'Notifications'، ثم انزل إلى أسفل حتى تجد 'Webhooks'",
+        "step4": "أنشئ webhook جديد",
+        "step4Desc": "اضغط 'Create webhook'، الصق الرابط المنسوخ، اختر 'Order creation' وformat 'JSON'",
+        "step5": "احفظ",
+        "step5Desc": "اضغط 'Save' - طلباتك ستتزامن تلقائياً!"
       },
       "woocommerce": {
         "step1": "سجل الدخول إلى ووردبريس",
@@ -1239,6 +1239,29 @@
       "invalidCallback": "رابط الرجوع غير صالح",
       "backToIntegrations": "العودة للتكاملات",
       "noStoreError": "الرجاء إنشاء متجر أولاً"
+    },
+    "shopify": {
+      "connectTitle": "ربط متجر Shopify",
+      "enterShopDomain": "أدخل نطاق متجر Shopify الخاص بك لربط حسابك.",
+      "shopDomain": "نطاق المتجر",
+      "shopDomainHint": "أدخل اسم المتجر فقط (مثال: mystore)",
+      "shopDomainRequired": "الرجاء إدخال نطاق متجرك",
+      "connect": "ربط المتجر",
+      "setupRequired": "الإعداد مطلوب",
+      "setupRequiredDesc": "قبل ربط متجرك، تحتاج إلى إنشاء تطبيق في Shopify.",
+      "setupGuide": "دليل الإعداد",
+      "setupStep1": "1. فتح إعدادات Shopify",
+      "setupStep1Desc": "اذهب إلى admin.shopify.com ← الإعدادات ← التطبيقات وقنوات البيع ← تطوير التطبيقات",
+      "setupStep2": "2. إنشاء تطبيق",
+      "setupStep2Desc": "انقر على 'إنشاء تطبيق' وسمه 'RapidaGO'",
+      "setupStep3": "3. تكوين الأذونات",
+      "setupStep3Desc": "انقر على 'تكوين نطاقات API Admin' وفعّل: read_orders, write_orders, read_products, read_customers",
+      "setupStep4": "4. تثبيت التطبيق",
+      "setupStep4Desc": "اذهب إلى 'بيانات اعتماد API' وانقر على 'تثبيت التطبيق'",
+      "setupStep5": "5. نسخ المفاتيح",
+      "setupStep5Desc": "انسخ 'مفتاح API' و'المفتاح السري API' وأرسلهما للمسؤول",
+      "needHelp": "تحتاج مساعدة؟",
+      "contactAdmin": "تواصل مع المسؤول لتكوين مفاتيح API Shopify"
     }
   },
   "expenses": {

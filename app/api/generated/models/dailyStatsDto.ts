@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Daily statistics for trend charts - real data per day.
+ */
 export interface DailyStatsDto {
   date?: string;
   totalOrders?: number;
