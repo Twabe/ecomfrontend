@@ -263,7 +263,10 @@ export function usePlatformConfig() {
 
   const generateWebhookUrl = (integrationId: string): string => {
     const apiBase = config.public.apiBaseUrl || 'http://ecombackend.ecom.astracaisse.com'
-    return `${apiBase}/api/v1/webhooks/${integrationId}`
+    // Include tenant ID for multi-tenant support
+    const { tenantId } = useAuthCookies()
+    const tenant = tenantId.value || 'root'
+    return `${apiBase}/api/v1/webhooks/${integrationId}?tenant=${tenant}`
   }
 
   const generateGoogleSheetsScript = (integrationId: string): string => {
