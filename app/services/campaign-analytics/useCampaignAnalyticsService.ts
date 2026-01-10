@@ -180,7 +180,7 @@ export function getRateBgColor(rate: number, type: 'confirmation' | 'delivery' |
 
 const getCampaignStats = (request: GetCampaignStatsRequest): Promise<CampaignStatsDto> => {
   return customInstance<CampaignStatsDto>({
-    url: '/api/v1/campaign-analytics/stats',
+    url: '/api/v1/campaignanalytics/stats',
     method: 'POST',
     data: request,
   })
@@ -188,14 +188,14 @@ const getCampaignStats = (request: GetCampaignStatsRequest): Promise<CampaignSta
 
 const getUtmSources = (): Promise<string[]> => {
   return customInstance<string[]>({
-    url: '/api/v1/campaign-analytics/sources',
+    url: '/api/v1/campaignanalytics/sources',
     method: 'GET',
   })
 }
 
 const getUtmCampaigns = (source?: string): Promise<string[]> => {
   return customInstance<string[]>({
-    url: '/api/v1/campaign-analytics/campaigns',
+    url: '/api/v1/campaignanalytics/campaigns',
     method: 'GET',
     params: source ? { utmSource: source } : undefined,
   })
