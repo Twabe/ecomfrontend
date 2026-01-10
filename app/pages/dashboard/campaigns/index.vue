@@ -267,8 +267,8 @@ onMounted(() => {
     </div>
 
     <!-- KPI Cards -->
-    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
-      <!-- Total Orders -->
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <!-- Total Orders (All) -->
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
           {{ t('campaigns.totalOrders') }}
@@ -278,21 +278,21 @@ onMounted(() => {
           {{ summary.totalOrders.toLocaleString() }}
         </div>
         <div v-if="!isLoading" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          {{ summary.trackedOrders }} tracked ({{ formatRate(summary.trackingCoverage) }})
+          {{ t('campaigns.totalOrdersDesc') }}
         </div>
       </div>
 
-      <!-- Unique Campaigns -->
+      <!-- Tracked Orders (UTM) -->
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
-          {{ t('campaigns.uniqueCampaigns') }}
+          {{ t('campaigns.trackedOrders') }}
         </div>
         <div v-if="isLoading" class="mt-2 h-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-        <div v-else class="mt-2 text-xl font-bold text-gray-900 dark:text-white">
-          {{ summary.uniqueCampaigns }}
+        <div v-else class="mt-2 text-xl font-bold text-blue-600 dark:text-blue-400">
+          {{ summary.trackedOrders }}
         </div>
         <div v-if="!isLoading" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          {{ summary.uniqueSources }} sources
+          {{ formatRate(summary.trackingCoverage) }} du total
         </div>
       </div>
 
@@ -339,7 +339,7 @@ onMounted(() => {
       </div>
 
       <!-- Total Revenue -->
-      <div class="col-span-2 rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
           {{ t('campaigns.totalRevenue') }}
         </div>
@@ -351,6 +351,11 @@ onMounted(() => {
           {{ t('campaigns.revenueDesc') }}
         </div>
       </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="rounded-lg bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+      <span class="font-medium">ℹ️ Info:</span> Les KPIs ci-dessus = toutes les commandes. Les tableaux ci-dessous = commandes avec UTM uniquement.
     </div>
 
     <!-- Charts Row -->
