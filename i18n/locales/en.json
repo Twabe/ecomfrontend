@@ -74,7 +74,9 @@
     "page": "Page",
     "reset": "Reset",
     "product": "Product",
-    "platform": "Platform"
+    "platform": "Platform",
+    "store": "Store",
+    "allStores": "All Stores"
   },
   "date": {
     "today": "Today",

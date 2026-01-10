@@ -77,7 +77,9 @@
     "page": "Page",
     "reset": "Réinitialiser",
     "product": "Produit",
-    "platform": "Plateforme"
+    "platform": "Plateforme",
+    "store": "Magasin",
+    "allStores": "Tous les magasins"
   },
   "date": {
     "today": "Aujourd'hui",
