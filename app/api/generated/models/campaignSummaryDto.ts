@@ -28,4 +28,12 @@ export interface CampaignSummaryDto {
   overallDeliveryRate?: number;
   /** Overall return rate (returned / delivered * 100). */
   overallReturnRate?: number;
+  /** Total ad spend in the date range. */
+  totalAdSpend?: number;
+  /** Number of new customers acquired in the date range. */
+  newCustomers?: number;
+  /** Customer Acquisition Cost (TotalAdSpend / NewCustomers). */
+  cac?: number;
+  /** ROAS for this period (Revenue / AdSpend). */
+  roas?: number;
 }

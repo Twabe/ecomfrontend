@@ -8,6 +8,8 @@
 import type { CampaignSummaryDto } from './campaignSummaryDto';
 import type { CampaignPerformanceDto } from './campaignPerformanceDto';
 import type { SourcePerformanceDto } from './sourcePerformanceDto';
+import type { ContentPerformanceDto } from './contentPerformanceDto';
+import type { FunnelDto } from './funnelDto';
 import type { DailyTrendDto } from './dailyTrendDto';
 
 /**
@@ -17,5 +19,7 @@ export interface CampaignStatsDto {
   summary?: CampaignSummaryDto;
   campaigns?: CampaignPerformanceDto[];
   sources?: SourcePerformanceDto[];
+  contents?: ContentPerformanceDto[];
+  funnel?: FunnelDto;
   dailyTrend?: DailyTrendDto[];
 }

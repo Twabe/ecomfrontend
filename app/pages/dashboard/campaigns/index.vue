@@ -68,6 +68,8 @@ const {
   summary,
   campaigns,
   sources,
+  contents,
+  funnel,
   dailyTrend,
   trendChartData,
   sourceChartData,
@@ -353,9 +355,117 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Info Banner -->
-    <div class="rounded-lg bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-      <span class="font-medium">ℹ️ Info:</span> Les KPIs ci-dessus = toutes les commandes. Les tableaux ci-dessous = commandes avec UTM uniquement.
+    <!-- Marketing Metrics Row (CAC, ROAS, Ad Spend) -->
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <!-- Ad Spend -->
+      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+          {{ t('campaigns.adSpend') }}
+        </div>
+        <div v-if="isLoading" class="mt-2 h-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div v-else class="mt-2 text-xl font-bold text-orange-600 dark:text-orange-400">
+          {{ formatCurrency(summary.totalAdSpend) }}
+        </div>
+      </div>
+
+      <!-- New Customers -->
+      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+          {{ t('campaigns.newCustomers') }}
+        </div>
+        <div v-if="isLoading" class="mt-2 h-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div v-else class="mt-2 text-xl font-bold text-purple-600 dark:text-purple-400">
+          {{ summary.newCustomers }}
+        </div>
+      </div>
+
+      <!-- CAC -->
+      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+          {{ t('campaigns.cac') }}
+        </div>
+        <div v-if="isLoading" class="mt-2 h-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div v-else class="mt-2 text-xl font-bold" :class="summary.cac > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'">
+          {{ summary.cac > 0 ? formatCurrency(summary.cac) : '-' }}
+        </div>
+        <div v-if="!isLoading" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {{ t('campaigns.cacDesc') }}
+        </div>
+      </div>
+
+      <!-- ROAS -->
+      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+          {{ t('campaigns.roas') }}
+        </div>
+        <div v-if="isLoading" class="mt-2 h-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div v-else class="mt-2 text-xl font-bold" :class="summary.roas >= 2 ? 'text-green-600 dark:text-green-400' : summary.roas >= 1 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'">
+          {{ summary.roas > 0 ? summary.roas.toFixed(2) + 'x' : '-' }}
+        </div>
+        <div v-if="!isLoading" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {{ t('campaigns.roasDesc') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversion Funnel -->
+    <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+      <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+        {{ t('campaigns.conversionFunnel') }}
+      </h3>
+      <div v-if="isLoading" class="h-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+      <div v-else class="flex items-center justify-between gap-2">
+        <!-- Stage 1: Orders -->
+        <div class="flex-1 text-center">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+            <span class="text-lg font-bold">{{ funnel.totalOrders }}</span>
+          </div>
+          <div class="mt-2 text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('campaigns.orders') }}</div>
+        </div>
+
+        <!-- Arrow with drop-off -->
+        <div class="flex flex-col items-center">
+          <div class="text-red-500 text-xs font-medium">-{{ funnel.confirmationDropOff }}%</div>
+          <div class="text-gray-400">→</div>
+        </div>
+
+        <!-- Stage 2: Confirmed -->
+        <div class="flex-1 text-center">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+            <span class="text-lg font-bold">{{ funnel.confirmedOrders }}</span>
+          </div>
+          <div class="mt-2 text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('campaigns.confirmed') }}</div>
+        </div>
+
+        <!-- Arrow with drop-off -->
+        <div class="flex flex-col items-center">
+          <div class="text-red-500 text-xs font-medium">-{{ funnel.deliveryDropOff }}%</div>
+          <div class="text-gray-400">→</div>
+        </div>
+
+        <!-- Stage 3: Delivered -->
+        <div class="flex-1 text-center">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
+            <span class="text-lg font-bold">{{ funnel.deliveredOrders }}</span>
+          </div>
+          <div class="mt-2 text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('campaigns.delivered') }}</div>
+        </div>
+
+        <!-- Arrow with drop-off -->
+        <div class="flex flex-col items-center">
+          <div class="text-red-500 text-xs font-medium">-{{ funnel.returnDropOff }}%</div>
+          <div class="text-gray-400">→</div>
+        </div>
+
+        <!-- Stage 4: Successful -->
+        <div class="flex-1 text-center">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-100 text-teal-600 dark:bg-teal-900/50 dark:text-teal-400">
+            <span class="text-lg font-bold">{{ funnel.successfulOrders }}</span>
+          </div>
+          <div class="mt-2 text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('campaigns.successful') }}</div>
+          <div class="mt-1 text-xs font-bold text-teal-600 dark:text-teal-400">{{ funnel.overallSuccessRate }}%</div>
+        </div>
+      </div>
     </div>
 
     <!-- Charts Row -->
@@ -574,6 +684,71 @@ onMounted(() => {
       </div>
       <div v-else class="flex h-[200px] items-center justify-center text-gray-500 dark:text-gray-400">
         {{ t('reports.noData') }}
+      </div>
+    </div>
+
+    <!-- Content Performance Table (utm_content - Ad Creatives) -->
+    <div v-if="contents.length > 0" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+      <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+        {{ t('campaigns.contentDetails') }}
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700/50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Content
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {{ t('campaigns.source') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {{ t('campaigns.orders') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {{ t('campaigns.confirmed') }} %
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {{ t('campaigns.delivered') }} %
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {{ t('campaigns.revenue') }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tr v-for="content in contents" :key="content.content">
+              <td class="whitespace-nowrap px-4 py-4">
+                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                  {{ content.content }}
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500 dark:text-gray-400 capitalize">
+                {{ content.source || '-' }}
+              </td>
+              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-900 dark:text-white">
+                {{ content.totalOrders.toLocaleString() }}
+              </td>
+              <td class="whitespace-nowrap px-4 py-4">
+                <span
+                  :class="['inline-flex rounded-full px-2 py-1 text-xs font-semibold', getRateBadgeClasses(content.confirmationRate, 'confirmation')]"
+                >
+                  {{ formatRate(content.confirmationRate) }}
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-4 py-4">
+                <span
+                  :class="['inline-flex rounded-full px-2 py-1 text-xs font-semibold', getRateBadgeClasses(content.deliveryRate, 'delivery')]"
+                >
+                  {{ formatRate(content.deliveryRate) }}
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-4 py-4 text-sm text-green-600 dark:text-green-400">
+                {{ formatCurrency(content.revenue) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

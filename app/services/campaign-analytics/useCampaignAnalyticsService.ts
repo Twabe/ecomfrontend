@@ -19,6 +19,8 @@ export interface CampaignStatsDto {
   summary: CampaignSummaryDto
   campaigns: CampaignPerformanceDto[]
   sources: SourcePerformanceDto[]
+  contents: ContentPerformanceDto[]
+  funnel: FunnelDto
   dailyTrend: DailyTrendDto[]
 }
 
@@ -32,6 +34,11 @@ export interface CampaignSummaryDto {
   overallConfirmationRate: number
   overallDeliveryRate: number
   overallReturnRate: number
+  // CAC & ROAS
+  totalAdSpend: number
+  newCustomers: number
+  cac: number
+  roas: number
 }
 
 export interface CampaignPerformanceDto {
@@ -69,6 +76,30 @@ export interface DailyTrendDto {
   delivered: number
   returned: number
   revenue: number
+}
+
+export interface ContentPerformanceDto {
+  content: string
+  source: string | null
+  totalOrders: number
+  confirmedOrders: number
+  deliveredOrders: number
+  returnedOrders: number
+  confirmationRate: number
+  deliveryRate: number
+  returnRate: number
+  revenue: number
+}
+
+export interface FunnelDto {
+  totalOrders: number
+  confirmedOrders: number
+  deliveredOrders: number
+  successfulOrders: number
+  confirmationDropOff: number
+  deliveryDropOff: number
+  returnDropOff: number
+  overallSuccessRate: number
 }
 
 export interface GetCampaignStatsRequest {
@@ -251,6 +282,10 @@ export function useCampaignAnalyticsService(params: Ref<CampaignAnalyticsParams>
         overallConfirmationRate: 0,
         overallDeliveryRate: 0,
         overallReturnRate: 0,
+        totalAdSpend: 0,
+        newCustomers: 0,
+        cac: 0,
+        roas: 0,
       }
     }
     return data
@@ -269,6 +304,25 @@ export function useCampaignAnalyticsService(params: Ref<CampaignAnalyticsParams>
   // Daily trend data
   const dailyTrend = computed<DailyTrendDto[]>(() => {
     return rawData.value?.dailyTrend ?? []
+  })
+
+  // Content performance data (utm_content)
+  const contents = computed<ContentPerformanceDto[]>(() => {
+    return rawData.value?.contents ?? []
+  })
+
+  // Funnel data
+  const funnel = computed<FunnelDto>(() => {
+    return rawData.value?.funnel ?? {
+      totalOrders: 0,
+      confirmedOrders: 0,
+      deliveredOrders: 0,
+      successfulOrders: 0,
+      confirmationDropOff: 0,
+      deliveryDropOff: 0,
+      returnDropOff: 0,
+      overallSuccessRate: 0,
+    }
   })
 
   // Chart data for daily trend (line chart)
@@ -328,6 +382,8 @@ export function useCampaignAnalyticsService(params: Ref<CampaignAnalyticsParams>
     summary,
     campaigns,
     sources,
+    contents,
+    funnel,
     dailyTrend,
 
     // Chart data
