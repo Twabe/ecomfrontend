@@ -294,7 +294,7 @@ const getROASBadgeClasses = (roas: number) => {
           :colors="['#4F46E5']"
           horizontal
           :show-legend="false"
-          :y-axis-formatter="(val) => val.toFixed(2) + 'x'"
+          :y-axis-formatter="(val) => typeof val === 'number' ? val.toFixed(2) + 'x' : String(val)"
         />
         <div v-else-if="isLoading" class="flex h-[300px] items-center justify-center">
           <div class="h-full w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
